@@ -12,11 +12,9 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'dev-secret-change-in-production';
 const DATABASE_PATH = process.env.DATABASE_PATH || './community.db';
 
-// OAuth credentials
+// OAuth credentials (Discord only)
 const DISCORD_CLIENT_ID = process.env.DISCORD_CLIENT_ID;
 const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
-const GITHUB_CLIENT_ID = process.env.GITHUB_CLIENT_ID;
-const GITHUB_CLIENT_SECRET = process.env.GITHUB_CLIENT_SECRET;
 
 // Base URL for OAuth callbacks
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
@@ -238,84 +236,6 @@ app.get('/auth/discord/callback', authLimiter, async (req, res) => {
 
   } catch (err) {
     console.error('Discord OAuth error:', err);
-    res.redirect('/?error=auth_failed');
-  }
-});
-
-// ============================================================================
-// OAUTH ROUTES - GITHUB
-// ============================================================================
-
-app.get('/auth/github', authLimiter, (req, res) => {
-  if (!GITHUB_CLIENT_ID) {
-    return res.status(503).send('GitHub OAuth not configured');
-  }
-
-  const params = new URLSearchParams({
-    client_id: GITHUB_CLIENT_ID,
-    redirect_uri: `${BASE_URL}/auth/github/callback`,
-    scope: 'read:user'
-  });
-
-  res.redirect(`https://github.com/login/oauth/authorize?${params}`);
-});
-
-app.get('/auth/github/callback', authLimiter, async (req, res) => {
-  const { code } = req.query;
-
-  if (!code) {
-    return res.redirect('/?error=auth_failed');
-  }
-
-  try {
-    // Exchange code for token
-    const tokenResponse = await fetch('https://github.com/login/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      body: JSON.stringify({
-        client_id: GITHUB_CLIENT_ID,
-        client_secret: GITHUB_CLIENT_SECRET,
-        code
-      })
-    });
-
-    const tokenData = await tokenResponse.json();
-
-    if (!tokenData.access_token) {
-      console.error('GitHub token error:', tokenData);
-      return res.redirect('/?error=auth_failed');
-    }
-
-    // Get user info
-    const userResponse = await fetch('https://api.github.com/user', {
-      headers: { Authorization: `Bearer ${tokenData.access_token}` }
-    });
-
-    const githubUser = await userResponse.json();
-
-    // Find or create user
-    let user = db.prepare('SELECT * FROM users WHERE provider = ? AND provider_id = ?')
-      .get('github', String(githubUser.id));
-
-    if (!user) {
-      const userId = generateUserId();
-
-      db.prepare(`
-        INSERT INTO users (id, provider, provider_id, username, avatar_url)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(userId, 'github', String(githubUser.id), githubUser.login, githubUser.avatar_url);
-
-      user = { id: userId };
-    }
-
-    setAuthCookie(res, user.id);
-    res.redirect('/?login=success');
-
-  } catch (err) {
-    console.error('GitHub OAuth error:', err);
     res.redirect('/?error=auth_failed');
   }
 });
@@ -694,8 +614,5 @@ app.use('/parsers', express.static(path.join(__dirname, 'parsers')));
 
 app.listen(PORT, () => {
   console.log(`Server running at http://localhost:${PORT}`);
-  console.log('OAuth configured:', {
-    discord: !!DISCORD_CLIENT_ID,
-    github: !!GITHUB_CLIENT_ID
-  });
+  console.log('Discord OAuth configured:', !!DISCORD_CLIENT_ID);
 });

@@ -4,7 +4,7 @@ app = "daggerheart-converter"
 primary_region = "ord"
 
 [build]
-  builder = "heroku/builder:22"
+  dockerfile = "Dockerfile"
 
 [env]
   PORT = "3000"
@@ -32,6 +32,4 @@ primary_region = "ord"
 # fly secrets set JWT_SECRET="your-secure-secret"
 # fly secrets set DISCORD_CLIENT_ID="your-discord-client-id"
 # fly secrets set DISCORD_CLIENT_SECRET="your-discord-client-secret"
-# fly secrets set GITHUB_CLIENT_ID="your-github-client-id"
-# fly secrets set GITHUB_CLIENT_SECRET="your-github-client-secret"
 # fly secrets set BASE_URL="https://daggerheart-converter.fly.dev"
