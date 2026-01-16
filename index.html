@@ -2186,6 +2186,95 @@
       opacity: 0.7;
     }
 
+    .footer-links {
+      margin-top: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .footer-links a {
+      font-size: 0.65rem;
+      color: var(--text-secondary);
+      opacity: 0.6;
+      text-decoration: none;
+      transition: opacity 0.2s;
+    }
+
+    .footer-links a:hover {
+      opacity: 1;
+      text-decoration: underline;
+    }
+
+    /* Privacy Modal */
+    .privacy-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      z-index: 2000;
+      justify-content: center;
+      align-items: center;
+      padding: 1rem;
+    }
+
+    .privacy-modal.active {
+      display: flex;
+    }
+
+    .privacy-modal-content {
+      background: var(--card-bg);
+      border-radius: 12px;
+      max-width: 600px;
+      width: 100%;
+      max-height: 80vh;
+      overflow-y: auto;
+      padding: 2rem;
+      position: relative;
+    }
+
+    .privacy-modal-content h2 {
+      margin-top: 0;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+    }
+
+    .privacy-modal-content h3 {
+      color: var(--accent);
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+      font-size: 1rem;
+    }
+
+    .privacy-modal-content p,
+    .privacy-modal-content li {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+      line-height: 1.6;
+    }
+
+    .privacy-modal-content ul {
+      padding-left: 1.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .privacy-modal-content .close-btn {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 0.25rem 0.5rem;
+    }
+
+    .privacy-modal-content .close-btn:hover {
+      color: var(--text);
+    }
+
     .zs-credits {
       display: flex;
       justify-content: center;
@@ -2583,9 +2672,56 @@ The converter will auto-detect the source system."
     </div>
   </div>
 
+  <!-- Privacy Policy Modal -->
+  <div id="privacyModal" class="privacy-modal" onclick="if(event.target === this) closePrivacyModal()">
+    <div class="privacy-modal-content">
+      <button class="close-btn" onclick="closePrivacyModal()" aria-label="Close">&times;</button>
+      <h2>Privacy Policy</h2>
+
+      <h3>What We Collect</h3>
+      <p>When you sign in with Discord, we store only the following public profile information:</p>
+      <ul>
+        <li><strong>Discord Username</strong> - To show who created each submission</li>
+        <li><strong>Discord Avatar URL</strong> - To display your profile picture</li>
+        <li><strong>Discord User ID</strong> - To recognize you when you return</li>
+      </ul>
+
+      <h3>What We Don't Collect</h3>
+      <p>We do not collect, store, or have access to:</p>
+      <ul>
+        <li>Your email address</li>
+        <li>Your password</li>
+        <li>Your Discord messages or servers</li>
+        <li>Any private Discord information</li>
+      </ul>
+
+      <h3>How Your Data Is Used</h3>
+      <p>Your information is used solely to:</p>
+      <ul>
+        <li>Attribute your community submissions to you</li>
+        <li>Allow you to edit or delete your own submissions</li>
+        <li>Track your votes (one vote per conversion)</li>
+      </ul>
+
+      <h3>Data Security</h3>
+      <p>Your data is stored in a secure database hosted on Fly.io infrastructure. We use industry-standard JWT tokens for authentication, stored in secure HTTP-only cookies.</p>
+
+      <h3>Data Deletion</h3>
+      <p>You can delete your submissions at any time. If you wish to have your account completely removed, contact us and we will delete all your data.</p>
+
+      <h3>Third Parties</h3>
+      <p>We do not sell, share, or transfer your data to any third parties. Your information stays between you and this application.</p>
+
+      <p style="margin-top: 2rem; font-size: 0.8rem; opacity: 0.7;">Last updated: January 2026</p>
+    </div>
+  </div>
+
   <!-- Footer -->
   <footer class="site-footer">
     <p>This tool is not affiliated with, endorsed, or sponsored by Wizards of the Coast, Paizo Inc., or Darrington Press. All product names and trademarks are property of their respective owners.</p>
+    <div class="footer-links">
+      <a href="#" onclick="openPrivacyModal(); return false;">Privacy Policy</a>
+    </div>
     <div class="zs-credits" itemscope="" itemtype="https://schema.org/Organization">
       <a href="https://zealoussites.com" target="_blank" rel="noopener noreferrer nofollow" title="Website by Marcus Zeal @ Zealous Sites" aria-label="Website by Zealous Sites" itemprop="url">
         <span itemprop="name">
@@ -4033,6 +4169,15 @@ Tags: ${c.tags.join(', ')}`;
     function closeLoginModal(event) {
       if (event && event.target !== event.currentTarget) return;
       document.getElementById('loginModal').classList.add('hidden');
+    }
+
+    // ==================== PRIVACY MODAL ====================
+    function openPrivacyModal() {
+      document.getElementById('privacyModal').classList.add('active');
+    }
+
+    function closePrivacyModal() {
+      document.getElementById('privacyModal').classList.remove('active');
     }
 
     function toggleUserMenu() {
