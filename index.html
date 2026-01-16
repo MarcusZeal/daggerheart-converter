@@ -1802,15 +1802,18 @@
       align-items: center;
       gap: 0.5rem;
       padding: 0.4rem 0.8rem;
-      background: var(--bg-input);
+      background: var(--bg-card);
       border: 1px solid var(--border);
       border-radius: 6px;
       cursor: pointer;
       transition: all 0.2s;
+      color: var(--text-primary);
+      font-size: 0.9rem;
     }
 
     .user-menu-toggle:hover {
       border-color: var(--accent);
+      background: var(--bg-input);
     }
 
     .user-avatar {
@@ -1844,6 +1847,12 @@
       margin-top: 0.25rem;
       z-index: 200;
       display: none;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      overflow: hidden;
+    }
+
+    :root.light-mode .user-dropdown {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
     }
 
     .user-dropdown.show {
@@ -1854,14 +1863,14 @@
       padding: 0.6rem 1rem;
       cursor: pointer;
       font-size: 0.9rem;
-      border-bottom: 1px solid var(--border);
       display: block;
       width: 100%;
       text-align: left;
-      background: none;
+      background: var(--bg-card);
       border: none;
       border-bottom: 1px solid var(--border);
       color: var(--text-primary);
+      transition: background 0.15s;
     }
 
     .user-dropdown-item:last-child {
@@ -1874,6 +1883,10 @@
 
     .user-dropdown-item.danger {
       color: var(--error);
+    }
+
+    .user-dropdown-item.danger:hover {
+      background: rgba(239, 68, 68, 0.1);
     }
 
     /* Community Tab Styles */
