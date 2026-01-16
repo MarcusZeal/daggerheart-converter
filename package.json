@@ -1,0 +1,15 @@
+{
+  "name": "daggerheart-converter",
+  "version": "1.0.0",
+  "description": "Convert creature stat blocks from popular TTRPGs to Daggerheart format",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "keywords": ["daggerheart", "ttrpg", "converter", "stat-block"],
+  "author": "Marcus Zeal",
+  "license": "MIT",
+  "dependencies": {
+    "express": "^4.18.2"
+  }
+}

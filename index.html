@@ -1,0 +1,3144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Daggerheart Adversary Converter</title>
+  <style>
+    :root {
+      --bg-dark: #1a1a2e;
+      --bg-card: #16213e;
+      --bg-input: #0f0f23;
+      --text-primary: #e4e4e7;
+      --text-secondary: #c4c4cc;
+      --accent: #c9a227;
+      --accent-hover: #e4b82e;
+      --accent-secondary: #6366f1;
+      --accent-secondary-hover: #818cf8;
+      --border: #333355;
+      --success: #22c55e;
+      --error: #ef4444;
+      --warning: #f59e0b;
+      --info: #3b82f6;
+      --focus-ring: 0 0 0 2px var(--bg-dark), 0 0 0 4px var(--accent);
+    }
+
+    /* Light mode */
+    :root.light-mode {
+      --bg-dark: #f5f5f7;
+      --bg-card: #ffffff;
+      --bg-input: #e8e8ed;
+      --text-primary: #1a1a2e;
+      --text-secondary: #52525b;
+      --border: #d4d4d8;
+      --focus-ring: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--accent);
+    }
+
+    :root.light-mode .json-output {
+      color: #1e40af;
+    }
+
+    :root.light-mode .stat-block {
+      background: var(--bg-card);
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      min-height: 100vh;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding-bottom: 1rem;
+      border-bottom: 2px solid var(--accent);
+    }
+
+    .header-row {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1rem;
+      position: relative;
+    }
+
+    h1 {
+      font-size: 2rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    /* Theme Toggle */
+    .theme-toggle {
+      position: absolute;
+      right: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 50%;
+      width: 44px;
+      height: 44px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      transition: all 0.2s;
+    }
+
+    .theme-toggle:hover {
+      border-color: var(--accent);
+      background: var(--bg-card);
+    }
+
+    .theme-icon-light {
+      display: none;
+    }
+
+    :root.light-mode .theme-icon-dark {
+      display: none;
+    }
+
+    :root.light-mode .theme-icon-light {
+      display: inline;
+    }
+
+    @media (max-width: 768px) {
+      .header-row {
+        flex-direction: column;
+      }
+
+      .theme-toggle {
+        position: static;
+        transform: none;
+        margin-top: 0.5rem;
+      }
+    }
+
+    .subtitle {
+      color: var(--text-secondary);
+      font-size: 0.95rem;
+    }
+
+    .keyboard-hints {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-top: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+
+    .keyboard-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    kbd {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.15rem 0.4rem;
+      font-family: monospace;
+      font-size: 0.75rem;
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+    }
+
+    @media (max-width: 1024px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* Tablet breakpoint */
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+
+      h1 {
+        font-size: 1.5rem;
+      }
+
+      .keyboard-hints {
+        display: none;
+      }
+
+      .panel {
+        padding: 1rem;
+      }
+
+      .btn {
+        min-height: 44px;
+        padding: 0.75rem 1rem;
+      }
+
+      .btn-small {
+        min-height: 44px;
+        padding: 0.5rem 0.75rem;
+      }
+
+      .btn-icon {
+        min-width: 44px;
+        min-height: 44px;
+        padding: 0.5rem;
+      }
+
+      .tab {
+        min-height: 44px;
+        padding: 0.75rem 1rem;
+      }
+
+      .mode-btn {
+        min-height: 44px;
+        padding: 0.75rem;
+      }
+
+      .sample-buttons {
+        display: none;
+      }
+
+      .stat-grid {
+        grid-template-columns: repeat(auto-fit, minmax(90px, 1fr));
+        gap: 0.75rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .recent-menu {
+        max-width: calc(100vw - 2rem);
+        right: auto;
+        left: 0;
+      }
+
+      .panel-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+      }
+
+      .panel-header .btn-group {
+        width: 100%;
+        flex-wrap: wrap;
+      }
+
+      .undo-toolbar {
+        margin-left: 0;
+      }
+    }
+
+    /* Small phone breakpoint */
+    @media (max-width: 480px) {
+      .container {
+        padding: 0.75rem;
+      }
+
+      h1 {
+        font-size: 1.25rem;
+      }
+
+      .subtitle {
+        font-size: 0.85rem;
+      }
+
+      .panel {
+        padding: 0.75rem;
+        border-radius: 8px;
+      }
+
+      .stat-block {
+        padding: 1rem;
+      }
+
+      .stat-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .tabs {
+        gap: 0.25rem;
+      }
+
+      .tab {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.8rem;
+        flex: 1;
+        text-align: center;
+      }
+
+      .btn-group {
+        width: 100%;
+      }
+
+      .btn-group .btn {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .feature-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+      }
+
+      .feature-actions {
+        opacity: 1;
+        position: absolute;
+        top: 0.5rem;
+        right: 0.5rem;
+      }
+
+      .feature {
+        position: relative;
+      }
+
+      textarea {
+        min-height: 200px;
+        font-size: 0.85rem;
+      }
+
+      .live-parse-grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .confidence-legend {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+      }
+    }
+
+    .panel {
+      background: var(--bg-card);
+      border-radius: 12px;
+      padding: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .panel-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* Focus indicators for accessibility */
+    *:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    button:focus-visible, a:focus-visible, input:focus-visible,
+    select:focus-visible, textarea:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    /* Ensure all interactive elements have visible focus */
+    .feature-type:focus-visible,
+    .tag:focus-visible,
+    .collapsible-header:focus-visible,
+    .batch-item-header:focus-visible,
+    .image-placeholder:focus-visible {
+      outline: none;
+      box-shadow: var(--focus-ring);
+    }
+
+    /* Drop zone */
+    .drop-zone {
+      position: relative;
+      width: 100%;
+    }
+
+    .drop-zone.drag-over textarea {
+      border-color: var(--accent);
+      background: rgba(201, 162, 39, 0.1);
+    }
+
+    .drop-zone.drag-over::after {
+      content: 'Drop file here';
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(201, 162, 39, 0.2);
+      border: 2px dashed var(--accent);
+      border-radius: 8px;
+      font-size: 1.2rem;
+      color: var(--accent);
+      pointer-events: none;
+    }
+
+    textarea {
+      width: 100%;
+      min-height: 250px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      color: var(--text-primary);
+      font-family: 'Consolas', 'Monaco', monospace;
+      font-size: 0.9rem;
+      resize: vertical;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    textarea::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1.2rem;
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: var(--bg-dark);
+    }
+
+    .btn-primary:hover:not(:disabled) {
+      background: var(--accent-hover);
+    }
+
+    .btn-secondary {
+      background: var(--border);
+      color: var(--text-primary);
+    }
+
+    .btn-secondary:hover:not(:disabled) {
+      background: #444466;
+    }
+
+    .btn-success {
+      background: var(--success);
+      color: white;
+    }
+
+    .btn-success:hover:not(:disabled) {
+      background: #16a34a;
+    }
+
+    .btn-small {
+      padding: 0.4rem 0.8rem;
+      font-size: 0.8rem;
+    }
+
+    .btn-icon {
+      padding: 0.4rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    .btn-icon:hover:not(:disabled) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-label {
+      display: block;
+      margin-bottom: 0.4rem;
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    .form-input, .form-select {
+      width: 100%;
+      padding: 0.6rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .form-input:focus, .form-select:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    /* Mode toggle */
+    .mode-toggle {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .mode-btn {
+      flex: 1;
+      padding: 0.5rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+
+    .mode-btn.active {
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-color: var(--accent);
+    }
+
+    .mode-btn:hover:not(.active) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Recent conversions dropdown */
+    .recent-dropdown {
+      position: relative;
+      display: inline-block;
+    }
+
+    .recent-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      right: 0;
+      min-width: 200px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-top: 0.25rem;
+      z-index: 100;
+      display: none;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .recent-menu.show {
+      display: block;
+    }
+
+    .recent-item {
+      padding: 0.6rem 0.8rem;
+      cursor: pointer;
+      font-size: 0.85rem;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .recent-item:last-child {
+      border-bottom: none;
+    }
+
+    .recent-item:hover {
+      background: var(--bg-input);
+    }
+
+    .recent-item-name {
+      font-weight: 500;
+    }
+
+    .recent-item-tier {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .recent-item-delete {
+      color: var(--text-secondary);
+      padding: 0.2rem;
+      cursor: pointer;
+    }
+
+    .recent-item-delete:hover {
+      color: var(--error);
+    }
+
+    /* Live Parse Preview */
+    .live-parse {
+      margin-top: 1rem;
+      padding: 1rem;
+      background: var(--bg-input);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .live-parse-title {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .live-parse-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .parse-field {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      background: var(--bg-card);
+      border-radius: 4px;
+      font-size: 0.85rem;
+    }
+
+    .parse-field-label {
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+    }
+
+    .parse-field-value {
+      font-weight: 500;
+      flex: 1;
+    }
+
+    /* Confidence Badges - now with shape and text for accessibility */
+    .confidence-badge {
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      font-weight: bold;
+      color: white;
+    }
+
+    .confidence-high {
+      background: var(--success);
+      border-radius: 50%; /* Circle = good */
+    }
+    .confidence-high::after {
+      content: '✓';
+      font-size: 10px;
+    }
+
+    .confidence-medium {
+      background: var(--warning);
+      border-radius: 2px; /* Square = uncertain */
+    }
+    .confidence-medium::after {
+      content: '~';
+      font-size: 12px;
+    }
+
+    .confidence-low {
+      background: var(--error);
+      border-radius: 0;
+      clip-path: polygon(50% 0%, 100% 100%, 0% 100%); /* Triangle = warning */
+      width: 14px;
+      height: 12px;
+    }
+    .confidence-low::after {
+      content: '!';
+      font-size: 8px;
+      margin-top: 2px;
+    }
+
+    .confidence-legend {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      margin-top: 0.75rem;
+    }
+
+    .confidence-legend-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* Adjustments */
+    .adjustments-section {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .adjustments-title {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+      color: var(--accent);
+    }
+
+    /* Undo/Redo toolbar */
+    .undo-toolbar {
+      display: flex;
+      gap: 0.25rem;
+      margin-left: auto;
+    }
+
+    /* Stat Block Preview */
+    .stat-block {
+      background: var(--bg-input);
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      padding: 1.5rem;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .stat-block-header {
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .stat-block-name {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--accent);
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-block-type {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      font-style: italic;
+    }
+
+    .stat-block-desc {
+      font-style: italic;
+      color: var(--text-secondary);
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+    }
+
+    /* Image Section */
+    .stat-block-image-section {
+      margin-bottom: 1rem;
+    }
+
+    .stat-block-image-preview {
+      max-width: 200px;
+      max-height: 200px;
+      border-radius: 6px;
+      border: 2px solid var(--border);
+      object-fit: cover;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: border-color 0.2s;
+    }
+
+    .stat-block-image-preview:hover {
+      border-color: var(--accent);
+    }
+
+    .image-url-input {
+      width: 100%;
+      padding: 0.4rem 0.6rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+    }
+
+    .image-url-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .image-url-input::placeholder {
+      color: var(--text-secondary);
+    }
+
+    .image-placeholder {
+      width: 200px;
+      height: 120px;
+      border: 2px dashed var(--border);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+    }
+
+    .image-placeholder:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Collapsible sections */
+    .collapsible {
+      border-top: 1px solid var(--border);
+      margin-top: 1rem;
+    }
+
+    .collapsible-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 0;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .collapsible-header:hover {
+      color: var(--accent);
+    }
+
+    .collapsible-title {
+      font-weight: 600;
+      color: var(--accent);
+      text-transform: uppercase;
+      font-size: 0.85rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .collapsible-icon {
+      transition: transform 0.2s;
+      font-size: 0.75rem;
+    }
+
+    .collapsible.collapsed .collapsible-icon {
+      transform: rotate(-90deg);
+    }
+
+    .collapsible-content {
+      padding-bottom: 0.5rem;
+    }
+
+    .collapsible.collapsed .collapsible-content {
+      display: none;
+    }
+
+    /* Editable stat line */
+    .stat-line {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--accent);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .stat-value-editable {
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed transparent;
+      color: var(--text-primary);
+      font-size: inherit;
+      font-family: inherit;
+      padding: 0.1rem 0.3rem;
+      flex: 1;
+      min-width: 0;
+    }
+
+    .stat-value-editable:hover {
+      border-bottom-color: var(--border);
+    }
+
+    .stat-value-editable:focus {
+      outline: none;
+      border-bottom-color: var(--accent);
+    }
+
+    /* Editable stat grid */
+    .stat-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      gap: 0.5rem;
+      margin: 1rem 0;
+      padding: 0.75rem;
+      background: rgba(201, 162, 39, 0.1);
+      border-radius: 6px;
+    }
+
+    .stat-item {
+      text-align: center;
+    }
+
+    .stat-item-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+    }
+
+    .stat-item-value {
+      font-size: 1rem;
+      font-weight: bold;
+    }
+
+    .stat-item-input {
+      font-size: 1rem;
+      font-weight: bold;
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed transparent;
+      color: var(--text-primary);
+      text-align: center;
+      width: 100%;
+      padding: 0.1rem;
+    }
+
+    .stat-item-input:hover {
+      border-bottom-color: var(--border);
+    }
+
+    .stat-item-input:focus {
+      outline: none;
+      border-bottom-color: var(--accent);
+    }
+
+    /* Features Section */
+    .features-section {
+      padding-top: 0.5rem;
+    }
+
+    .feature {
+      margin-bottom: 0.75rem;
+      padding: 0.5rem;
+      border-radius: 4px;
+      transition: background 0.2s;
+    }
+
+    .feature:hover {
+      background: rgba(201, 162, 39, 0.05);
+    }
+
+    .feature-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+
+    .feature-name-input {
+      font-weight: 600;
+      color: var(--text-primary);
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed var(--border);
+      padding: 0.1rem 0.3rem;
+      font-size: inherit;
+      font-family: inherit;
+      min-width: 100px;
+      flex: 1;
+    }
+
+    .feature-name-input:focus {
+      outline: none;
+      border-bottom-color: var(--accent);
+    }
+
+    .feature-type {
+      font-size: 0.75rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      border: none;
+    }
+
+    .feature-type:hover {
+      opacity: 0.8;
+    }
+
+    .feature-type-passive { background: #334155; color: #94a3b8; }
+    .feature-type-action { background: #7c2d12; color: #fed7aa; }
+    .feature-type-reaction { background: #1e3a5f; color: #93c5fd; }
+
+    .feature-desc-input {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-top: 0.25rem;
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed transparent;
+      padding: 0.1rem 0;
+      font-family: inherit;
+      width: 100%;
+      resize: none;
+      overflow: hidden;
+    }
+
+    .feature-desc-input:hover {
+      border-bottom-color: var(--border);
+    }
+
+    .feature-desc-input:focus {
+      outline: none;
+      border-bottom-color: var(--accent);
+    }
+
+    .feature-actions {
+      margin-left: auto;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .feature:hover .feature-actions {
+      opacity: 1;
+    }
+
+    .feature-btn {
+      background: none;
+      border: 1px solid transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      padding: 0.5rem;
+      font-size: 1rem;
+      min-width: 44px;
+      min-height: 44px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 6px;
+      transition: all 0.2s;
+    }
+
+    .feature-btn:hover {
+      color: var(--error);
+      background: rgba(239, 68, 68, 0.1);
+      border-color: var(--error);
+    }
+
+    .add-feature-btn {
+      width: 100%;
+      padding: 0.5rem;
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--text-secondary);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+      margin-top: 0.5rem;
+    }
+
+    .add-feature-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* Tags */
+    .tags-section {
+      padding-top: 0.5rem;
+    }
+
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .tag {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.75rem;
+      background: rgba(201, 162, 39, 0.2);
+      color: var(--accent);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      min-height: 32px;
+      border: 1px solid transparent;
+    }
+
+    .tag:hover {
+      background: rgba(201, 162, 39, 0.4);
+      border-color: var(--accent);
+    }
+
+    .tag-remove {
+      margin-left: 0.25rem;
+      opacity: 0.7;
+      font-size: 1rem;
+      padding: 0.25rem;
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 20px;
+      min-height: 20px;
+    }
+
+    .tag-remove:hover {
+      opacity: 1;
+      background: rgba(239, 68, 68, 0.2);
+      color: var(--error);
+    }
+
+    .add-tag-input {
+      background: transparent;
+      border: 1px dashed var(--border);
+      color: var(--text-primary);
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      width: 80px;
+    }
+
+    .add-tag-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .tab {
+      padding: 0.5rem 1rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 0.9rem;
+    }
+
+    .tab.active {
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-color: var(--accent);
+    }
+
+    .tab:hover:not(.active) {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* JSON Output */
+    .json-output {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.8rem;
+      white-space: pre-wrap;
+      word-break: break-all;
+      max-height: 500px;
+      overflow-y: auto;
+      color: #93c5fd;
+    }
+
+    /* Markdown Output */
+    .markdown-output {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: monospace;
+      font-size: 0.85rem;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    /* Text Output */
+    .text-output {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: 'Segoe UI', sans-serif;
+      font-size: 0.9rem;
+      white-space: pre-wrap;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 2rem;
+      right: 2rem;
+      padding: 1rem 1.5rem;
+      border-radius: 8px;
+      color: white;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.3s;
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      max-width: calc(100vw - 2rem);
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .toast.paused {
+      /* Keeps toast visible when hovered */
+    }
+
+    .toast-success { background: var(--success); }
+    .toast-error { background: var(--error); }
+    .toast-info { background: var(--info); }
+
+    .toast-message {
+      flex: 1;
+    }
+
+    .toast-close {
+      background: rgba(255, 255, 255, 0.2);
+      border: none;
+      color: white;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      transition: background 0.2s;
+      flex-shrink: 0;
+    }
+
+    .toast-close:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .toast-progress {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      height: 3px;
+      background: rgba(255, 255, 255, 0.5);
+      border-radius: 0 0 0 8px;
+      transition: width 0.1s linear;
+    }
+
+    @media (max-width: 480px) {
+      .toast {
+        left: 1rem;
+        right: 1rem;
+        bottom: 1rem;
+      }
+    }
+
+    /* Utility */
+    .hidden {
+      display: none !important;
+    }
+
+    .sample-btn {
+      font-size: 0.8rem;
+      padding: 0.4rem 0.8rem;
+    }
+
+    .empty-state {
+      text-align: center;
+      color: var(--text-secondary);
+      padding: 3rem;
+    }
+
+    .empty-state-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .pulse {
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .draft-indicator {
+      font-size: 0.75rem;
+      color: var(--warning);
+      margin-left: 0.5rem;
+    }
+
+    .batch-separator {
+      text-align: center;
+      padding: 1rem;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .batch-results {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .batch-item {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .batch-item-header {
+      background: var(--bg-input);
+      padding: 0.75rem 1rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .batch-item-header:hover {
+      background: rgba(201, 162, 39, 0.1);
+    }
+
+    .batch-item-content {
+      padding: 1rem;
+    }
+
+    .batch-item.collapsed .batch-item-content {
+      display: none;
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg-input);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+
+    /* Print styles */
+    @media print {
+      body {
+        background: white;
+        color: black;
+      }
+
+      .container {
+        max-width: 100%;
+        padding: 0;
+      }
+
+      header, .keyboard-hints, .panel:first-child,
+      .tabs, .btn-group, .adjustments-section,
+      .live-parse, .toast, .mode-toggle {
+        display: none !important;
+      }
+
+      .main-grid {
+        display: block;
+      }
+
+      .panel {
+        border: none;
+        padding: 0;
+        background: white;
+      }
+
+      .stat-block {
+        border: 2px solid #c9a227;
+        padding: 1.5rem;
+        background: white;
+        page-break-inside: avoid;
+      }
+
+      .stat-block-name {
+        color: #c9a227;
+      }
+
+      .stat-label {
+        color: #c9a227;
+      }
+
+      .collapsible-header {
+        display: none;
+      }
+
+      .stat-block-image-section {
+        text-align: center;
+        margin-bottom: 1rem;
+      }
+
+      .stat-block-image-preview {
+        max-width: 150px;
+        max-height: 150px;
+        border: 1px solid #c9a227;
+      }
+
+      .image-url-input,
+      .image-placeholder {
+        display: none !important;
+      }
+
+      .collapsible-content {
+        display: block !important;
+      }
+
+      .feature-actions, .tag-remove, .add-feature-btn,
+      .add-tag-input, .collapsible-icon {
+        display: none !important;
+      }
+
+      .stat-value-editable, .stat-item-input,
+      .feature-name-input, .feature-desc-input {
+        border: none !important;
+      }
+    }
+
+    /* Screen reader only */
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    /* Footer */
+    .site-footer {
+      text-align: center;
+      padding: 1.5rem 1rem;
+      margin-top: 2rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .site-footer p {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      max-width: 600px;
+      margin: 0 auto;
+      line-height: 1.4;
+      opacity: 0.7;
+    }
+
+    .zs-credits {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+
+    .zs-credits a {
+      color: var(--text-secondary);
+      text-decoration: none;
+      opacity: 0.7;
+      transition: opacity 0.2s;
+    }
+
+    .zs-credits a:hover {
+      opacity: 1;
+      color: var(--accent);
+    }
+
+    .zs-credits span {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      font-size: 10px;
+    }
+
+    @media print {
+      .site-footer {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a href="#main-content" class="sr-only">Skip to main content</a>
+
+  <div class="container">
+    <header>
+      <div class="header-row">
+        <h1>Daggerheart Adversary Converter</h1>
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle light/dark mode">
+          <span class="theme-icon-dark" aria-hidden="true">☀️</span>
+          <span class="theme-icon-light" aria-hidden="true">🌙</span>
+        </button>
+      </div>
+      <p class="subtitle">Transform any creature from other popular TTRPGs into a Daggerheart stat block—just paste and convert.</p>
+      <div class="keyboard-hints" role="note" aria-label="Keyboard shortcuts">
+        <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> Convert</span>
+        <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> Copy JSON</span>
+        <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Z</kbd> Undo</span>
+        <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Y</kbd> Redo</span>
+        <span class="keyboard-hint"><kbd>Esc</kbd> Clear</span>
+      </div>
+    </header>
+
+    <main id="main-content" class="main-grid">
+      <!-- Input Panel -->
+      <div class="panel" role="region" aria-label="Input panel">
+        <div class="panel-header">
+          <span class="panel-title">
+            TTRPG Stat Block
+            <span id="draftIndicator" class="draft-indicator hidden" title="Draft auto-saved">Draft saved</span>
+          </span>
+          <div class="btn-group">
+            <div class="recent-dropdown">
+              <button class="btn btn-secondary btn-small" onclick="toggleRecentMenu()"
+                      aria-haspopup="true" aria-expanded="false" id="recentBtn">
+                Recent
+              </button>
+              <div class="recent-menu" id="recentMenu" role="menu" aria-labelledby="recentBtn">
+                <div id="recentList"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- System Selector -->
+        <div class="system-selector" style="margin-bottom: 1rem;">
+          <label class="form-label" for="systemSelect">Source System</label>
+          <div style="display: flex; gap: 0.5rem; align-items: center;">
+            <select id="systemSelect" class="form-select" style="flex: 1;" onchange="handleSystemChange()">
+              <option value="auto">Auto-Detect</option>
+              <option value="dnd5e">D&D 5th Edition</option>
+              <option value="pf2e">Pathfinder 2e</option>
+              <option value="dnd35e">D&D 3.5e / Pathfinder 1e</option>
+              <option value="osr">OSR / B/X / Old-School</option>
+            </select>
+            <span id="detectedSystem" class="detected-system" style="font-size: 0.8rem; color: var(--text-secondary);"></span>
+          </div>
+        </div>
+
+        <!-- Sample Buttons by System -->
+        <div class="sample-buttons" style="margin-bottom: 1rem;">
+          <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem;">Samples:</span>
+          <div class="btn-group" id="sampleButtons">
+            <button class="btn btn-secondary sample-btn" onclick="loadSample('dnd5e', 'ogre')">5e Ogre</button>
+            <button class="btn btn-secondary sample-btn" onclick="loadSample('dnd5e', 'wight')">5e Wight</button>
+            <button class="btn btn-secondary sample-btn" onclick="loadSample('pf2e', 'ironscale')">PF2e Warrior</button>
+            <button class="btn btn-secondary sample-btn" onclick="loadSample('dnd35e', 'ogre')">3.5e Ogre</button>
+            <button class="btn btn-secondary sample-btn" onclick="loadSample('osr', 'goblin')">OSR Goblin</button>
+          </div>
+        </div>
+
+        <!-- Mode Toggle -->
+        <div class="mode-toggle" role="tablist" aria-label="Conversion mode">
+          <button class="mode-btn active" role="tab" aria-selected="true" data-mode="single" onclick="setMode('single')">
+            Single
+          </button>
+          <button class="mode-btn" role="tab" aria-selected="false" data-mode="batch" onclick="setMode('batch')">
+            Batch (separate with ---)
+          </button>
+        </div>
+
+        <div class="drop-zone" id="dropZone">
+          <textarea
+            id="inputText"
+            aria-label="TTRPG stat block input"
+            placeholder="Paste a creature stat block here, or drag & drop a .txt file...
+
+For batch mode, separate multiple stat blocks with ---
+
+Supports most popular TTRPG stat block formats.
+The converter will auto-detect the source system."
+            oninput="handleLiveParse()"></textarea>
+        </div>
+
+        <div class="btn-group" style="margin-top: 1rem;">
+          <button class="btn btn-primary" onclick="convert()" id="convertBtn" aria-describedby="convertHint">
+            Convert to Daggerheart
+          </button>
+          <button class="btn btn-secondary" onclick="clearAll()" aria-label="Clear all input and output">
+            Clear
+          </button>
+          <span id="convertHint" class="sr-only">Press Ctrl+Enter to convert</span>
+        </div>
+
+        <!-- Live Parse Preview -->
+        <div id="liveParsePreview" class="live-parse hidden" role="status" aria-live="polite">
+          <div class="live-parse-title">
+            <span class="pulse" aria-hidden="true">●</span> Live Detection
+          </div>
+          <div class="live-parse-grid" id="liveParseGrid"></div>
+          <div class="confidence-legend">
+            <span class="confidence-legend-item"><span class="confidence-badge confidence-high" aria-hidden="true"></span> Detected</span>
+            <span class="confidence-legend-item"><span class="confidence-badge confidence-medium" aria-hidden="true"></span> Inferred</span>
+            <span class="confidence-legend-item"><span class="confidence-badge confidence-low" aria-hidden="true"></span> Not found</span>
+          </div>
+        </div>
+
+        <!-- Adjustments -->
+        <div id="adjustments" class="adjustments-section hidden">
+          <div class="adjustments-title">Adjustments (Optional)</div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="overrideTier">Override Tier</label>
+              <select id="overrideTier" class="form-select" onchange="reconvert()">
+                <option value="">Auto-detect</option>
+                <option value="1">Tier 1 (CR 0-1)</option>
+                <option value="2">Tier 2 (CR 2-4)</option>
+                <option value="3">Tier 3 (CR 5-10)</option>
+                <option value="4">Tier 4 (CR 11+)</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="overrideType">Override Type</label>
+              <select id="overrideType" class="form-select" onchange="reconvert()">
+                <option value="">Auto-detect</option>
+                <option value="Bruiser">Bruiser (high HP, melee)</option>
+                <option value="Horde">Horde (groups, weak)</option>
+                <option value="Leader">Leader (commands allies)</option>
+                <option value="Minion">Minion (1 HP, fodder)</option>
+                <option value="Ranged">Ranged (attacks from distance)</option>
+                <option value="Skulk">Skulk (stealth, ambush)</option>
+                <option value="Social">Social (non-combat)</option>
+                <option value="Solo">Solo (fights whole party)</option>
+                <option value="Standard">Standard (balanced)</option>
+                <option value="Support">Support (buffs/debuffs)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Output Panel -->
+      <div class="panel" role="region" aria-label="Output panel">
+        <div class="panel-header">
+          <span class="panel-title">Daggerheart Output</span>
+          <div class="undo-toolbar">
+            <button class="btn btn-icon btn-small" onclick="undo()" id="undoBtn" disabled
+                    aria-label="Undo" title="Undo (Ctrl+Z)">↶</button>
+            <button class="btn btn-icon btn-small" onclick="redo()" id="redoBtn" disabled
+                    aria-label="Redo" title="Redo (Ctrl+Y)">↷</button>
+          </div>
+          <div class="btn-group">
+            <button class="btn btn-success btn-small" onclick="copyJSON()" id="copyBtn" disabled>
+              Copy JSON
+            </button>
+            <button class="btn btn-secondary btn-small" onclick="copyMarkdown()" id="copyMdBtn" disabled>
+              Copy MD
+            </button>
+            <button class="btn btn-secondary btn-small" onclick="copyText()" id="copyTextBtn" disabled>
+              Copy Text
+            </button>
+            <button class="btn btn-secondary btn-small" onclick="downloadJSON()" id="downloadBtn" disabled>
+              Download
+            </button>
+            <button class="btn btn-secondary btn-small" onclick="addToLibrary()" id="libraryBtn" disabled
+                    title="Add to DM Screen library">
+              + Library
+            </button>
+            <button class="btn btn-secondary btn-small" onclick="window.print()" id="printBtn" disabled
+                    title="Print stat block">
+              Print
+            </button>
+          </div>
+        </div>
+
+        <div class="tabs" role="tablist">
+          <button class="tab active" onclick="switchTab('preview')" data-tab="preview" role="tab" aria-selected="true">
+            Preview
+          </button>
+          <button class="tab" onclick="switchTab('json')" data-tab="json" role="tab" aria-selected="false">
+            JSON
+          </button>
+          <button class="tab" onclick="switchTab('markdown')" data-tab="markdown" role="tab" aria-selected="false">
+            Markdown
+          </button>
+          <button class="tab" onclick="switchTab('text')" data-tab="text" role="tab" aria-selected="false">
+            Text
+          </button>
+        </div>
+
+        <!-- Preview Tab -->
+        <div id="previewTab" role="tabpanel">
+          <div id="statBlockPreview" class="stat-block">
+            <div class="empty-state">
+              <div class="empty-state-icon" aria-hidden="true">⚔️</div>
+              <div>Paste a stat block and press <kbd>Ctrl</kbd>+<kbd>Enter</kbd></div>
+              <div style="margin-top: 0.5rem; font-size: 0.85rem;">or click "Convert to Daggerheart"</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- JSON Tab -->
+        <div id="jsonTab" class="hidden" role="tabpanel">
+          <div id="jsonOutput" class="json-output">// JSON output will appear here after conversion</div>
+        </div>
+
+        <!-- Markdown Tab -->
+        <div id="markdownTab" class="hidden" role="tabpanel">
+          <div id="markdownOutput" class="markdown-output">Markdown output will appear here after conversion</div>
+        </div>
+
+        <!-- Text Tab -->
+        <div id="textTab" class="hidden" role="tabpanel">
+          <div id="textOutput" class="text-output">Text output will appear here after conversion</div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Footer -->
+  <footer class="site-footer">
+    <p>This tool is not affiliated with, endorsed, or sponsored by Wizards of the Coast, Paizo Inc., or Darrington Press. All product names and trademarks are property of their respective owners.</p>
+    <div class="zs-credits" itemscope="" itemtype="https://schema.org/Organization">
+      <a href="https://zealoussites.com" target="_blank" rel="noopener noreferrer nofollow" title="Website by Marcus Zeal @ Zealous Sites" aria-label="Website by Zealous Sites" itemprop="url">
+        <span itemprop="name">
+          Website by
+          <svg height="20" viewBox="0 0 210 124" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <path d="M46.072 100V86.08L83.512 42.496L86.296 50.368H47.032V32.8H106.264V46.72L68.824 90.304L66.04 82.432H107.8V100H46.072ZM139.434 101.536C133.802 101.536 128.362 100.896 123.114 99.616C117.866 98.336 113.546 96.672 110.154 94.624L117.45 78.112C120.65 79.968 124.202 81.472 128.106 82.624C132.074 83.712 135.914 84.256 139.626 84.256C141.802 84.256 143.498 84.128 144.714 83.872C145.994 83.552 146.922 83.136 147.498 82.624C148.074 82.048 148.362 81.376 148.362 80.608C148.362 79.392 147.69 78.432 146.346 77.728C145.002 77.024 143.21 76.448 140.97 76C138.794 75.488 136.394 74.976 133.77 74.464C131.146 73.888 128.49 73.152 125.802 72.256C123.178 71.36 120.746 70.176 118.506 68.704C116.33 67.232 114.57 65.312 113.226 62.944C111.882 60.512 111.21 57.504 111.21 53.92C111.21 49.76 112.362 45.984 114.666 42.592C117.034 39.136 120.522 36.384 125.13 34.336C129.802 32.288 135.594 31.264 142.506 31.264C147.05 31.264 151.53 31.744 155.946 32.704C160.362 33.664 164.33 35.136 167.85 37.12L161.034 53.536C157.706 51.872 154.474 50.624 151.338 49.792C148.266 48.96 145.258 48.544 142.314 48.544C140.138 48.544 138.41 48.736 137.13 49.12C135.85 49.504 134.922 50.016 134.346 50.656C133.834 51.296 133.578 52 133.578 52.768C133.578 53.92 134.25 54.848 135.594 55.552C136.938 56.192 138.698 56.736 140.874 57.184C143.114 57.632 145.546 58.112 148.17 58.624C150.858 59.136 153.514 59.84 156.138 60.736C158.762 61.632 161.162 62.816 163.338 64.288C165.578 65.76 167.37 67.68 168.714 70.048C170.058 72.416 170.73 75.36 170.73 78.88C170.73 82.976 169.546 86.752 167.178 90.208C164.874 93.6 161.418 96.352 156.81 98.464C152.202 100.512 146.41 101.536 139.434 101.536Z" fill="currentColor"></path>
+            <path d="M30.528 111.624C24.576 111.624 20.064 110.12 16.992 107.112C13.92 104.168 12.384 99.944 12.384 94.44V77.064C12.384 75.528 12 74.408 11.232 73.704C10.464 72.936 9.44 72.552 8.16 72.552H4.992V60.84H8.16C9.44 60.84 10.464 60.456 11.232 59.688C12 58.92 12.384 57.8 12.384 56.328V38.952C12.384 33.384 13.92 29.128 16.992 26.184C20.064 23.24 24.576 21.768 30.528 21.768H36.096V33.48H34.368C32.064 33.48 30.304 34.088 29.088 35.304C27.936 36.52 27.36 38.28 27.36 40.584V55.944C27.36 58.76 26.976 60.968 26.208 62.568C25.44 64.168 24.224 65.32 22.56 66.024C20.96 66.728 18.88 67.24 16.32 67.56V65.832C18.88 66.088 20.96 66.6 22.56 67.368C24.224 68.072 25.44 69.224 26.208 70.824C26.976 72.424 27.36 74.632 27.36 77.448V92.808C27.36 95.112 27.936 96.872 29.088 98.088C30.304 99.304 32.064 99.912 34.368 99.912H36.096V111.624H30.528Z" fill="currentColor"></path>
+            <path d="M179.008 111.624H173.44V99.912H175.168C177.472 99.912 179.2 99.304 180.352 98.088C181.568 96.872 182.176 95.112 182.176 92.808V77.448C182.176 74.632 182.56 72.424 183.328 70.824C184.16 69.224 185.376 68.072 186.976 67.368C188.576 66.6 190.656 66.088 193.216 65.832V67.56C190.656 67.24 188.576 66.728 186.976 66.024C185.376 65.32 184.16 64.168 183.328 62.568C182.56 60.968 182.176 58.76 182.176 55.944V40.584C182.176 38.28 181.568 36.52 180.352 35.304C179.2 34.088 177.472 33.48 175.168 33.48H173.44V21.768H179.008C185.024 21.768 189.536 23.24 192.544 26.184C195.616 29.128 197.152 33.384 197.152 38.952V56.328C197.152 57.8 197.536 58.92 198.304 59.688C199.072 60.456 200.096 60.84 201.376 60.84H204.544V72.552H201.376C200.096 72.552 199.072 72.936 198.304 73.704C197.536 74.408 197.152 75.528 197.152 77.064V94.44C197.152 99.944 195.616 104.168 192.544 107.112C189.536 110.12 185.024 111.624 179.008 111.624Z" fill="currentColor"></path>
+          </svg>
+        </span>
+      </a>
+    </div>
+  </footer>
+
+  <!-- Toast -->
+  <div id="toast" class="toast" role="alert" aria-live="assertive">
+    <span class="toast-message" id="toastMessage"></span>
+    <button class="toast-close" onclick="dismissToast()" aria-label="Dismiss notification">×</button>
+    <div class="toast-progress" id="toastProgress"></div>
+  </div>
+
+  <!-- Load the modules -->
+  <script src="parsers/parser-manager.js"></script>
+  <script src="parsers/dnd5e-parser.js"></script>
+  <script src="parsers/pf2e-parser.js"></script>
+  <script src="parsers/dnd35e-parser.js"></script>
+  <script src="parsers/osr-parser.js"></script>
+  <script src="dnd-parser.js"></script>
+  <script src="daggerheart-converter.js"></script>
+
+  <script>
+    // ==================== STATE ====================
+    let currentParsed = null;
+    let currentConverted = null;
+    let parseDebounceTimer = null;
+    let saveDebounceTimer = null;
+    let currentMode = 'single';
+    let currentSystem = 'auto';
+    let detectedSystem = null;
+    let batchResults = [];
+
+    // Undo/Redo history
+    let history = [];
+    let historyIndex = -1;
+    const MAX_HISTORY = 50;
+
+    // Recent conversions
+    const MAX_RECENT = 10;
+    const STORAGE_KEYS = {
+      recent: 'dnd-dh-recent',
+      draft: 'dnd-dh-draft'
+    };
+
+    // ==================== SAMPLES BY SYSTEM ====================
+    // These samples use SRD content (CC-BY-4.0 for 5e, OGL for 3.5e) or original creations
+    const SAMPLES = {
+      dnd5e: {
+        // From 5e SRD (CC-BY-4.0)
+        ogre: `Ogre
+Large giant, chaotic evil
+Armor Class 11 (hide armor)
+Hit Points 59 (7d10 + 21)
+Speed 40 ft.
+STR 19 (+4) DEX 8 (-1) CON 16 (+3) INT 5 (-3) WIS 7 (-2) CHA 7 (-2)
+Senses darkvision 60 ft., passive Perception 8
+Languages Common, Giant
+Challenge 2 (450 XP)
+
+Actions
+Greatclub. Melee Weapon Attack: +6 to hit, reach 5 ft., one target. Hit: 13 (2d8 + 4) bludgeoning damage.
+
+Javelin. Melee or Ranged Weapon Attack: +6 to hit, reach 5 ft. or range 30/120 ft., one target. Hit: 11 (2d6 + 4) piercing damage.`,
+
+        // From 5e SRD (CC-BY-4.0)
+        wight: `Wight
+Medium undead, neutral evil
+Armor Class 14 (studded leather)
+Hit Points 45 (6d8 + 18)
+Speed 30 ft.
+STR 15 (+2) DEX 14 (+2) CON 16 (+3) INT 10 (+0) WIS 13 (+1) CHA 15 (+2)
+Skills Perception +3, Stealth +4
+Damage Resistances necrotic; bludgeoning, piercing, and slashing from nonmagical attacks
+Damage Immunities poison
+Condition Immunities exhaustion, poisoned
+Senses darkvision 60 ft., passive Perception 13
+Languages the languages it knew in life
+Challenge 3 (700 XP)
+
+Sunlight Sensitivity. While in sunlight, the wight has disadvantage on attack rolls, as well as on Wisdom (Perception) checks that rely on sight.
+
+Actions
+Multiattack. The wight makes two longsword attacks or two longbow attacks. It can use its Life Drain in place of one longsword attack.
+
+Life Drain. Melee Weapon Attack: +4 to hit, reach 5 ft., one creature. Hit: 5 (1d6 + 2) necrotic damage. The target must succeed on a DC 13 Constitution saving throw or its hit point maximum is reduced by an amount equal to the damage taken.
+
+Longsword. Melee Weapon Attack: +4 to hit, reach 5 ft., one target. Hit: 6 (1d8 + 2) slashing damage.`
+      },
+
+      pf2e: {
+        // Original creation in PF2e format
+        ironscale: `Ironscale Warrior
+Creature 3
+[N] [Medium] [Humanoid] [Lizardfolk]
+Perception +9; low-light vision
+Languages Common, Draconic
+Skills Athletics +10, Intimidation +7, Stealth +8, Survival +9
+Str +4, Dex +2, Con +3, Int +0, Wis +2, Cha +1
+Items hide armor, steel shield, trident
+AC 19 (21 with shield raised); Fort +10, Ref +7, Will +7
+HP 45
+Shield Block [reaction]
+Speed 25 feet, swim 20 feet
+
+Melee [one-action] trident +11 (reach 10 feet), Damage 1d8+6 piercing
+Melee [one-action] jaws +11, Damage 1d6+6 piercing
+Melee [one-action] tail +11 (agile), Damage 1d4+6 bludgeoning
+Ranged [one-action] trident +9 (thrown 20 feet), Damage 1d8+4 piercing
+
+Deep Breath The ironscale warrior can hold their breath for 10 minutes.
+
+Tail Sweep [two-actions] The warrior makes a tail Strike against each enemy within reach. Each attack counts toward their multiple attack penalty, but the penalty doesn't increase until after all attacks.`
+      },
+
+      dnd35e: {
+        // From 3.5e SRD (OGL)
+        ogre: `Ogre
+CR 3
+CE Large Giant
+Init -1; Senses darkvision 60 ft., low-light vision; Listen +2, Spot +2
+
+AC 16, touch 8, flat-footed 16 (-1 size, -1 Dex, +5 natural, +3 hide armor)
+hp 29 (4d8+11)
+Fort +6, Ref +0, Will +1
+
+Speed 30 ft. (40 ft. base)
+Melee greatclub +8 (2d8+7) or
+Melee javelin +7 (1d8+5)
+Ranged javelin +1 (1d8+5)
+Space 10 ft.; Reach 10 ft.
+
+Abilities Str 21, Dex 8, Con 15, Int 6, Wis 10, Cha 7
+Base Atk +3; Grp +12
+Feats Toughness, Weapon Focus (greatclub)
+Skills Climb +5, Listen +2, Spot +2
+
+Ogres are brutish creatures standing 9 to 10 feet tall and weighing 600 to 650 pounds. They favor overwhelming odds and ambush tactics.`
+      },
+
+      osr: {
+        // Generic OSR stat block (common across many retroclones)
+        skeleton: `Skeleton
+AC: 7 [12]
+HD: 1
+Move: 60' (20')
+Attacks: 1 (weapon)
+Damage: 1d6 or by weapon
+No. Appearing: 3d4 (3d10)
+Save As: Fighter 1
+Morale: 12
+Treasure Type: None
+Alignment: Chaotic
+
+Animated bones of the dead, driven by dark magic. Immune to sleep, charm, and hold spells. Edged weapons deal half damage. Can be turned by clerics.`,
+
+        // Generic OSR stat block
+        goblin: `Goblin
+AC: 6 [13]
+HD: 1-1
+Move: 60' (20')
+Attacks: 1 (weapon)
+Damage: 1d6 or by weapon
+No. Appearing: 2d4 (6d10)
+Save As: Normal Human
+Morale: 7 (9 with leader)
+Treasure Type: R (C)
+Alignment: Chaotic
+
+Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty in bright sunlight. Often led by a chieftain (HD 2, 11 hp). Favor ambushes and overwhelming numbers.`
+      }
+    };
+
+    // ==================== INITIALIZATION ====================
+    document.addEventListener('DOMContentLoaded', () => {
+      setupDragAndDrop();
+      setupKeyboardShortcuts();
+      loadDraft();
+      renderRecentList();
+      loadThemePreference();
+      setupToastInteraction();
+    });
+
+    // ==================== THEME TOGGLE ====================
+    function toggleTheme() {
+      const isLight = document.documentElement.classList.toggle('light-mode');
+      localStorage.setItem('dnd-dh-theme', isLight ? 'light' : 'dark');
+      showToast(isLight ? 'Light mode enabled' : 'Dark mode enabled', 'info');
+    }
+
+    function loadThemePreference() {
+      const savedTheme = localStorage.getItem('dnd-dh-theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+      if (savedTheme === 'light' || (!savedTheme && !prefersDark)) {
+        document.documentElement.classList.add('light-mode');
+      }
+
+      // Listen for system theme changes
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
+        if (!localStorage.getItem('dnd-dh-theme')) {
+          document.documentElement.classList.toggle('light-mode', !e.matches);
+        }
+      });
+    }
+
+    // ==================== DRAG AND DROP ====================
+    function setupDragAndDrop() {
+      const dropZone = document.getElementById('dropZone');
+      const textarea = document.getElementById('inputText');
+
+      ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, preventDefaults, false);
+      });
+
+      function preventDefaults(e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+
+      ['dragenter', 'dragover'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.add('drag-over'));
+      });
+
+      ['dragleave', 'drop'].forEach(eventName => {
+        dropZone.addEventListener(eventName, () => dropZone.classList.remove('drag-over'));
+      });
+
+      dropZone.addEventListener('drop', handleDrop);
+
+      function handleDrop(e) {
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+          const file = files[0];
+          if (file.type === 'text/plain' || file.name.endsWith('.txt')) {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+              textarea.value = event.target.result;
+              handleLiveParse();
+              saveDraft();
+              showToast('File loaded: ' + file.name, 'info');
+            };
+            reader.readAsText(file);
+          } else {
+            showToast('Please drop a .txt file', 'error');
+          }
+        }
+      }
+    }
+
+    // ==================== KEYBOARD SHORTCUTS ====================
+    function setupKeyboardShortcuts() {
+      document.addEventListener('keydown', (e) => {
+        // Ctrl+Enter: Convert
+        if (e.ctrlKey && e.key === 'Enter') {
+          e.preventDefault();
+          convert();
+        }
+        // Ctrl+Shift+C: Copy JSON
+        if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+          e.preventDefault();
+          copyJSON();
+        }
+        // Ctrl+Z: Undo
+        if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+          if (document.activeElement.tagName !== 'TEXTAREA' &&
+              document.activeElement.tagName !== 'INPUT') {
+            e.preventDefault();
+            undo();
+          }
+        }
+        // Ctrl+Y or Ctrl+Shift+Z: Redo
+        if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
+          e.preventDefault();
+          redo();
+        }
+        // Escape: Clear
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          clearAll();
+        }
+      });
+    }
+
+    // ==================== MODE TOGGLE ====================
+    function setMode(mode) {
+      currentMode = mode;
+      document.querySelectorAll('.mode-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.mode === mode);
+        btn.setAttribute('aria-selected', btn.dataset.mode === mode);
+      });
+    }
+
+    // ==================== DRAFT AUTO-SAVE ====================
+    function saveDraft() {
+      clearTimeout(saveDebounceTimer);
+      saveDebounceTimer = setTimeout(() => {
+        const input = document.getElementById('inputText').value;
+        if (input.trim()) {
+          localStorage.setItem(STORAGE_KEYS.draft, JSON.stringify({
+            input: input,
+            timestamp: Date.now()
+          }));
+          document.getElementById('draftIndicator').classList.remove('hidden');
+          setTimeout(() => {
+            document.getElementById('draftIndicator').classList.add('hidden');
+          }, 2000);
+        }
+      }, 1000);
+    }
+
+    function loadDraft() {
+      try {
+        const draft = JSON.parse(localStorage.getItem(STORAGE_KEYS.draft));
+        if (draft && draft.input) {
+          const age = Date.now() - draft.timestamp;
+          // Only load drafts less than 24 hours old
+          if (age < 24 * 60 * 60 * 1000) {
+            document.getElementById('inputText').value = draft.input;
+            handleLiveParse();
+            showToast('Draft restored', 'info');
+          }
+        }
+      } catch (e) {
+        // Ignore errors
+      }
+    }
+
+    function clearDraft() {
+      localStorage.removeItem(STORAGE_KEYS.draft);
+    }
+
+    // ==================== RECENT CONVERSIONS ====================
+    function getRecent() {
+      try {
+        return JSON.parse(localStorage.getItem(STORAGE_KEYS.recent)) || [];
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function saveToRecent(converted) {
+      const recent = getRecent();
+      // Remove duplicates
+      const filtered = recent.filter(r => r.id !== converted.id);
+      // Add to front
+      filtered.unshift({
+        id: converted.id,
+        name: converted.name,
+        tier: converted.tier,
+        advType: converted.advType,
+        data: converted,
+        timestamp: Date.now()
+      });
+      // Limit size
+      const limited = filtered.slice(0, MAX_RECENT);
+      localStorage.setItem(STORAGE_KEYS.recent, JSON.stringify(limited));
+      renderRecentList();
+    }
+
+    function renderRecentList() {
+      const recent = getRecent();
+      const list = document.getElementById('recentList');
+
+      if (recent.length === 0) {
+        list.innerHTML = '<div class="recent-item" style="color: var(--text-secondary);">No recent conversions</div>';
+        return;
+      }
+
+      list.innerHTML = recent.map((r, i) => `
+        <div class="recent-item" role="menuitem" onclick="loadRecent(${i})">
+          <div>
+            <span class="recent-item-name">${escapeHtml(r.name)}</span>
+            <span class="recent-item-tier">T${r.tier} ${r.advType}</span>
+          </div>
+          <span class="recent-item-delete" onclick="event.stopPropagation(); deleteRecent(${i})"
+                title="Remove" aria-label="Remove from recent">×</span>
+        </div>
+      `).join('');
+    }
+
+    function loadRecent(index) {
+      const recent = getRecent();
+      if (recent[index]) {
+        currentConverted = recent[index].data;
+        currentParsed = null; // We don't have the parsed data
+        pushHistory();
+        renderPreview();
+        renderJSON();
+        renderMarkdown();
+        renderText();
+        enableButtons();
+        toggleRecentMenu();
+        showToast('Loaded: ' + recent[index].name, 'info');
+      }
+    }
+
+    function deleteRecent(index) {
+      const recent = getRecent();
+      recent.splice(index, 1);
+      localStorage.setItem(STORAGE_KEYS.recent, JSON.stringify(recent));
+      renderRecentList();
+    }
+
+    function toggleRecentMenu() {
+      const menu = document.getElementById('recentMenu');
+      const btn = document.getElementById('recentBtn');
+      const isOpen = menu.classList.toggle('show');
+      btn.setAttribute('aria-expanded', isOpen);
+    }
+
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.recent-dropdown')) {
+        document.getElementById('recentMenu').classList.remove('show');
+        document.getElementById('recentBtn').setAttribute('aria-expanded', 'false');
+      }
+    });
+
+    // ==================== UNDO/REDO ====================
+    function pushHistory() {
+      if (!currentConverted) return;
+
+      // Remove any redo history
+      history = history.slice(0, historyIndex + 1);
+
+      // Add current state
+      history.push(JSON.stringify(currentConverted));
+
+      // Limit history size
+      if (history.length > MAX_HISTORY) {
+        history.shift();
+      }
+
+      historyIndex = history.length - 1;
+      updateUndoRedoButtons();
+    }
+
+    function undo() {
+      if (historyIndex > 0) {
+        historyIndex--;
+        currentConverted = JSON.parse(history[historyIndex]);
+        renderAll();
+        updateUndoRedoButtons();
+        showToast('Undo', 'info');
+      }
+    }
+
+    function redo() {
+      if (historyIndex < history.length - 1) {
+        historyIndex++;
+        currentConverted = JSON.parse(history[historyIndex]);
+        renderAll();
+        updateUndoRedoButtons();
+        showToast('Redo', 'info');
+      }
+    }
+
+    function updateUndoRedoButtons() {
+      document.getElementById('undoBtn').disabled = historyIndex <= 0;
+      document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+    }
+
+    // ==================== LIVE PARSING ====================
+    function handleLiveParse() {
+      saveDraft();
+
+      clearTimeout(parseDebounceTimer);
+      parseDebounceTimer = setTimeout(() => {
+        const input = document.getElementById('inputText').value.trim();
+
+        if (input.length < 20) {
+          document.getElementById('liveParsePreview').classList.add('hidden');
+          updateDetectedSystemDisplay(null);
+          return;
+        }
+
+        try {
+          // For batch mode, only parse the first block for preview
+          const firstBlock = currentMode === 'batch'
+            ? input.split(/\n-{3,}\n/)[0]
+            : input;
+
+          // Detect system if in auto mode
+          if (typeof ParserManager !== 'undefined' && currentSystem === 'auto') {
+            const detected = ParserManager.detectSystem(firstBlock);
+            detectedSystem = detected.system;
+            updateDetectedSystemDisplay(detected);
+          }
+
+          // Parse using appropriate parser
+          let parsed;
+          if (typeof ParserManager !== 'undefined') {
+            parsed = ParserManager.parse(firstBlock, { system: currentSystem });
+          } else {
+            parsed = DnDParser.parse(firstBlock);
+          }
+
+          renderLivePreview(parsed);
+          document.getElementById('liveParsePreview').classList.remove('hidden');
+        } catch (e) {
+          console.error('Parse error:', e);
+          document.getElementById('liveParsePreview').classList.add('hidden');
+        }
+      }, 300);
+    }
+
+    function renderLivePreview(parsed) {
+      // Add system info if available
+      const systemInfo = parsed._meta?.systemInfo;
+      const systemLabel = systemInfo ? systemInfo.shortName : 'Unknown';
+
+      const fields = [
+        { label: 'System', value: systemLabel, confidence: parsed._meta?.detected?.confidence > 0.5 ? 'high' : 'medium' },
+        { label: 'Name', value: parsed.name, confidence: parsed.name !== 'Unknown Creature' ? 'high' : 'low' },
+        { label: 'CR/Lvl', value: parsed.level ? `Lvl ${parsed.level}` : parsed.cr.string, confidence: parsed.cr.numeric > 0 || parsed.level ? 'high' : 'medium' },
+        { label: 'HP', value: parsed.hp.value, confidence: parsed.hp.value > 0 ? 'high' : 'low' },
+        { label: 'AC', value: parsed.ac.value, confidence: parsed.ac.value > 0 ? 'high' : 'low' },
+        { label: 'Type', value: parsed.typeInfo.type, confidence: parsed.typeInfo.type !== 'creature' ? 'high' : 'medium' },
+        { label: 'Size', value: parsed.typeInfo.size, confidence: 'high' },
+        { label: 'Actions', value: parsed.actions.length, confidence: parsed.actions.length > 0 ? 'high' : 'low' },
+      ];
+
+      document.getElementById('liveParseGrid').innerHTML = fields.map(f => `
+        <div class="parse-field">
+          <span class="confidence-badge confidence-${f.confidence}" aria-label="${f.confidence} confidence"></span>
+          <span class="parse-field-label">${f.label}:</span>
+          <span class="parse-field-value">${f.value}</span>
+        </div>
+      `).join('');
+    }
+
+    // ==================== SYSTEM HANDLING ====================
+    function handleSystemChange() {
+      currentSystem = document.getElementById('systemSelect').value;
+      handleLiveParse();
+    }
+
+    function getActiveParser() {
+      const system = currentSystem === 'auto' ? (detectedSystem || 'dnd5e') : currentSystem;
+
+      // Use ParserManager if available, otherwise fall back to DnDParser
+      if (typeof ParserManager !== 'undefined') {
+        return { parser: ParserManager, system: system };
+      }
+      return { parser: DnDParser, system: 'dnd5e' };
+    }
+
+    function updateDetectedSystemDisplay(detected) {
+      const display = document.getElementById('detectedSystem');
+      if (detected && currentSystem === 'auto') {
+        const confidence = Math.round(detected.confidence * 100);
+        const name = detected.info?.shortName || detected.system;
+        display.textContent = `Detected: ${name} (${confidence}%)`;
+        display.style.color = confidence > 60 ? 'var(--success)' : 'var(--warning)';
+      } else {
+        display.textContent = '';
+      }
+    }
+
+    // ==================== LOAD SAMPLE ====================
+    function loadSample(system, name) {
+      if (SAMPLES[system] && SAMPLES[system][name]) {
+        document.getElementById('inputText').value = SAMPLES[system][name];
+        // Set the system selector to match the sample
+        document.getElementById('systemSelect').value = system;
+        currentSystem = system;
+        handleLiveParse();
+        convert();
+      } else {
+        showToast('Sample not found', 'error');
+      }
+    }
+
+    // ==================== CONVERT ====================
+    function convert() {
+      const input = document.getElementById('inputText').value.trim();
+      if (!input) {
+        showToast('Please paste a stat block to convert', 'error');
+        return;
+      }
+
+      try {
+        if (currentMode === 'batch') {
+          convertBatch(input);
+        } else {
+          convertSingle(input);
+        }
+
+        clearDraft();
+        showToast('Converted successfully!', 'success');
+      } catch (e) {
+        console.error(e);
+        showToast('Error parsing stat block: ' + e.message, 'error');
+      }
+    }
+
+    function convertSingle(input) {
+      // Use ParserManager if available, otherwise fall back to DnDParser
+      if (typeof ParserManager !== 'undefined') {
+        currentParsed = ParserManager.parse(input, { system: currentSystem });
+        // Update detected system display
+        if (currentParsed._meta && currentParsed._meta.detected) {
+          updateDetectedSystemDisplay(currentParsed._meta.detected);
+        }
+      } else {
+        currentParsed = DnDParser.parse(input);
+      }
+      document.getElementById('adjustments').classList.remove('hidden');
+      reconvert();
+    }
+
+    function convertBatch(input) {
+      const blocks = input.split(/\n-{3,}\n/).filter(b => b.trim());
+      batchResults = [];
+
+      const overrideTier = document.getElementById('overrideTier').value;
+      const overrideType = document.getElementById('overrideType').value;
+      const options = {};
+      if (overrideTier) options.tier = parseInt(overrideTier);
+      if (overrideType) options.type = overrideType;
+
+      for (const block of blocks) {
+        try {
+          // Use ParserManager if available
+          let parsed;
+          if (typeof ParserManager !== 'undefined') {
+            parsed = ParserManager.parse(block.trim(), { system: currentSystem });
+          } else {
+            parsed = DnDParser.parse(block.trim());
+          }
+          const converted = DaggerheartConverter.convert(parsed, options);
+          batchResults.push({ success: true, data: converted });
+          saveToRecent(converted);
+        } catch (e) {
+          batchResults.push({ success: false, error: e.message, input: block.substring(0, 50) });
+        }
+      }
+
+      renderBatchResults();
+      enableButtons();
+    }
+
+    function renderBatchResults() {
+      const container = document.getElementById('statBlockPreview');
+
+      const html = batchResults.map((result, i) => {
+        if (result.success) {
+          return `
+            <div class="batch-item" data-index="${i}">
+              <div class="batch-item-header" onclick="toggleBatchItem(${i})">
+                <span><strong>${escapeHtml(result.data.name)}</strong> - Tier ${result.data.tier} ${result.data.advType}</span>
+                <span class="collapsible-icon">▼</span>
+              </div>
+              <div class="batch-item-content">
+                ${renderStatBlockHTML(result.data)}
+              </div>
+            </div>
+          `;
+        } else {
+          return `
+            <div class="batch-item" style="border-color: var(--error);">
+              <div class="batch-item-header">
+                <span style="color: var(--error);">Failed: ${escapeHtml(result.input)}...</span>
+              </div>
+              <div class="batch-item-content">
+                <p style="color: var(--error);">${escapeHtml(result.error)}</p>
+              </div>
+            </div>
+          `;
+        }
+      }).join('');
+
+      container.innerHTML = `<div class="batch-results">${html}</div>`;
+
+      // Set first successful result as current
+      const firstSuccess = batchResults.find(r => r.success);
+      if (firstSuccess) {
+        currentConverted = firstSuccess.data;
+        pushHistory();
+        renderJSON();
+        renderMarkdown();
+        renderText();
+      }
+    }
+
+    function toggleBatchItem(index) {
+      const item = document.querySelector(`.batch-item[data-index="${index}"]`);
+      item.classList.toggle('collapsed');
+    }
+
+    function reconvert() {
+      if (!currentParsed) return;
+
+      const overrideTier = document.getElementById('overrideTier').value;
+      const overrideType = document.getElementById('overrideType').value;
+
+      const options = {};
+      if (overrideTier) options.tier = parseInt(overrideTier);
+      if (overrideType) options.type = overrideType;
+
+      currentConverted = DaggerheartConverter.convert(currentParsed, options);
+
+      pushHistory();
+      saveToRecent(currentConverted);
+      renderAll();
+      enableButtons();
+    }
+
+    function renderAll() {
+      renderPreview();
+      renderJSON();
+      renderMarkdown();
+      renderText();
+    }
+
+    function enableButtons() {
+      document.getElementById('copyBtn').disabled = false;
+      document.getElementById('copyMdBtn').disabled = false;
+      document.getElementById('copyTextBtn').disabled = false;
+      document.getElementById('downloadBtn').disabled = false;
+      document.getElementById('libraryBtn').disabled = false;
+      document.getElementById('printBtn').disabled = false;
+    }
+
+    // ==================== RENDER PREVIEW ====================
+    function renderPreview() {
+      if (!currentConverted) return;
+      document.getElementById('statBlockPreview').innerHTML = renderStatBlockHTML(currentConverted);
+      // Auto-resize all textareas
+      document.querySelectorAll('.feature-desc-input').forEach(autoResizeTextarea);
+    }
+
+    function renderStatBlockHTML(c) {
+      const featuresHTML = c.features.map((f, i) => `
+        <div class="feature" data-index="${i}">
+          <div class="feature-header">
+            <input type="text" class="feature-name-input" value="${escapeHtml(f.name)}"
+                   onchange="updateFeature(${i}, 'name', this.value)"
+                   aria-label="Feature name">
+            <button class="feature-type feature-type-${f.type.toLowerCase()}"
+                  onclick="cycleFeatureType(${i})" title="Click to change type"
+                  aria-label="Feature type: ${f.type}. Click to cycle.">${f.type}</button>
+            <span class="feature-actions">
+              <button class="feature-btn" onclick="removeFeature(${i})" title="Remove feature"
+                      aria-label="Remove feature">✕</button>
+            </span>
+          </div>
+          <textarea class="feature-desc-input"
+                    onchange="updateFeature(${i}, 'desc', this.value)"
+                    oninput="autoResizeTextarea(this)"
+                    aria-label="Feature description">${escapeHtml(f.desc)}</textarea>
+        </div>
+      `).join('');
+
+      const tagsHTML = c.tags.map((t, i) => `
+        <span class="tag" onclick="removeTag(${i})">
+          ${escapeHtml(t)}<span class="tag-remove" aria-label="Remove tag">×</span>
+        </span>
+      `).join('');
+
+      const imageHTML = c.imageUrl
+        ? `<img src="${escapeHtml(c.imageUrl)}" alt="${escapeHtml(c.name)}"
+               class="stat-block-image-preview" onclick="document.getElementById('imageUrlInput').focus()"
+               onerror="this.style.display='none'; document.querySelector('.image-placeholder').style.display='flex';">`
+        : `<div class="image-placeholder" onclick="document.getElementById('imageUrlInput').focus()">
+             Click to add image URL
+           </div>`;
+
+      return `
+        <div class="stat-block-header">
+          <div class="stat-block-name">${escapeHtml(c.name)}</div>
+          <div class="stat-block-type">Tier ${c.tier} ${c.advType}</div>
+        </div>
+
+        <div class="stat-block-image-section">
+          ${imageHTML}
+          <input type="url" id="imageUrlInput" class="image-url-input"
+                 placeholder="Paste image URL here (optional)"
+                 value="${c.imageUrl ? escapeHtml(c.imageUrl) : ''}"
+                 onchange="updateImageUrl(this.value)"
+                 aria-label="Image URL">
+        </div>
+
+        <div class="stat-block-desc">${escapeHtml(c.description)}</div>
+
+        <div class="stat-line">
+          <span class="stat-label">Motives:</span>
+          <input type="text" class="stat-value-editable" value="${escapeHtml(c.motives)}"
+                 onchange="updateStat('motives', this.value)" aria-label="Motives">
+        </div>
+        <div class="stat-line">
+          <span class="stat-label">Tactics:</span>
+          <input type="text" class="stat-value-editable" value="${escapeHtml(c.tactics)}"
+                 onchange="updateStat('tactics', this.value)" aria-label="Tactics">
+        </div>
+
+        <div class="stat-grid">
+          <div class="stat-item">
+            <div class="stat-item-label">Difficulty</div>
+            <input type="number" class="stat-item-input" value="${c.difficulty}"
+                   onchange="updateStat('difficulty', parseInt(this.value))" aria-label="Difficulty">
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-label">Major</div>
+            <input type="number" class="stat-item-input" value="${c.majorThresh}"
+                   onchange="updateStat('majorThresh', parseInt(this.value))" aria-label="Major threshold">
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-label">Severe</div>
+            <input type="number" class="stat-item-input" value="${c.severeThresh}"
+                   onchange="updateStat('severeThresh', parseInt(this.value))" aria-label="Severe threshold">
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-label">HP</div>
+            <input type="number" class="stat-item-input" value="${c.hp}"
+                   onchange="updateStat('hp', parseInt(this.value))" aria-label="Hit points">
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-label">Stress</div>
+            <input type="number" class="stat-item-input" value="${c.stress}"
+                   onchange="updateStat('stress', parseInt(this.value))" aria-label="Stress">
+          </div>
+          <div class="stat-item">
+            <div class="stat-item-label">Attack</div>
+            <input type="text" class="stat-item-input" value="${c.atkMod}"
+                   onchange="updateStat('atkMod', this.value)" aria-label="Attack modifier">
+          </div>
+        </div>
+
+        <div class="stat-line">
+          <span class="stat-label">Weapon:</span>
+          <input type="text" class="stat-value-editable" value="${escapeHtml(c.weapon)}"
+                 onchange="updateStat('weapon', this.value)" style="width: 120px;" aria-label="Weapon">
+          <span>(</span>
+          <input type="text" class="stat-value-editable" value="${c.range}"
+                 onchange="updateStat('range', this.value)" style="width: 80px;" aria-label="Range">
+          <span>)</span>
+        </div>
+        <div class="stat-line">
+          <span class="stat-label">Damage:</span>
+          <input type="text" class="stat-value-editable" value="${c.damage}"
+                 onchange="updateStat('damage', this.value)" style="width: 80px;" aria-label="Damage dice">
+          <input type="text" class="stat-value-editable" value="${c.dmgType}"
+                 onchange="updateStat('dmgType', this.value)" style="width: 40px;" aria-label="Damage type">
+        </div>
+        <div class="stat-line">
+          <span class="stat-label">Experience:</span>
+          <input type="text" class="stat-value-editable" value="${escapeHtml(c.experience)}"
+                 onchange="updateStat('experience', this.value)" aria-label="Experience">
+        </div>
+
+        <!-- Features Section -->
+        <div class="collapsible" id="featuresCollapsible">
+          <div class="collapsible-header" onclick="toggleCollapsible('featuresCollapsible')"
+               role="button" aria-expanded="true" tabindex="0"
+               onkeypress="if(event.key==='Enter')toggleCollapsible('featuresCollapsible')">
+            <span class="collapsible-title">
+              Features (${c.features.length})
+              <span style="font-weight: normal; font-size: 0.75rem; color: var(--text-secondary);">click to edit</span>
+            </span>
+            <span class="collapsible-icon" aria-hidden="true">▼</span>
+          </div>
+          <div class="collapsible-content features-section">
+            ${featuresHTML}
+            <button class="add-feature-btn" onclick="addFeature()" aria-label="Add new feature">
+              + Add Feature
+            </button>
+          </div>
+        </div>
+
+        <!-- Tags Section -->
+        <div class="collapsible" id="tagsCollapsible">
+          <div class="collapsible-header" onclick="toggleCollapsible('tagsCollapsible')"
+               role="button" aria-expanded="true" tabindex="0"
+               onkeypress="if(event.key==='Enter')toggleCollapsible('tagsCollapsible')">
+            <span class="collapsible-title">Tags (${c.tags.length})</span>
+            <span class="collapsible-icon" aria-hidden="true">▼</span>
+          </div>
+          <div class="collapsible-content tags-section">
+            <div class="tags">
+              ${tagsHTML}
+              <input type="text" class="add-tag-input" placeholder="+ tag"
+                     onkeypress="if(event.key==='Enter'){addTag(this.value);this.value='';}"
+                     aria-label="Add new tag">
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    function toggleCollapsible(id) {
+      const el = document.getElementById(id);
+      el.classList.toggle('collapsed');
+      const header = el.querySelector('.collapsible-header');
+      header.setAttribute('aria-expanded', !el.classList.contains('collapsed'));
+    }
+
+    // ==================== EDITING FUNCTIONS ====================
+    function updateStat(key, value) {
+      if (currentConverted) {
+        currentConverted[key] = value;
+        pushHistory();
+        renderJSON();
+        renderMarkdown();
+        renderText();
+      }
+    }
+
+    function updateImageUrl(url) {
+      if (currentConverted) {
+        currentConverted.imageUrl = url.trim();
+        pushHistory();
+        renderPreview();
+        renderJSON();
+        renderMarkdown();
+        renderText();
+      }
+    }
+
+    function updateFeature(index, field, value) {
+      if (currentConverted && currentConverted.features[index]) {
+        currentConverted.features[index][field] = value;
+        pushHistory();
+        renderJSON();
+        renderMarkdown();
+        renderText();
+      }
+    }
+
+    function cycleFeatureType(index) {
+      if (!currentConverted || !currentConverted.features[index]) return;
+      const types = ['Passive', 'Action', 'Reaction'];
+      const current = currentConverted.features[index].type;
+      const nextIndex = (types.indexOf(current) + 1) % types.length;
+      currentConverted.features[index].type = types[nextIndex];
+      pushHistory();
+      renderPreview();
+      renderJSON();
+      renderMarkdown();
+      renderText();
+    }
+
+    function removeFeature(index) {
+      if (currentConverted && currentConverted.features[index]) {
+        currentConverted.features.splice(index, 1);
+        pushHistory();
+        renderPreview();
+        renderJSON();
+        renderMarkdown();
+        renderText();
+        showToast('Feature removed', 'info');
+      }
+    }
+
+    function addFeature() {
+      if (!currentConverted) return;
+      currentConverted.features.push({
+        name: 'New Feature',
+        type: 'Passive',
+        desc: 'Description here...'
+      });
+      pushHistory();
+      renderPreview();
+      renderJSON();
+      renderMarkdown();
+      renderText();
+      // Focus the new feature name input
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('.feature-name-input');
+        if (inputs.length > 0) {
+          inputs[inputs.length - 1].focus();
+          inputs[inputs.length - 1].select();
+        }
+      }, 50);
+    }
+
+    function addTag(tag) {
+      if (!currentConverted || !tag.trim()) return;
+      currentConverted.tags.push(tag.trim().toLowerCase());
+      pushHistory();
+      renderPreview();
+      renderJSON();
+    }
+
+    function removeTag(index) {
+      if (currentConverted && currentConverted.tags[index] !== undefined) {
+        currentConverted.tags.splice(index, 1);
+        pushHistory();
+        renderPreview();
+        renderJSON();
+      }
+    }
+
+    function escapeHtml(text) {
+      if (!text) return '';
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function autoResizeTextarea(textarea) {
+      textarea.style.height = 'auto';
+      textarea.style.height = textarea.scrollHeight + 'px';
+    }
+
+    // ==================== RENDER JSON ====================
+    function renderJSON() {
+      if (!currentConverted) return;
+      const exportObj = getExportObject();
+      document.getElementById('jsonOutput').textContent = JSON.stringify(exportObj, null, 2);
+    }
+
+    // ==================== RENDER MARKDOWN ====================
+    function renderMarkdown() {
+      if (!currentConverted) return;
+      const c = currentConverted;
+
+      const featuresText = c.features.map(f =>
+        `**${f.name}** *(${f.type})*: ${f.desc}`
+      ).join('\n\n');
+
+      const imageSection = c.imageUrl ? `![${c.name}](${c.imageUrl})\n\n` : '';
+
+      const md = `# ${c.name}
+*Tier ${c.tier} ${c.advType}*
+
+${imageSection}${c.description}
+
+**Motives:** ${c.motives}
+**Tactics:** ${c.tactics}
+
+| Stat | Value |
+|------|-------|
+| Difficulty | ${c.difficulty} |
+| Thresholds | ${c.majorThresh}/${c.severeThresh} |
+| HP | ${c.hp} |
+| Stress | ${c.stress} |
+| Attack | ${c.atkMod} |
+| Damage | ${c.damage} ${c.dmgType} |
+
+**Weapon:** ${c.weapon} (${c.range})
+**Experience:** ${c.experience}
+
+## Features
+
+${featuresText}
+
+---
+*Tags: ${c.tags.join(', ')}*`;
+
+      document.getElementById('markdownOutput').textContent = md;
+    }
+
+    // ==================== RENDER TEXT ====================
+    function renderText() {
+      if (!currentConverted) return;
+      const c = currentConverted;
+
+      const featuresText = c.features.map(f =>
+        `${f.name} - ${f.type}: ${f.desc}`
+      ).join('\n');
+
+      const imageSection = c.imageUrl ? `Image: ${c.imageUrl}\n\n` : '';
+
+      const text = `${c.name.toUpperCase()}
+Tier ${c.tier} ${c.advType}
+
+${imageSection}${c.description}
+Motives & Tactics: ${c.motives}
+Difficulty: ${c.difficulty} | Thresholds: ${c.majorThresh}/${c.severeThresh} | HP: ${c.hp} | Stress: ${c.stress}
+ATK: ${c.atkMod} | ${c.weapon}: ${c.range} | ${c.damage} ${c.dmgType}
+Experience: ${c.experience}
+
+FEATURES
+${featuresText}
+
+Tags: ${c.tags.join(', ')}`;
+
+      document.getElementById('textOutput').textContent = text;
+    }
+
+    // ==================== TABS ====================
+    function switchTab(tab) {
+      document.querySelectorAll('.tab').forEach(t => {
+        const isActive = t.dataset.tab === tab;
+        t.classList.toggle('active', isActive);
+        t.setAttribute('aria-selected', isActive);
+      });
+
+      ['preview', 'json', 'markdown', 'text'].forEach(t => {
+        document.getElementById(t + 'Tab').classList.toggle('hidden', t !== tab);
+      });
+    }
+
+    // ==================== EXPORT FUNCTIONS ====================
+    function getExportObject() {
+      const exportObj = { ...currentConverted };
+      delete exportObj._converted;
+      delete exportObj._sourceCR;
+      delete exportObj._sourceHP;
+      return exportObj;
+    }
+
+    function copyJSON() {
+      if (!currentConverted) {
+        showToast('Nothing to copy. Convert a stat block first.', 'error');
+        return;
+      }
+      const exportObj = getExportObject();
+      navigator.clipboard.writeText(JSON.stringify(exportObj, null, 2))
+        .then(() => showToast('JSON copied!', 'success'))
+        .catch(() => showToast('Failed to copy', 'error'));
+    }
+
+    function copyMarkdown() {
+      if (!currentConverted) {
+        showToast('Nothing to copy. Convert a stat block first.', 'error');
+        return;
+      }
+      navigator.clipboard.writeText(document.getElementById('markdownOutput').textContent)
+        .then(() => showToast('Markdown copied!', 'success'))
+        .catch(() => showToast('Failed to copy', 'error'));
+    }
+
+    function copyText() {
+      if (!currentConverted) {
+        showToast('Nothing to copy. Convert a stat block first.', 'error');
+        return;
+      }
+      navigator.clipboard.writeText(document.getElementById('textOutput').textContent)
+        .then(() => showToast('Text copied!', 'success'))
+        .catch(() => showToast('Failed to copy', 'error'));
+    }
+
+    function downloadJSON() {
+      if (!currentConverted) {
+        showToast('Nothing to download. Convert a stat block first.', 'error');
+        return;
+      }
+      const exportObj = getExportObject();
+      const blob = new Blob([JSON.stringify(exportObj, null, 2)], { type: 'application/json' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${currentConverted.id}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+      showToast('Downloaded: ' + currentConverted.id + '.json', 'success');
+    }
+
+    function addToLibrary() {
+      if (!currentConverted) {
+        showToast('Nothing to add. Convert a stat block first.', 'error');
+        return;
+      }
+
+      // Try to add to the main app's library if available
+      try {
+        // Check if we're in an iframe or have access to parent
+        if (window.opener && window.opener.addToLibraryFromConverter) {
+          window.opener.addToLibraryFromConverter(getExportObject());
+          showToast('Added to library!', 'success');
+          return;
+        }
+
+        // Check localStorage for the main app's library
+        const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+        const exportObj = getExportObject();
+        exportObj._userCreated = true;
+
+        // Check for duplicates
+        const exists = existingLibrary.some(item => item.id === exportObj.id);
+        if (exists) {
+          // Update existing
+          const index = existingLibrary.findIndex(item => item.id === exportObj.id);
+          existingLibrary[index] = exportObj;
+          showToast('Updated in library!', 'success');
+        } else {
+          existingLibrary.push(exportObj);
+          showToast('Added to library!', 'success');
+        }
+
+        localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+      } catch (e) {
+        console.error(e);
+        showToast('Could not add to library: ' + e.message, 'error');
+      }
+    }
+
+    // ==================== CLEAR ====================
+    function clearAll() {
+      document.getElementById('inputText').value = '';
+      document.getElementById('liveParsePreview').classList.add('hidden');
+      document.getElementById('adjustments').classList.add('hidden');
+      document.getElementById('overrideTier').value = '';
+      document.getElementById('overrideType').value = '';
+
+      ['copyBtn', 'copyMdBtn', 'copyTextBtn', 'downloadBtn', 'libraryBtn', 'printBtn'].forEach(id => {
+        document.getElementById(id).disabled = true;
+      });
+
+      document.getElementById('statBlockPreview').innerHTML = `
+        <div class="empty-state">
+          <div class="empty-state-icon" aria-hidden="true">⚔️</div>
+          <div>Paste a stat block and press <kbd>Ctrl</kbd>+<kbd>Enter</kbd></div>
+          <div style="margin-top: 0.5rem; font-size: 0.85rem;">or click "Convert to Daggerheart"</div>
+        </div>
+      `;
+      document.getElementById('jsonOutput').textContent = '// JSON output will appear here';
+      document.getElementById('markdownOutput').textContent = 'Markdown output will appear here';
+      document.getElementById('textOutput').textContent = 'Text output will appear here';
+
+      currentParsed = null;
+      currentConverted = null;
+      batchResults = [];
+      history = [];
+      historyIndex = -1;
+      updateUndoRedoButtons();
+
+      clearDraft();
+      showToast('Cleared', 'info');
+    }
+
+    // ==================== TOAST ====================
+    let toastTimeout = null;
+    let toastStartTime = null;
+    let toastDuration = 3000;
+    let toastRemainingTime = 0;
+    let toastProgressInterval = null;
+
+    function setupToastInteraction() {
+      const toast = document.getElementById('toast');
+
+      toast.addEventListener('mouseenter', () => {
+        pauseToast();
+      });
+
+      toast.addEventListener('mouseleave', () => {
+        resumeToast();
+      });
+
+      // Also pause on focus (for keyboard users)
+      toast.addEventListener('focusin', () => {
+        pauseToast();
+      });
+
+      toast.addEventListener('focusout', (e) => {
+        // Only resume if focus left the toast entirely
+        if (!toast.contains(e.relatedTarget)) {
+          resumeToast();
+        }
+      });
+    }
+
+    function showToast(message, type = 'success') {
+      const toast = document.getElementById('toast');
+      const toastMessage = document.getElementById('toastMessage');
+      const toastProgress = document.getElementById('toastProgress');
+
+      // Clear any existing timeout
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+      }
+      if (toastProgressInterval) {
+        clearInterval(toastProgressInterval);
+      }
+
+      toastMessage.textContent = message;
+      toast.className = `toast toast-${type} show`;
+      toastProgress.style.width = '100%';
+
+      toastDuration = 3000;
+      toastStartTime = Date.now();
+      toastRemainingTime = toastDuration;
+
+      // Animate progress bar
+      toastProgressInterval = setInterval(() => {
+        const elapsed = Date.now() - toastStartTime;
+        const remaining = Math.max(0, toastDuration - elapsed);
+        const percent = (remaining / toastDuration) * 100;
+        toastProgress.style.width = percent + '%';
+      }, 50);
+
+      // Auto-dismiss after duration
+      toastTimeout = setTimeout(() => {
+        dismissToast();
+      }, toastDuration);
+    }
+
+    function pauseToast() {
+      const toast = document.getElementById('toast');
+      if (!toast.classList.contains('show')) return;
+
+      toast.classList.add('paused');
+      toastRemainingTime = Math.max(0, toastDuration - (Date.now() - toastStartTime));
+
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+        toastTimeout = null;
+      }
+      if (toastProgressInterval) {
+        clearInterval(toastProgressInterval);
+        toastProgressInterval = null;
+      }
+    }
+
+    function resumeToast() {
+      const toast = document.getElementById('toast');
+      const toastProgress = document.getElementById('toastProgress');
+      if (!toast.classList.contains('show')) return;
+
+      toast.classList.remove('paused');
+      toastStartTime = Date.now();
+      toastDuration = toastRemainingTime;
+
+      // Resume progress bar animation
+      toastProgressInterval = setInterval(() => {
+        const elapsed = Date.now() - toastStartTime;
+        const remaining = Math.max(0, toastDuration - elapsed);
+        const percent = (remaining / toastDuration) * 100;
+        toastProgress.style.width = percent + '%';
+      }, 50);
+
+      // Resume auto-dismiss
+      toastTimeout = setTimeout(() => {
+        dismissToast();
+      }, toastRemainingTime);
+    }
+
+    function dismissToast() {
+      const toast = document.getElementById('toast');
+      const toastProgress = document.getElementById('toastProgress');
+
+      toast.classList.remove('show', 'paused');
+
+      if (toastTimeout) {
+        clearTimeout(toastTimeout);
+        toastTimeout = null;
+      }
+      if (toastProgressInterval) {
+        clearInterval(toastProgressInterval);
+        toastProgressInterval = null;
+      }
+
+      toastProgress.style.width = '0%';
+    }
+  </script>
+</body>
+</html>
