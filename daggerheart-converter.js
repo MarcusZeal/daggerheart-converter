@@ -200,9 +200,9 @@ const DaggerheartConverter = (function() {
     // Check for support-style abilities
     const supportKeywords = ['heal', 'buff', 'aid', 'bless', 'protection'];
     const hasSupport = parsed.traits.some(t =>
-      supportKeywords.some(kw => t.description.toLowerCase().includes(kw))
+      t.description && supportKeywords.some(kw => t.description.toLowerCase().includes(kw))
     ) || parsed.actions.some(a =>
-      supportKeywords.some(kw => a.description.toLowerCase().includes(kw))
+      a.description && supportKeywords.some(kw => a.description.toLowerCase().includes(kw))
     );
     if (hasSupport && cr <= 3) {
       return 'Support';
@@ -211,7 +211,7 @@ const DaggerheartConverter = (function() {
     // Check for stealth/ambush -> Skulk
     const skulkKeywords = ['stealth', 'sneak', 'ambush', 'surprise', 'hidden'];
     const hasSkulk = parsed.skills.stealth ||
-      parsed.traits.some(t => skulkKeywords.some(kw => t.name.toLowerCase().includes(kw)));
+      parsed.traits.some(t => t.name && skulkKeywords.some(kw => t.name.toLowerCase().includes(kw)));
     if (hasSkulk) {
       return 'Skulk';
     }
@@ -366,7 +366,7 @@ const DaggerheartConverter = (function() {
 
     // Based on special abilities
     const hasBreath = parsed.actions.some(a =>
-      a.name.toLowerCase().includes('breath')
+      a.name && a.name.toLowerCase().includes('breath')
     );
     if (hasBreath) {
       tactics.push('Open with breath weapon on grouped enemies');

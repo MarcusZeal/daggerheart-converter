@@ -352,22 +352,28 @@ const PF2eParser = (function() {
       const reachMatch = traits.find(t => t.match(/reach\s+\d+/i));
       const rangeMatch = traits.find(t => t.match(/range\s+\d+/i));
 
+      const strikeName = match[2].trim();
+      const strikeRange = reachMatch ? reachMatch.match(/\d+/)[0] : (rangeMatch ? rangeMatch.match(/\d+/)[0] : '5');
+      const strikeDamage = match[5];
+      const strikeDamageType = match[6].toLowerCase();
+
       strikes.push({
-        name: match[2].trim(),
+        name: strikeName,
         type: match[1].toLowerCase(),
         toHit: parseInt(match[3]),
         traits: traits,
-        range: reachMatch ? reachMatch.match(/\d+/)[0] : (rangeMatch ? rangeMatch.match(/\d+/)[0] : '5'),
-        damageDice: match[5],
-        damageType: match[6].toLowerCase(),
+        range: strikeRange,
+        damageDice: strikeDamage,
+        damageType: strikeDamageType,
+        description: `${match[1]} attack with ${strikeName}. ${strikeDamage} ${strikeDamageType} damage.`,
         isAttack: true,
         attackInfo: {
           type: match[1].toLowerCase(),
           toHit: parseInt(match[3]),
-          range: reachMatch ? reachMatch.match(/\d+/)[0] : (rangeMatch ? rangeMatch.match(/\d+/)[0] : '5'),
-          damageDice: match[5],
-          damageType: match[6].toLowerCase(),
-          avgDamage: calculateAvgDamage(match[5])
+          range: strikeRange,
+          damageDice: strikeDamage,
+          damageType: strikeDamageType,
+          avgDamage: calculateAvgDamage(strikeDamage)
         }
       });
     }
