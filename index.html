@@ -65,13 +65,269 @@
       line-height: 1.6;
     }
 
+    /* Navigation Bar */
+    .navbar {
+      background: var(--bg-card);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar-inner {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 60px;
+    }
+
+    .navbar-brand {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 1.25rem;
+    }
+
+    .navbar-brand-icon {
+      font-size: 1.5rem;
+    }
+
+    .navbar-nav {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .nav-link {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.6rem 1rem;
+      color: var(--text-secondary);
+      text-decoration: none;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      transition: all 0.2s;
+      border: 1px solid transparent;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+      background: var(--bg-input);
+    }
+
+    .nav-link.active {
+      color: var(--accent);
+      background: var(--bg-input);
+      border-color: var(--accent);
+    }
+
+    .nav-link svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .navbar-right {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .btn-login {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1.25rem;
+      background: var(--accent);
+      color: var(--bg-dark);
+      border: none;
+      border-radius: 6px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn-login:hover {
+      background: var(--accent-hover);
+    }
+
+    /* Login Modal */
+    .login-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .login-modal.hidden {
+      display: none;
+    }
+
+    .login-modal-content {
+      background: var(--bg-card);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      overflow: hidden;
+    }
+
+    .login-modal-header {
+      padding: 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .login-modal-header h2 {
+      color: var(--accent);
+      margin-bottom: 0.5rem;
+    }
+
+    .login-modal-header p {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .login-modal-body {
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .login-modal-footer {
+      padding: 1rem 1.5rem;
+      background: var(--bg-input);
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .btn-sso {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+      padding: 0.875rem 1.5rem;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-sso:hover {
+      border-color: var(--accent);
+      background: var(--bg-card);
+    }
+
+    .btn-sso svg {
+      width: 24px;
+      height: 24px;
+    }
+
+    .btn-sso.discord {
+      border-color: #5865F2;
+    }
+
+    .btn-sso.discord:hover {
+      background: rgba(88, 101, 242, 0.1);
+    }
+
+    .btn-sso.github {
+      border-color: #6e7681;
+    }
+
+    .btn-sso.github:hover {
+      background: rgba(110, 118, 129, 0.1);
+    }
+
+    /* Page Views */
+    .page-view {
+      display: none;
+    }
+
+    .page-view.active {
+      display: block;
+    }
+
+    /* Community Library Page */
+    .community-page {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .community-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .community-header h1 {
+      color: var(--accent);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .community-header p {
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+      .navbar-inner {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 0.75rem 0;
+        gap: 0.75rem;
+      }
+
+      .navbar-brand {
+        font-size: 1.1rem;
+      }
+
+      .navbar-nav {
+        order: 3;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .nav-link {
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+      }
+
+      .nav-link span {
+        display: none;
+      }
+
+      .navbar-right {
+        gap: 0.5rem;
+      }
+
+      .community-page {
+        padding: 1rem;
+      }
+    }
+
     .container {
       max-width: 1400px;
       margin: 0 auto;
       padding: 2rem;
     }
 
-    header {
+    .page-header {
       text-align: center;
       margin-bottom: 2rem;
       padding-bottom: 1rem;
@@ -648,29 +904,33 @@
     }
 
     .live-parse-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+      display: flex;
+      flex-wrap: wrap;
       gap: 0.5rem;
     }
 
     .parse-field {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 0.5rem;
       padding: 0.4rem 0.6rem;
       background: var(--bg-card);
       border-radius: 4px;
       font-size: 0.85rem;
+      white-space: nowrap;
     }
 
     .parse-field-label {
       color: var(--text-secondary);
       font-size: 0.75rem;
+      flex-shrink: 0;
     }
 
     .parse-field-value {
       font-weight: 500;
-      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 150px;
     }
 
     /* Confidence Badges - now with shape and text for accessibility */
@@ -1504,6 +1764,419 @@
       border: 0;
     }
 
+    /* Auth UI */
+    .auth-section {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .auth-buttons {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .btn-oauth {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.5rem 1rem;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+      text-decoration: none;
+    }
+
+    .btn-oauth:hover {
+      border-color: var(--accent);
+      background: var(--bg-card);
+    }
+
+    .btn-oauth svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .user-menu {
+      position: relative;
+    }
+
+    .user-menu-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.8rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .user-menu-toggle:hover {
+      border-color: var(--accent);
+    }
+
+    .user-avatar {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.8rem;
+      font-weight: bold;
+      color: var(--bg-dark);
+    }
+
+    .user-avatar img {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-dropdown {
+      position: absolute;
+      top: 100%;
+      right: 0;
+      min-width: 180px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      margin-top: 0.25rem;
+      z-index: 200;
+      display: none;
+    }
+
+    .user-dropdown.show {
+      display: block;
+    }
+
+    .user-dropdown-item {
+      padding: 0.6rem 1rem;
+      cursor: pointer;
+      font-size: 0.9rem;
+      border-bottom: 1px solid var(--border);
+      display: block;
+      width: 100%;
+      text-align: left;
+      background: none;
+      border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+    }
+
+    .user-dropdown-item:last-child {
+      border-bottom: none;
+    }
+
+    .user-dropdown-item:hover {
+      background: var(--bg-input);
+    }
+
+    .user-dropdown-item.danger {
+      color: var(--error);
+    }
+
+    /* Community Tab Styles */
+    .community-container {
+      min-height: 400px;
+    }
+
+    .community-filters {
+      display: flex;
+      gap: 0.75rem;
+      margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .community-filters .search-input {
+      flex: 1;
+      min-width: 200px;
+      padding: 0.6rem 1rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text-primary);
+      font-size: 0.9rem;
+    }
+
+    .community-filters .search-input:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .community-filters select {
+      padding: 0.6rem;
+      min-width: 120px;
+    }
+
+    .community-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+
+    .community-item {
+      display: flex;
+      align-items: center;
+      padding: 1rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .community-item:hover {
+      border-color: var(--accent);
+      background: var(--bg-card);
+    }
+
+    .community-item-main {
+      flex: 1;
+    }
+
+    .community-item-name {
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 0.25rem;
+    }
+
+    .community-item-meta {
+      display: flex;
+      gap: 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      flex-wrap: wrap;
+    }
+
+    .community-item-tag {
+      background: var(--bg-dark);
+      padding: 0.15rem 0.4rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+    }
+
+    .community-item-votes {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.25rem;
+      padding: 0.5rem;
+      min-width: 50px;
+    }
+
+    .vote-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0.25rem;
+      color: var(--text-secondary);
+      transition: color 0.2s;
+      font-size: 1.1rem;
+    }
+
+    .vote-btn:hover {
+      color: var(--accent);
+    }
+
+    .vote-btn.active.upvote {
+      color: var(--success);
+    }
+
+    .vote-btn.active.downvote {
+      color: var(--error);
+    }
+
+    .vote-score {
+      font-weight: bold;
+      font-size: 1rem;
+    }
+
+    .vote-score.positive {
+      color: var(--success);
+    }
+
+    .vote-score.negative {
+      color: var(--error);
+    }
+
+    .community-empty {
+      text-align: center;
+      padding: 3rem;
+      color: var(--text-secondary);
+    }
+
+    .community-pagination {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+      margin-top: 1rem;
+    }
+
+    .community-pagination button {
+      padding: 0.5rem 1rem;
+    }
+
+    /* Community Detail Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-overlay.hidden {
+      display: none;
+    }
+
+    .modal-content {
+      background: var(--bg-card);
+      border-radius: 12px;
+      max-width: 800px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h2 {
+      margin: 0;
+      font-size: 1.25rem;
+      color: var(--accent);
+    }
+
+    .modal-close {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 0.25rem;
+    }
+
+    .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-top: 1px solid var(--border);
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .modal-vote-section {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    /* Share button */
+    .btn-share {
+      background: var(--accent-secondary);
+      color: white;
+    }
+
+    .btn-share:hover {
+      background: var(--accent-secondary-hover);
+    }
+
+    /* Loading spinner */
+    .loading-spinner {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .community-loading {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 3rem;
+      gap: 1rem;
+    }
+
+    /* My Submissions section */
+    .my-submissions-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+      .auth-section {
+        order: -1;
+        width: 100%;
+        justify-content: center;
+      }
+
+      .community-filters {
+        flex-direction: column;
+      }
+
+      .community-filters .search-input,
+      .community-filters select {
+        width: 100%;
+      }
+
+      .community-item {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .community-item-votes {
+        flex-direction: row;
+        justify-content: center;
+        border-top: 1px solid var(--border);
+        margin-top: 0.75rem;
+        padding-top: 0.75rem;
+      }
+
+      .modal-footer {
+        flex-direction: column;
+      }
+
+      .modal-footer .btn-group {
+        width: 100%;
+      }
+    }
+
     /* Footer */
     .site-footer {
       text-align: center;
@@ -1556,26 +2229,87 @@
 <body>
   <a href="#main-content" class="sr-only">Skip to main content</a>
 
-  <div class="container">
-    <header>
-      <div class="header-row">
-        <h1>Daggerheart Adversary Converter</h1>
-        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle light/dark mode">
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="#" class="navbar-brand" onclick="navigateTo('converter'); return false;">
+        <span class="navbar-brand-icon">⚔️</span>
+        <span>Daggerheart Tools</span>
+      </a>
+
+      <div class="navbar-nav">
+        <a href="#" class="nav-link active" data-page="converter" onclick="navigateTo('converter'); return false;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+          </svg>
+          <span>Converter</span>
+        </a>
+        <a href="#" class="nav-link" data-page="community" onclick="navigateTo('community'); return false;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+            <circle cx="9" cy="7" r="4"/>
+            <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+          </svg>
+          <span>Community Library</span>
+        </a>
+      </div>
+
+      <div class="navbar-right">
+        <button class="theme-toggle" onclick="toggleTheme()" aria-label="Toggle light/dark mode" title="Toggle theme">
           <span class="theme-icon-dark" aria-hidden="true">☀️</span>
           <span class="theme-icon-light" aria-hidden="true">🌙</span>
         </button>
+        <div id="authSection">
+          <!-- Auth UI populated by JavaScript -->
+        </div>
       </div>
-      <p class="subtitle">Transform any creature from other popular TTRPGs into a Daggerheart stat block—just paste and convert.</p>
-      <div class="keyboard-hints" role="note" aria-label="Keyboard shortcuts">
-        <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> Convert</span>
-        <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> Copy JSON</span>
-        <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Z</kbd> Undo</span>
-        <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Y</kbd> Redo</span>
-        <span class="keyboard-hint"><kbd>Esc</kbd> Clear</span>
-      </div>
-    </header>
+    </div>
+  </nav>
 
-    <main id="main-content" class="main-grid">
+  <!-- Login Modal -->
+  <div id="loginModal" class="login-modal hidden" onclick="closeLoginModal(event)">
+    <div class="login-modal-content" onclick="event.stopPropagation()">
+      <div class="login-modal-header">
+        <h2>Welcome Back</h2>
+        <p>Sign in to share conversions and vote</p>
+      </div>
+      <div class="login-modal-body">
+        <a href="/auth/discord" class="btn-sso discord">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M20.317 4.492c-1.53-.69-3.17-1.2-4.885-1.49a.075.075 0 0 0-.079.036c-.21.369-.444.85-.608 1.23a18.566 18.566 0 0 0-5.487 0 12.36 12.36 0 0 0-.617-1.23A.077.077 0 0 0 8.562 3c-1.714.29-3.354.8-4.885 1.491a.07.07 0 0 0-.032.027C.533 9.093-.32 13.555.099 17.961a.08.08 0 0 0 .031.055 20.03 20.03 0 0 0 5.993 2.98.078.078 0 0 0 .084-.026c.462-.63.874-1.295 1.226-1.963a.074.074 0 0 0-.041-.104 13.201 13.201 0 0 1-1.872-.878.075.075 0 0 1-.008-.125c.126-.093.252-.19.372-.287a.075.075 0 0 1 .078-.01c3.927 1.764 8.18 1.764 12.061 0a.075.075 0 0 1 .079.009c.12.098.245.195.372.288a.075.075 0 0 1-.006.125c-.598.344-1.22.635-1.873.877a.075.075 0 0 0-.041.105c.36.687.772 1.341 1.225 1.962a.077.077 0 0 0 .084.028 19.963 19.963 0 0 0 6.002-2.981.076.076 0 0 0 .032-.054c.5-5.094-.838-9.52-3.549-13.442a.06.06 0 0 0-.031-.028zM8.02 15.278c-1.182 0-2.157-1.069-2.157-2.38 0-1.312.956-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.956 2.38-2.157 2.38zm7.975 0c-1.183 0-2.157-1.069-2.157-2.38 0-1.312.955-2.38 2.157-2.38 1.21 0 2.176 1.077 2.157 2.38 0 1.312-.946 2.38-2.157 2.38z"/>
+          </svg>
+          Continue with Discord
+        </a>
+        <a href="/auth/github" class="btn-sso github">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.374 0 0 5.373 0 12c0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23A11.509 11.509 0 0 1 12 5.803c1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576C20.566 21.797 24 17.3 24 12c0-6.627-5.373-12-12-12z"/>
+          </svg>
+          Continue with GitHub
+        </a>
+      </div>
+      <div class="login-modal-footer">
+        By signing in, you agree to share your creations with the community.
+      </div>
+    </div>
+  </div>
+
+  <!-- Converter Page -->
+  <div id="converterPage" class="page-view active">
+    <div class="container">
+      <header class="page-header">
+        <h1>Adversary Converter</h1>
+        <p class="subtitle">Transform any creature from other popular TTRPGs into a Daggerheart stat block—just paste and convert.</p>
+        <div class="keyboard-hints" role="note" aria-label="Keyboard shortcuts">
+          <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> Convert</span>
+          <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> Copy JSON</span>
+          <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Z</kbd> Undo</span>
+          <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Y</kbd> Redo</span>
+          <span class="keyboard-hint"><kbd>Esc</kbd> Clear</span>
+        </div>
+      </header>
+
+      <main id="main-content" class="main-grid">
       <!-- Input Panel -->
       <div class="panel" role="region" aria-label="Input panel">
         <div class="panel-header">
@@ -1730,6 +2464,10 @@ The converter will auto-detect the source system."
                     title="Add to DM Screen library">
               + Library
             </button>
+            <button class="btn btn-share btn-small" onclick="shareToCommunity()" id="shareBtn" disabled
+                    title="Share to community library">
+              Share
+            </button>
             <button class="btn btn-secondary btn-small" onclick="window.print()" id="printBtn" disabled
                     title="Print stat block">
               Print
@@ -1779,6 +2517,84 @@ The converter will auto-detect the source system."
         </div>
       </div>
     </main>
+    </div>
+  </div>
+
+  <!-- Community Library Page -->
+  <div id="communityPage" class="page-view">
+    <div class="community-page">
+      <div class="community-header">
+        <h1>Community Library</h1>
+        <p>Browse and share Daggerheart conversions created by the community</p>
+      </div>
+
+      <div class="community-container">
+        <div class="community-filters">
+          <input type="text" class="search-input" id="communitySearch" placeholder="Search conversions..." oninput="debounceCommunitySearch()">
+          <select id="communityTier" class="form-select" onchange="loadCommunityConversions()">
+            <option value="">All Tiers</option>
+            <option value="1">Tier 1</option>
+            <option value="2">Tier 2</option>
+            <option value="3">Tier 3</option>
+            <option value="4">Tier 4</option>
+          </select>
+          <select id="communityType" class="form-select" onchange="loadCommunityConversions()">
+            <option value="">All Types</option>
+            <option value="Bruiser">Bruiser</option>
+            <option value="Horde">Horde</option>
+            <option value="Leader">Leader</option>
+            <option value="Minion">Minion</option>
+            <option value="Ranged">Ranged</option>
+            <option value="Skulk">Skulk</option>
+            <option value="Social">Social</option>
+            <option value="Solo">Solo</option>
+            <option value="Standard">Standard</option>
+            <option value="Support">Support</option>
+          </select>
+          <select id="communitySort" class="form-select" onchange="loadCommunityConversions()">
+            <option value="popular">Most Popular</option>
+            <option value="newest">Newest</option>
+            <option value="oldest">Oldest</option>
+          </select>
+        </div>
+
+        <div id="communityList" class="community-list">
+          <div class="community-empty">
+            <p>Click "Community Library" in the nav to browse shared conversions.</p>
+          </div>
+        </div>
+
+        <div id="communityPagination" class="community-pagination hidden">
+          <button class="btn btn-secondary btn-small" onclick="communityPrevPage()" id="communityPrevBtn" disabled>Previous</button>
+          <span id="communityPageInfo">Page 1 of 1</span>
+          <button class="btn btn-secondary btn-small" onclick="communityNextPage()" id="communityNextBtn" disabled>Next</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Community Detail Modal -->
+  <div id="communityModal" class="modal-overlay hidden" onclick="closeCommunityModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="modalTitle">Conversion Details</h2>
+        <button class="modal-close" onclick="closeCommunityModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="modalStatBlock" class="stat-block"></div>
+      </div>
+      <div class="modal-footer">
+        <div class="modal-vote-section" id="modalVoteSection">
+          <button class="vote-btn upvote" id="modalUpvoteBtn" onclick="voteOnConversion(1)" title="Upvote">&#9650;</button>
+          <span class="vote-score" id="modalVoteScore">0</span>
+          <button class="vote-btn downvote" id="modalDownvoteBtn" onclick="voteOnConversion(-1)" title="Downvote">&#9660;</button>
+        </div>
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-small" onclick="copyModalJSON()" title="Copy JSON">Copy JSON</button>
+          <button class="btn btn-success btn-small" onclick="addModalToLibrary()" title="Add to your library">Add to Library</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- Footer -->
@@ -1973,6 +2789,8 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       renderRecentList();
       loadThemePreference();
       setupToastInteraction();
+      checkAuthState();
+      handleAuthRedirect();
     });
 
     // ==================== THEME TOGGLE ====================
@@ -2514,6 +3332,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       document.getElementById('copyTextBtn').disabled = false;
       document.getElementById('downloadBtn').disabled = false;
       document.getElementById('libraryBtn').disabled = false;
+      document.getElementById('shareBtn').disabled = false;
       document.getElementById('printBtn').disabled = false;
     }
 
@@ -3139,6 +3958,473 @@ Tags: ${c.tags.join(', ')}`;
 
       toastProgress.style.width = '0%';
     }
+
+    // ==================== AUTH STATE ====================
+    let currentUser = null;
+
+    async function checkAuthState() {
+      try {
+        const response = await fetch('/api/auth/me');
+        const data = await response.json();
+        currentUser = data.user;
+        renderAuthUI();
+      } catch (err) {
+        console.log('Auth check failed (server may not be running):', err.message);
+        currentUser = null;
+        renderAuthUI();
+      }
+    }
+
+    function handleAuthRedirect() {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('login') === 'success') {
+        showToast('Logged in successfully!', 'success');
+        window.history.replaceState({}, '', window.location.pathname);
+      } else if (params.get('error') === 'auth_failed') {
+        showToast('Login failed. Please try again.', 'error');
+        window.history.replaceState({}, '', window.location.pathname);
+      }
+    }
+
+    function renderAuthUI() {
+      const authSection = document.getElementById('authSection');
+      if (!authSection) return;
+
+      if (currentUser) {
+        const initial = currentUser.username.charAt(0).toUpperCase();
+        authSection.innerHTML = `
+          <div class="user-menu">
+            <button class="user-menu-toggle" onclick="toggleUserMenu()" aria-haspopup="true" aria-expanded="false">
+              <div class="user-avatar">
+                ${currentUser.avatar_url
+                  ? `<img src="${currentUser.avatar_url}" alt="${currentUser.username}">`
+                  : initial}
+              </div>
+              <span>${currentUser.username}</span>
+            </button>
+            <div class="user-dropdown" id="userDropdown">
+              <button class="user-dropdown-item" onclick="navigateTo('community'); toggleUserMenu();">My Submissions</button>
+              <button class="user-dropdown-item danger" onclick="logout()">Logout</button>
+            </div>
+          </div>
+        `;
+      } else {
+        authSection.innerHTML = `
+          <button class="btn-login" onclick="openLoginModal()">
+            Sign In
+          </button>
+        `;
+      }
+    }
+
+    // ==================== PAGE NAVIGATION ====================
+    let currentPage = 'converter';
+
+    function navigateTo(page) {
+      currentPage = page;
+
+      // Update nav links
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.toggle('active', link.dataset.page === page);
+      });
+
+      // Update page views
+      document.querySelectorAll('.page-view').forEach(view => {
+        view.classList.toggle('active', view.id === page + 'Page');
+      });
+
+      // Load community when navigating to it
+      if (page === 'community' && !communityLoaded) {
+        loadCommunityConversions();
+      }
+    }
+
+    // ==================== LOGIN MODAL ====================
+    function openLoginModal() {
+      document.getElementById('loginModal').classList.remove('hidden');
+    }
+
+    function closeLoginModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('loginModal').classList.add('hidden');
+    }
+
+    function toggleUserMenu() {
+      const dropdown = document.getElementById('userDropdown');
+      if (dropdown) {
+        dropdown.classList.toggle('show');
+      }
+    }
+
+    async function logout() {
+      try {
+        await fetch('/auth/logout', { method: 'POST' });
+        currentUser = null;
+        renderAuthUI();
+        showToast('Logged out successfully', 'info');
+      } catch (err) {
+        showToast('Logout failed', 'error');
+      }
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.user-menu')) {
+        const dropdown = document.getElementById('userDropdown');
+        if (dropdown) dropdown.classList.remove('show');
+      }
+    });
+
+    // ==================== COMMUNITY LIBRARY ====================
+    let communityLoaded = false;
+    let communityConversions = [];
+    let communityPage = 1;
+    let communityTotalPages = 1;
+    let communitySearchDebounce = null;
+    let selectedConversion = null;
+
+    async function loadCommunityConversions() {
+      const listEl = document.getElementById('communityList');
+      listEl.innerHTML = `
+        <div class="community-loading">
+          <div class="loading-spinner"></div>
+          <span>Loading community conversions...</span>
+        </div>
+      `;
+
+      try {
+        const search = document.getElementById('communitySearch').value;
+        const tier = document.getElementById('communityTier').value;
+        const type = document.getElementById('communityType').value;
+        const sort = document.getElementById('communitySort').value;
+
+        const params = new URLSearchParams({
+          page: communityPage,
+          limit: 20,
+          search,
+          tier,
+          type,
+          sort
+        });
+
+        const response = await fetch(`/api/community/conversions?${params}`);
+        const data = await response.json();
+
+        communityConversions = data.conversions || [];
+        communityTotalPages = data.pagination?.totalPages || 1;
+        communityLoaded = true;
+
+        renderCommunityList();
+        updateCommunityPagination();
+
+      } catch (err) {
+        console.error('Failed to load community conversions:', err);
+        listEl.innerHTML = `
+          <div class="community-empty">
+            <p>Could not load community conversions.</p>
+            <p style="font-size: 0.85rem; margin-top: 0.5rem;">Make sure the server is running.</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderCommunityList() {
+      const listEl = document.getElementById('communityList');
+
+      if (communityConversions.length === 0) {
+        listEl.innerHTML = `
+          <div class="community-empty">
+            <p>No conversions found.</p>
+            <p style="font-size: 0.85rem; margin-top: 0.5rem;">Be the first to share your creation!</p>
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = communityConversions.map(conv => `
+        <div class="community-item" onclick="openCommunityModal('${conv.id}')">
+          <div class="community-item-main">
+            <div class="community-item-name">${escapeHtml(conv.name)}</div>
+            <div class="community-item-meta">
+              <span class="community-item-tag">T${conv.tier}</span>
+              <span class="community-item-tag">${conv.advType}</span>
+              <span>by @${escapeHtml(conv.author?.username || 'Unknown')}</span>
+            </div>
+          </div>
+          <div class="community-item-votes">
+            <button class="vote-btn upvote ${conv.userVote === 1 ? 'active' : ''}"
+                    onclick="event.stopPropagation(); quickVote('${conv.id}', 1)">&#9650;</button>
+            <span class="vote-score ${conv.score > 0 ? 'positive' : conv.score < 0 ? 'negative' : ''}">${conv.score}</span>
+            <button class="vote-btn downvote ${conv.userVote === -1 ? 'active' : ''}"
+                    onclick="event.stopPropagation(); quickVote('${conv.id}', -1)">&#9660;</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    function updateCommunityPagination() {
+      const paginationEl = document.getElementById('communityPagination');
+      const pageInfo = document.getElementById('communityPageInfo');
+      const prevBtn = document.getElementById('communityPrevBtn');
+      const nextBtn = document.getElementById('communityNextBtn');
+
+      if (communityTotalPages <= 1) {
+        paginationEl.classList.add('hidden');
+        return;
+      }
+
+      paginationEl.classList.remove('hidden');
+      pageInfo.textContent = `Page ${communityPage} of ${communityTotalPages}`;
+      prevBtn.disabled = communityPage <= 1;
+      nextBtn.disabled = communityPage >= communityTotalPages;
+    }
+
+    function communityPrevPage() {
+      if (communityPage > 1) {
+        communityPage--;
+        loadCommunityConversions();
+      }
+    }
+
+    function communityNextPage() {
+      if (communityPage < communityTotalPages) {
+        communityPage++;
+        loadCommunityConversions();
+      }
+    }
+
+    function debounceCommunitySearch() {
+      clearTimeout(communitySearchDebounce);
+      communitySearchDebounce = setTimeout(() => {
+        communityPage = 1;
+        loadCommunityConversions();
+      }, 300);
+    }
+
+    async function quickVote(conversionId, vote) {
+      if (!currentUser) {
+        showToast('Please log in to vote', 'info');
+        return;
+      }
+
+      const conv = communityConversions.find(c => c.id === conversionId);
+      if (!conv) return;
+
+      // Toggle vote if clicking the same button
+      const newVote = conv.userVote === vote ? 0 : vote;
+
+      try {
+        const response = await fetch(`/api/community/conversions/${conversionId}/vote`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vote: newVote })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Vote failed');
+        }
+
+        const data = await response.json();
+
+        // Update local state
+        conv.userVote = data.userVote;
+        conv.upvotes = data.upvotes;
+        conv.downvotes = data.downvotes;
+        conv.score = data.score;
+
+        renderCommunityList();
+
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // ==================== COMMUNITY MODAL ====================
+    async function openCommunityModal(conversionId) {
+      const modal = document.getElementById('communityModal');
+      const titleEl = document.getElementById('modalTitle');
+      const statBlockEl = document.getElementById('modalStatBlock');
+
+      // Find in local cache first
+      selectedConversion = communityConversions.find(c => c.id === conversionId);
+
+      if (!selectedConversion) {
+        // Fetch from server
+        try {
+          const response = await fetch(`/api/community/conversions/${conversionId}`);
+          selectedConversion = await response.json();
+        } catch (err) {
+          showToast('Failed to load conversion', 'error');
+          return;
+        }
+      }
+
+      titleEl.textContent = selectedConversion.name;
+      statBlockEl.innerHTML = renderStatBlock(selectedConversion.data);
+      updateModalVotes();
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeCommunityModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('communityModal').classList.add('hidden');
+      selectedConversion = null;
+    }
+
+    function updateModalVotes() {
+      if (!selectedConversion) return;
+
+      const scoreEl = document.getElementById('modalVoteScore');
+      const upBtn = document.getElementById('modalUpvoteBtn');
+      const downBtn = document.getElementById('modalDownvoteBtn');
+
+      scoreEl.textContent = selectedConversion.score;
+      scoreEl.className = 'vote-score';
+      if (selectedConversion.score > 0) scoreEl.classList.add('positive');
+      if (selectedConversion.score < 0) scoreEl.classList.add('negative');
+
+      upBtn.classList.toggle('active', selectedConversion.userVote === 1);
+      downBtn.classList.toggle('active', selectedConversion.userVote === -1);
+    }
+
+    async function voteOnConversion(vote) {
+      if (!currentUser) {
+        showToast('Please log in to vote', 'info');
+        return;
+      }
+
+      if (!selectedConversion) return;
+
+      const newVote = selectedConversion.userVote === vote ? 0 : vote;
+
+      try {
+        const response = await fetch(`/api/community/conversions/${selectedConversion.id}/vote`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ vote: newVote })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Vote failed');
+        }
+
+        const data = await response.json();
+
+        selectedConversion.userVote = data.userVote;
+        selectedConversion.score = data.score;
+
+        // Update in list if exists
+        const listConv = communityConversions.find(c => c.id === selectedConversion.id);
+        if (listConv) {
+          listConv.userVote = data.userVote;
+          listConv.score = data.score;
+          listConv.upvotes = data.upvotes;
+          listConv.downvotes = data.downvotes;
+        }
+
+        updateModalVotes();
+        renderCommunityList();
+
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    function copyModalJSON() {
+      if (!selectedConversion) return;
+      navigator.clipboard.writeText(JSON.stringify(selectedConversion.data, null, 2))
+        .then(() => showToast('JSON copied to clipboard!', 'success'))
+        .catch(() => showToast('Failed to copy', 'error'));
+    }
+
+    function addModalToLibrary() {
+      if (!selectedConversion) return;
+
+      try {
+        const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+        const data = { ...selectedConversion.data, _userCreated: true };
+
+        const existing = existingLibrary.findIndex(item => item.id === data.id);
+        if (existing >= 0) {
+          existingLibrary[existing] = data;
+          showToast('Updated in library!', 'success');
+        } else {
+          existingLibrary.push(data);
+          showToast('Added to library!', 'success');
+        }
+
+        localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+      } catch (err) {
+        showToast('Could not add to library: ' + err.message, 'error');
+      }
+    }
+
+    // ==================== SHARE TO COMMUNITY ====================
+    async function shareToCommunity() {
+      if (!currentUser) {
+        showToast('Please log in to share conversions', 'info');
+        return;
+      }
+
+      if (!currentConverted) {
+        showToast('Nothing to share. Convert a stat block first.', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch('/api/community/conversions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: currentConverted.name,
+            tier: currentConverted.tier,
+            advType: currentConverted.advType,
+            sourceSystem: detectedSystem,
+            data: getExportObject()
+          })
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Failed to share');
+        }
+
+        showToast('Shared to community library!', 'success');
+
+        // Reload if on community tab
+        if (communityLoaded) {
+          communityPage = 1;
+          loadCommunityConversions();
+        }
+
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
+    }
+
+    // Close modals on Escape key
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        const communityModal = document.getElementById('communityModal');
+        const loginModal = document.getElementById('loginModal');
+
+        if (communityModal && !communityModal.classList.contains('hidden')) {
+          closeCommunityModal();
+        }
+        if (loginModal && !loginModal.classList.contains('hidden')) {
+          closeLoginModal();
+        }
+      }
+    });
   </script>
 </body>
 </html>
