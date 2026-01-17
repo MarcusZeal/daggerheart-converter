@@ -5678,8 +5678,14 @@ async function saveAndPublish() {
     });
 
     if (!response.ok) {
-      const err = await response.json();
-      throw new Error(err.error || 'Failed to save');
+      // Check if response is JSON before parsing
+      const contentType = response.headers.get('content-type');
+      if (contentType && contentType.includes('application/json')) {
+        const err = await response.json();
+        throw new Error(err.error || 'Failed to save');
+      } else {
+        throw new Error(`Server error (${response.status})`);
+      }
     }
 
     const result = await response.json();
