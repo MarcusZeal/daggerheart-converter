@@ -481,6 +481,22 @@
       padding: 2rem;
     }
 
+    #communityPage.active::after {
+      content: '';
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 350px;
+      height: 350px;
+      background-image: url('assets/friends.webp');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: bottom left;
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
+    }
+
     .community-header {
       text-align: center;
       margin-bottom: 2rem;
