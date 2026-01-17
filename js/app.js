@@ -880,7 +880,16 @@ function renderPreview() {
 }
 
 function renderStatBlockHTML(c) {
-  const featuresHTML = c.features.map((f, i) => `
+  const featuresHTML = c.features.map((f, i) => {
+    const fearCost = f.fearCost || 0;
+    const fearSkullsHTML = `
+      <span class="fear-cost-toggle" title="Fear cost (click skulls to toggle)">
+        <span class="fear-skull ${fearCost >= 1 ? 'active' : ''}" onclick="toggleFearCost(${i}, 1)">💀</span>
+        <span class="fear-skull ${fearCost >= 2 ? 'active' : ''}" onclick="toggleFearCost(${i}, 2)">💀</span>
+        <span class="fear-skull ${fearCost >= 3 ? 'active' : ''}" onclick="toggleFearCost(${i}, 3)">💀</span>
+      </span>
+    `;
+    return `
     <div class="feature" data-index="${i}">
       <div class="feature-header">
         <input type="text" class="feature-name-input" value="${escapeHtml(f.name)}"
@@ -889,6 +898,7 @@ function renderStatBlockHTML(c) {
         <button class="feature-type feature-type-${f.type.toLowerCase()}"
               onclick="cycleFeatureType(${i})" title="Click to change type"
               aria-label="Feature type: ${f.type}. Click to cycle.">${f.type}</button>
+        ${fearSkullsHTML}
         <span class="feature-actions">
           <button class="feature-btn" onclick="removeFeature(${i})" title="Remove feature"
                   aria-label="Remove feature">✕</button>
@@ -899,7 +909,8 @@ function renderStatBlockHTML(c) {
                 oninput="autoResizeTextarea(this)"
                 aria-label="Feature description">${escapeHtml(f.desc)}</textarea>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   const tagsHTML = c.tags.map((t, i) => `
     <span class="tag" onclick="removeTag(${i})">
@@ -1068,10 +1079,13 @@ function renderStatBlockReadOnly(c) {
     const typeClass = (f.type || 'passive').toLowerCase();
     // Escape first, then highlight dice rolls
     const descWithDice = highlightDiceRolls(escapeHtml(f.desc || ''));
+    // Fear cost skulls
+    const fearCost = f.fearCost || 0;
+    const fearSkulls = fearCost > 0 ? `<span class="fear-cost-display">${'💀'.repeat(fearCost)}</span>` : '';
     return `
       <div class="dh-stat-block-feature">
         <span class="dh-stat-block-feature-name">${escapeHtml(f.name)}</span> -
-        <span class="dh-stat-block-feature-type ${typeClass}">${f.type || 'Passive'}</span>:
+        <span class="dh-stat-block-feature-type ${typeClass}">${f.type || 'Passive'}</span>${fearSkulls}:
         ${descWithDice}
       </div>
     `;
@@ -1363,6 +1377,19 @@ function updateFeature(index, field, value) {
   }
 }
 
+function toggleFearCost(index, skulls) {
+  if (currentConverted && currentConverted.features[index]) {
+    const current = currentConverted.features[index].fearCost || 0;
+    // Toggle: if clicking same level, turn off; otherwise set to that level
+    currentConverted.features[index].fearCost = (current === skulls) ? 0 : skulls;
+    pushHistory();
+    renderStatBlock();
+    renderJSON();
+    renderMarkdown();
+    renderText();
+  }
+}
+
 function cycleFeatureType(index) {
   if (!currentConverted || !currentConverted.features[index]) return;
   const types = ['Passive', 'Action', 'Reaction'];
@@ -1594,9 +1621,10 @@ function renderMarkdown() {
   if (!currentConverted) return;
   const c = currentConverted;
 
-  const featuresText = c.features.map(f =>
-    `**${f.name}** *(${f.type})*: ${f.desc}`
-  ).join('\n\n');
+  const featuresText = c.features.map(f => {
+    const fearText = f.fearCost ? ` 💀×${f.fearCost}` : '';
+    return `**${f.name}** *(${f.type}${fearText})*: ${f.desc}`;
+  }).join('\n\n');
 
   const imageSection = c.imageUrl ? `![${c.name}](${c.imageUrl})\n\n` : '';
 
@@ -1635,9 +1663,10 @@ function renderText() {
   if (!currentConverted) return;
   const c = currentConverted;
 
-  const featuresText = c.features.map(f =>
-    `${f.name} - ${f.type}: ${f.desc}`
-  ).join('\n');
+  const featuresText = c.features.map(f => {
+    const fearText = f.fearCost ? ` (Fear ×${f.fearCost})` : '';
+    return `${f.name} - ${f.type}${fearText}: ${f.desc}`;
+  }).join('\n');
 
   const imageSection = c.imageUrl ? `Image: ${c.imageUrl}\n\n` : '';
 
@@ -1804,6 +1833,50 @@ function loadFromURL() {
       showToast('Invalid or corrupted share link', 'error');
     }
   }
+}
+
+// Create a new adversary from scratch
+function createNewAdversary() {
+  // Create a blank adversary template
+  const blankAdversary = {
+    id: 'adv-' + Date.now(),
+    category: 'adversary',
+    name: 'New Adversary',
+    tier: '2',
+    advType: 'Standard',
+    description: '',
+    motives: '',
+    tactics: '',
+    difficulty: 14,
+    majorThresh: 10,
+    severeThresh: 20,
+    hp: 5,
+    stress: 3,
+    atkMod: '+2',
+    weapon: 'Attack',
+    range: 'Melee',
+    damage: '2d8+3',
+    dmgType: 'phy',
+    experience: '',
+    imageUrl: '',
+    features: [
+      { name: 'Feature Name', type: 'Passive', desc: 'Feature description.', fearCost: 0 }
+    ],
+    tags: []
+  };
+
+  // Set as current converted and navigate to converter
+  currentConverted = blankAdversary;
+  currentParsed = null; // No source parsed data
+
+  // Navigate to converter
+  navigateTo('converter');
+
+  // Render the blank adversary for editing
+  setTimeout(() => {
+    renderAll();
+    showToast('Edit your new adversary, then click "Add to Library" to save', 'info');
+  }, 100);
 }
 
 function addToLibrary() {

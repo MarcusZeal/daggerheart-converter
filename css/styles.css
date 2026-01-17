@@ -3597,6 +3597,38 @@ textarea::placeholder {
   content: "\f54c"; /* fa-skull */
 }
 
+/* Fear cost skulls toggle */
+.fear-cost-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  margin-left: 0.25rem;
+}
+
+.fear-skull {
+  cursor: pointer;
+  font-size: 0.9rem;
+  opacity: 0.25;
+  transition: all 0.15s ease;
+  filter: grayscale(1);
+}
+
+.fear-skull:hover {
+  opacity: 0.6;
+  transform: scale(1.15);
+}
+
+.fear-skull.active {
+  opacity: 1;
+  filter: none;
+}
+
+/* Fear cost display in read-only */
+.fear-cost-display {
+  margin-left: 0.25rem;
+  font-size: 0.85em;
+}
+
 .feature-desc-input {
   color: var(--text-secondary);
   font-size: 0.85rem;

@@ -434,15 +434,11 @@ const DaggerheartConverter = (function() {
       .replace(/\s+/g, ' ')
       .trim();
 
-    // Truncate if too long
-    if (desc.length > 200) {
-      desc = desc.substring(0, 197) + '...';
-    }
-
     return {
       name: dndFeature.name,
       type: featureType,
-      desc: desc
+      desc: desc,
+      fearCost: 0 // Default no fear cost
     };
   }
 
