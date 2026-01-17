@@ -161,7 +161,7 @@
       position: relative;
     }
 
-    body::before {
+    body::after {
       content: '';
       position: fixed;
       bottom: 0;
@@ -891,6 +891,23 @@
       max-width: 1400px;
       margin: 0 auto;
       padding: 2rem;
+      position: relative;
+    }
+
+    #myLibraryPage.active .my-library-page::after {
+      content: '';
+      position: fixed;
+      bottom: 0;
+      right: 0;
+      width: 350px;
+      height: 350px;
+      background-image: url('assets/goblin-wizard-studying-up.webp');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: bottom right;
+      opacity: 0.12;
+      pointer-events: none;
+      z-index: 0;
     }
 
     .my-library-header {
@@ -2517,6 +2534,28 @@
     }
 
     .dh-modal-report:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    .dh-modal-secondary-actions {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .dh-modal-delete {
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      transition: all 0.2s;
+    }
+
+    .dh-modal-delete:hover {
       color: #ef4444;
       background: rgba(239, 68, 68, 0.1);
     }
@@ -5274,7 +5313,10 @@ The converter will auto-detect the source system."
         </div>
         <div class="dh-modal-secondary">
           <span class="dh-modal-author" id="modalAuthor"></span>
-          <button class="dh-modal-report" onclick="openReportModal()" title="Report this conversion">Report</button>
+          <div class="dh-modal-secondary-actions">
+            <button class="dh-modal-delete hidden" id="modalDeleteBtn" onclick="deleteMyConversion()" title="Delete your submission">Delete</button>
+            <button class="dh-modal-report" onclick="openReportModal()" title="Report this conversion">Report</button>
+          </div>
         </div>
       </div>
     </div>
@@ -8599,6 +8641,7 @@ Tags: ${c.tags.join(', ')}`;
       statBlockEl.innerHTML = renderStatBlockReadOnly(selectedConversion.data);
       updateModalVotes();
       updateModalAuthor();
+      updateDeleteButton();
 
       // Update URL for direct linking (only if not already on this URL)
       if (window.location.pathname !== `/community/${conversionId}`) {
@@ -8606,6 +8649,42 @@ Tags: ${c.tags.join(', ')}`;
       }
 
       modal.classList.remove('hidden');
+    }
+
+    function updateDeleteButton() {
+      const deleteBtn = document.getElementById('modalDeleteBtn');
+      if (!deleteBtn) return;
+
+      // Show delete button only if user owns this conversion
+      const isOwner = currentUser && selectedConversion &&
+                      selectedConversion.author &&
+                      selectedConversion.author.id === currentUser.id;
+      deleteBtn.classList.toggle('hidden', !isOwner);
+    }
+
+    async function deleteMyConversion() {
+      if (!selectedConversion || !currentUser) return;
+
+      if (!confirm(`Are you sure you want to delete "${selectedConversion.name || selectedConversion.data?.name || 'this conversion'}"? This cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/community/conversions/${selectedConversion.id}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) {
+          const data = await response.json();
+          throw new Error(data.error || 'Failed to delete');
+        }
+
+        showToast('Conversion deleted', 'success');
+        closeCommunityModal();
+        loadCommunityConversions();
+      } catch (err) {
+        showToast(err.message || 'Failed to delete conversion', 'error');
+      }
     }
 
     function closeCommunityModal(event) {
