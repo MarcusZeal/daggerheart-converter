@@ -5670,15 +5670,21 @@
     /* Roster card controls overlay */
     .encounter-roster-controls {
       position: absolute;
-      bottom: 0.5rem;
-      left: 0.5rem;
+      bottom: 0.75rem;
+      right: 0.75rem;
       display: flex;
       align-items: center;
       gap: 0.5rem;
-      background: rgba(0, 0, 0, 0.85);
-      padding: 0.35rem 0.5rem;
+      background: rgba(0, 0, 0, 0.9);
+      padding: 0.4rem 0.6rem;
       border-radius: 6px;
       z-index: 10;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+    }
+
+    /* Add padding to roster card body to prevent overlap */
+    .encounter-roster-card .dh-card-body {
+      padding-bottom: 3rem;
     }
 
     .encounter-roster-controls .party-btn {
