@@ -1424,6 +1424,115 @@
       border-color: var(--accent);
     }
 
+    /* Read-only stat block styles for community viewing */
+    .stat-block-image-section-readonly {
+      text-align: center;
+      margin: 1rem 0;
+    }
+
+    .stat-block-image-readonly {
+      max-width: 100%;
+      max-height: 250px;
+      border-radius: 8px;
+      border: 2px solid var(--border);
+    }
+
+    .stat-line-readonly {
+      margin-bottom: 0.5rem;
+      font-size: 0.9rem;
+    }
+
+    .stat-line-readonly .stat-value {
+      color: var(--text-primary);
+    }
+
+    .stat-grid-readonly {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(80px, 1fr));
+      gap: 0.5rem;
+      margin: 1rem 0;
+      padding: 0.75rem;
+      background: var(--bg-dark);
+      border-radius: 6px;
+    }
+
+    .stat-item-readonly {
+      text-align: center;
+      padding: 0.5rem;
+    }
+
+    .stat-item-readonly .stat-item-label {
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      margin-bottom: 0.25rem;
+    }
+
+    .stat-item-readonly .stat-item-value {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    .features-section-readonly {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .features-section-readonly .section-title,
+    .tags-section-readonly .section-title {
+      font-size: 0.9rem;
+      color: var(--accent);
+      margin-bottom: 0.75rem;
+      font-weight: 600;
+    }
+
+    .feature-readonly {
+      background: var(--bg-dark);
+      border-radius: 6px;
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-header-readonly {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
+    }
+
+    .feature-name-readonly {
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .feature-desc-readonly {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .tags-section-readonly {
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .tags-readonly {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .tag-readonly {
+      background: var(--bg-dark);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
     /* Tabs */
     .tabs {
       display: flex;
@@ -3801,6 +3910,110 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       header.setAttribute('aria-expanded', !el.classList.contains('collapsed'));
     }
 
+    // Read-only version for community viewing
+    function renderStatBlockReadOnly(c) {
+      if (!c) return '<p>No data available</p>';
+
+      const featuresHTML = (c.features || []).map(f => `
+        <div class="feature-readonly">
+          <div class="feature-header-readonly">
+            <span class="feature-name-readonly">${escapeHtml(f.name)}</span>
+            <span class="feature-type feature-type-${(f.type || 'passive').toLowerCase()}">${f.type || 'Passive'}</span>
+          </div>
+          <div class="feature-desc-readonly">${escapeHtml(f.desc || '')}</div>
+        </div>
+      `).join('');
+
+      const tagsHTML = (c.tags || []).map(t => `
+        <span class="tag-readonly">${escapeHtml(t)}</span>
+      `).join('');
+
+      const imageHTML = c.imageUrl
+        ? `<img src="${escapeHtml(c.imageUrl)}" alt="${escapeHtml(c.name)}" class="stat-block-image-readonly">`
+        : '';
+
+      return `
+        <div class="stat-block-header">
+          <div class="stat-block-name">${escapeHtml(c.name || 'Unknown')}</div>
+          <div class="stat-block-type">Tier ${c.tier || '?'} ${c.advType || 'Standard'}</div>
+        </div>
+
+        ${imageHTML ? `<div class="stat-block-image-section-readonly">${imageHTML}</div>` : ''}
+
+        ${c.description ? `<div class="stat-block-desc">${escapeHtml(c.description)}</div>` : ''}
+
+        ${c.motives ? `
+          <div class="stat-line-readonly">
+            <span class="stat-label">Motives:</span>
+            <span class="stat-value">${escapeHtml(c.motives)}</span>
+          </div>
+        ` : ''}
+
+        ${c.tactics ? `
+          <div class="stat-line-readonly">
+            <span class="stat-label">Tactics:</span>
+            <span class="stat-value">${escapeHtml(c.tactics)}</span>
+          </div>
+        ` : ''}
+
+        <div class="stat-grid-readonly">
+          <div class="stat-item-readonly">
+            <div class="stat-item-label">Difficulty</div>
+            <div class="stat-item-value">${c.difficulty || '?'}</div>
+          </div>
+          <div class="stat-item-readonly">
+            <div class="stat-item-label">Major</div>
+            <div class="stat-item-value">${c.majorThresh || '?'}</div>
+          </div>
+          <div class="stat-item-readonly">
+            <div class="stat-item-label">Severe</div>
+            <div class="stat-item-value">${c.severeThresh || '?'}</div>
+          </div>
+          <div class="stat-item-readonly">
+            <div class="stat-item-label">HP</div>
+            <div class="stat-item-value">${c.hp || '?'}</div>
+          </div>
+          <div class="stat-item-readonly">
+            <div class="stat-item-label">Stress</div>
+            <div class="stat-item-value">${c.stress || '?'}</div>
+          </div>
+          <div class="stat-item-readonly">
+            <div class="stat-item-label">Attack</div>
+            <div class="stat-item-value">${c.atkMod || '?'}</div>
+          </div>
+        </div>
+
+        <div class="stat-line-readonly">
+          <span class="stat-label">Weapon:</span>
+          <span class="stat-value">${escapeHtml(c.weapon || 'None')} (${c.range || 'Melee'})</span>
+        </div>
+        <div class="stat-line-readonly">
+          <span class="stat-label">Damage:</span>
+          <span class="stat-value">${c.damage || '?'} ${c.dmgType || 'phy'}</span>
+        </div>
+        ${c.experience ? `
+          <div class="stat-line-readonly">
+            <span class="stat-label">Experience:</span>
+            <span class="stat-value">${escapeHtml(c.experience)}</span>
+          </div>
+        ` : ''}
+
+        ${(c.features && c.features.length > 0) ? `
+          <div class="features-section-readonly">
+            <h4 class="section-title">Features</h4>
+            ${featuresHTML}
+          </div>
+        ` : ''}
+
+        ${(c.tags && c.tags.length > 0) ? `
+          <div class="tags-section-readonly">
+            <h4 class="section-title">Tags</h4>
+            <div class="tags-readonly">${tagsHTML}</div>
+          </div>
+        ` : ''}
+      `;
+    }
+
     // ==================== EDITING FUNCTIONS ====================
     function updateStat(key, value) {
       if (currentConverted) {
@@ -4601,7 +4814,7 @@ Tags: ${c.tags.join(', ')}`;
       }
 
       titleEl.textContent = selectedConversion.name;
-      statBlockEl.innerHTML = renderStatBlockHTML(selectedConversion.data);
+      statBlockEl.innerHTML = renderStatBlockReadOnly(selectedConversion.data);
       updateModalVotes();
       updateModalAuthor();
 
