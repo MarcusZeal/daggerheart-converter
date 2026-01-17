@@ -204,6 +204,26 @@
       opacity: 0.10;
     }
 
+    #encounter-builderPage.active::after {
+      content: '';
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 90vw;
+      height: 90vw;
+      background-image: url('assets/monster-faceoff.webp');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: bottom left;
+      opacity: 0.04;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    :root.light-mode #encounter-builderPage.active::after {
+      opacity: 0.10;
+    }
+
     /* Navigation Bar */
     .navbar {
       background: var(--bg-card);
