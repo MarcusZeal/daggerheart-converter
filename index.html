@@ -5230,7 +5230,27 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
     }
 
     // ==================== KEYBOARD SHORTCUTS ====================
+    const isMac = /Mac|iPod|iPhone|iPad/.test(navigator.platform) ||
+                  (navigator.userAgentData?.platform === 'macOS');
+    const modKey = isMac ? 'Cmd' : 'Ctrl';
+
+    function hasModifier(e) {
+      return isMac ? e.metaKey : e.ctrlKey;
+    }
+
+    function updateKeyboardHints() {
+      // Update inline hints
+      document.querySelectorAll('.keyboard-hint kbd, .shortcut-row kbd').forEach(kbd => {
+        if (kbd.textContent === 'Ctrl' || kbd.textContent === 'Cmd') {
+          kbd.textContent = modKey;
+        }
+      });
+    }
+
     function setupKeyboardShortcuts() {
+      // Update displayed keys on load
+      updateKeyboardHints();
+
       document.addEventListener('keydown', (e) => {
         const isTyping = document.activeElement.tagName === 'TEXTAREA' ||
                          document.activeElement.tagName === 'INPUT';
@@ -5241,25 +5261,25 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
           openKeyboardModal();
           return;
         }
-        // Ctrl+Enter: Convert
-        if (e.ctrlKey && e.key === 'Enter') {
+        // Cmd/Ctrl+Enter: Convert
+        if (hasModifier(e) && e.key === 'Enter') {
           e.preventDefault();
           convert();
         }
-        // Ctrl+Shift+C: Copy JSON
-        if (e.ctrlKey && e.shiftKey && e.key === 'C') {
+        // Cmd/Ctrl+Shift+C: Copy JSON
+        if (hasModifier(e) && e.shiftKey && e.key === 'C') {
           e.preventDefault();
           copyJSON();
         }
-        // Ctrl+Z: Undo
-        if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
+        // Cmd/Ctrl+Z: Undo
+        if (hasModifier(e) && e.key === 'z' && !e.shiftKey) {
           if (!isTyping) {
             e.preventDefault();
             undo();
           }
         }
-        // Ctrl+Y or Ctrl+Shift+Z: Redo
-        if ((e.ctrlKey && e.key === 'y') || (e.ctrlKey && e.shiftKey && e.key === 'z')) {
+        // Cmd/Ctrl+Y or Cmd/Ctrl+Shift+Z: Redo
+        if ((hasModifier(e) && e.key === 'y') || (hasModifier(e) && e.shiftKey && e.key === 'z')) {
           e.preventDefault();
           redo();
         }
