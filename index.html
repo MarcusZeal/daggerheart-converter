@@ -4,8 +4,15 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Daggerheart Adversary Converter</title>
+  <!-- Google Fonts - Daggerheart-inspired typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Roboto+Slab:wght@400;500;700&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     :root {
+      /* Colors */
       --bg-dark: #1a1a2e;
       --bg-card: #16213e;
       --bg-input: #0f0f23;
@@ -22,6 +29,11 @@
       --warning: #f59e0b;
       --info: #3b82f6;
       --focus-ring: 0 0 0 2px var(--bg-dark), 0 0 0 4px var(--accent);
+
+      /* Typography - Daggerheart-inspired fonts */
+      --font-display: 'Bebas Neue', 'Impact', sans-serif;
+      --font-body: 'Source Sans 3', 'Segoe UI', system-ui, sans-serif;
+      --font-slab: 'Roboto Slab', Georgia, serif;
     }
 
     /* Light mode - Daggerheart Rulebook Style */
@@ -42,32 +54,42 @@
     }
 
     /* Typography - Daggerheart Rulebook Style (both modes) */
-    /* All caps for H1-H3 */
+    /* Display font for major headers */
     h1, h2, h3,
     .page-header h1,
     .community-header h1,
     .my-library-header h1,
     .admin-header h1 {
+      font-family: var(--font-display);
       text-transform: uppercase;
+      font-weight: 400; /* Bebas Neue only has one weight */
     }
 
     /* H1 specific styling */
     h1 {
-      font-size: 2rem;
+      font-size: 2.5rem;
       color: var(--accent);
       margin-bottom: 0.5rem;
-      font-weight: 900;
-      letter-spacing: 0.06em;
-    }
-
-    /* H2 and H3 letter-spacing */
-    h2, h3 {
       letter-spacing: 0.04em;
     }
 
-    /* Title case for H4-H6 */
+    /* H2 styling */
+    h2 {
+      font-size: 1.75rem;
+      letter-spacing: 0.03em;
+    }
+
+    /* H3 styling */
+    h3 {
+      font-size: 1.35rem;
+      letter-spacing: 0.02em;
+    }
+
+    /* Slab font for H4-H6 (subheadings/labels) */
     h4, h5, h6 {
-      text-transform: capitalize;
+      font-family: var(--font-slab);
+      text-transform: none;
+      font-weight: 500;
     }
 
     :root.light-mode .json-output {
@@ -153,7 +175,7 @@
     }
 
     body {
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: var(--font-body);
       background: var(--bg-dark);
       color: var(--text-primary);
       min-height: 100vh;
@@ -206,8 +228,11 @@
       gap: 0.75rem;
       text-decoration: none;
       color: var(--accent);
-      font-weight: 700;
-      font-size: 1.25rem;
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: 1.5rem;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
     }
 
     .navbar-brand-icon {
@@ -266,6 +291,24 @@
 
     .coffee-link:hover {
       color: #ffdd00;
+      opacity: 1;
+    }
+
+    .faq-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      opacity: 0.7;
+      transition: all 0.2s;
+      cursor: pointer;
+      padding: 0.25rem;
+    }
+
+    .faq-link:hover {
+      color: var(--accent);
       opacity: 1;
     }
 
@@ -565,10 +608,12 @@
     }
 
     .stat-label {
+      font-family: var(--font-slab);
       font-size: 0.8rem;
       color: var(--text-secondary);
       text-transform: uppercase;
       letter-spacing: 0.03em;
+      font-weight: 500;
     }
 
     .admin-tabs {
@@ -2312,39 +2357,67 @@
     }
 
     .dh-stat-block-stats-line {
+      font-family: var(--font-body);
       font-size: 0.9rem;
-      margin-bottom: 0.4rem;
-      line-height: 1.4;
+      margin-bottom: 0.5rem;
+      line-height: 1.5;
+      padding: 0.4rem 0.6rem;
+      background: rgba(0, 0, 0, 0.03);
+      border-radius: 4px;
+      border-left: 3px solid var(--accent);
     }
 
     .dh-stat-block-stats-line .label {
+      font-family: var(--font-slab);
       font-weight: 600;
+      color: #1a1a1a;
     }
 
     .dh-stat-block-stats-line .separator {
-      color: #888;
-      margin: 0 0.4rem;
+      color: var(--accent);
+      margin: 0 0.5rem;
+      font-weight: 300;
     }
 
     .dh-stat-block-experience {
       font-size: 0.9rem;
       margin-bottom: 0.75rem;
+      padding: 0.3rem 0;
+      font-style: italic;
     }
 
     .dh-stat-block-experience strong {
+      font-family: var(--font-slab);
       font-weight: 600;
+      font-style: normal;
     }
 
     .dh-stat-block-features {
       border-top: 2px solid #2d2d2d;
       margin-top: 1rem;
       padding-top: 1rem;
+      position: relative;
+    }
+
+    /* Decorative corner on features section */
+    .dh-stat-block-features::before {
+      content: "◆";
+      position: absolute;
+      top: -0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: #f5f0e6;
+      padding: 0 0.5rem;
+      color: #2d2d2d;
+      font-size: 0.6rem;
     }
 
     .dh-stat-block-features-title {
-      font-size: 1rem;
-      font-weight: 700;
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 400;
       text-transform: uppercase;
+      letter-spacing: 0.05em;
       margin-bottom: 0.75rem;
       color: #2d2d2d;
     }
@@ -2360,24 +2433,66 @@
     }
 
     .dh-stat-block-feature-name {
+      font-family: var(--font-slab);
       font-weight: 700;
     }
 
     .dh-stat-block-feature-type {
-      font-weight: 600;
-      font-style: italic;
+      font-family: var(--font-slab);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      text-transform: uppercase;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-left: 0.25rem;
+      letter-spacing: 0.02em;
+    }
+
+    .dh-stat-block-feature-type::before {
+      font-size: 0.8em;
     }
 
     .dh-stat-block-feature-type.action {
-      color: #b45309;
+      background: linear-gradient(135deg, #dc2626, #991b1b);
+      color: #fef2f2;
+    }
+    .dh-stat-block-feature-type.action::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      content: "\f0e7"; /* fa-bolt */
     }
 
     .dh-stat-block-feature-type.reaction {
-      color: #7c3aed;
+      background: linear-gradient(135deg, #2563eb, #1d4ed8);
+      color: #eff6ff;
+    }
+    .dh-stat-block-feature-type.reaction::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      content: "\f2ea"; /* fa-rotate-left */
     }
 
     .dh-stat-block-feature-type.passive {
-      color: #059669;
+      background: linear-gradient(135deg, #475569, #334155);
+      color: #e2e8f0;
+    }
+    .dh-stat-block-feature-type.passive::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 400;
+      content: "\f111"; /* fa-circle (regular/outline) */
+    }
+
+    .dh-stat-block-feature-type.fear {
+      background: linear-gradient(135deg, #7c3aed, #5b21b6);
+      color: #f5f3ff;
+    }
+    .dh-stat-block-feature-type.fear::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      content: "\f54c"; /* fa-skull */
     }
 
     .dh-stat-block-image {
@@ -2603,24 +2718,78 @@
       }
     }
 
-    /* Legacy classes for backwards compatibility */
+    /* Daggerheart Stat Block - Rulebook Style */
+    .stat-block {
+      background: linear-gradient(135deg, var(--bg-card) 0%, var(--bg-input) 100%);
+      border: 2px solid var(--accent);
+      border-radius: 8px;
+      padding: 1.5rem;
+      position: relative;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+    }
+
+    /* Parchment style for light mode */
+    :root.light-mode .stat-block {
+      background: linear-gradient(135deg, #faf8f3 0%, #f5f0e6 50%, #ebe5d8 100%);
+      border-color: #8b7355;
+      box-shadow:
+        0 4px 12px rgba(0,0,0,0.15),
+        inset 0 0 60px rgba(139, 115, 85, 0.05);
+    }
+
+    /* Corner decorations for light mode */
+    :root.light-mode .stat-block::before,
+    :root.light-mode .stat-block::after {
+      content: "◆";
+      position: absolute;
+      color: var(--accent);
+      font-size: 0.75rem;
+      opacity: 0.6;
+    }
+    :root.light-mode .stat-block::before {
+      top: 0.5rem;
+      left: 0.5rem;
+    }
+    :root.light-mode .stat-block::after {
+      bottom: 0.5rem;
+      right: 0.5rem;
+    }
+
     .stat-block-header {
       border-bottom: 2px solid var(--accent);
       padding-bottom: 0.75rem;
       margin-bottom: 1rem;
+      position: relative;
+    }
+
+    /* Decorative header underline */
+    .stat-block-header::after {
+      content: "";
+      position: absolute;
+      bottom: -2px;
+      left: 0;
+      right: 0;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent) 0%, transparent 100%);
     }
 
     .stat-block-name {
-      font-size: 1.4rem;
-      font-weight: bold;
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 400;
       color: var(--accent);
       margin-bottom: 0.25rem;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
     }
 
     .stat-block-name-input {
-      font-size: 1.4rem;
-      font-weight: bold;
+      font-family: var(--font-display);
+      font-size: 1.8rem;
+      font-weight: 400;
       color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
       background: transparent;
       border: none;
       border-bottom: 1px dashed transparent;
@@ -2811,8 +2980,26 @@
 
     /* Collapsible sections */
     .collapsible {
-      border-top: 1px solid var(--border);
-      margin-top: 1rem;
+      border-top: 2px solid var(--accent);
+      margin-top: 1.25rem;
+      position: relative;
+    }
+
+    /* Decorative divider diamond */
+    .collapsible::before {
+      content: "◆";
+      position: absolute;
+      top: -0.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      padding: 0 0.5rem;
+      color: var(--accent);
+      font-size: 0.6rem;
+    }
+
+    :root.light-mode .collapsible::before {
+      background: linear-gradient(135deg, #faf8f3, #f5f0e6);
     }
 
     .collapsible-header {
@@ -2829,10 +3016,12 @@
     }
 
     .collapsible-title {
-      font-weight: 600;
+      font-family: var(--font-display);
+      font-weight: 400;
       color: var(--accent);
       text-transform: uppercase;
-      font-size: 0.85rem;
+      font-size: 1.1rem;
+      letter-spacing: 0.03em;
       display: flex;
       align-items: center;
       gap: 0.5rem;
@@ -2865,6 +3054,7 @@
     }
 
     .stat-label {
+      font-family: var(--font-slab);
       color: var(--accent);
       font-weight: 600;
       flex-shrink: 0;
@@ -2970,6 +3160,7 @@
     }
 
     .feature-name-input {
+      font-family: var(--font-slab);
       font-weight: 600;
       color: var(--text-primary);
       background: transparent;
@@ -2977,7 +3168,6 @@
       border-bottom: 1px dashed var(--border);
       padding: 0.1rem 0.3rem;
       font-size: inherit;
-      font-family: inherit;
       min-width: 100px;
       flex: 1;
     }
@@ -2988,22 +3178,75 @@
     }
 
     .feature-type {
-      font-size: 0.75rem;
-      padding: 0.15rem 0.4rem;
+      font-family: var(--font-slab);
+      font-size: 0.7rem;
+      font-weight: 500;
+      padding: 0.2rem 0.5rem;
       border-radius: 3px;
       text-transform: uppercase;
       cursor: pointer;
-      transition: opacity 0.2s;
+      transition: all 0.2s;
       border: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      letter-spacing: 0.02em;
+    }
+
+    .feature-type::before {
+      font-size: 0.85em;
     }
 
     .feature-type:hover {
-      opacity: 0.8;
+      opacity: 0.85;
+      transform: translateY(-1px);
     }
 
-    .feature-type-passive { background: #334155; color: #94a3b8; }
-    .feature-type-action { background: #7c2d12; color: #fed7aa; }
-    .feature-type-reaction { background: #1e3a5f; color: #93c5fd; }
+    /* Feature type colors with Font Awesome icons */
+    .feature-type-passive {
+      background: linear-gradient(135deg, #475569, #334155);
+      color: #e2e8f0;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .feature-type-passive::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 400;
+      content: "\f111"; /* fa-circle (regular/outline) */
+    }
+
+    .feature-type-action {
+      background: linear-gradient(135deg, #b91c1c, #7c2d12);
+      color: #fef2f2;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .feature-type-action::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      content: "\f0e7"; /* fa-bolt */
+    }
+
+    .feature-type-reaction {
+      background: linear-gradient(135deg, #2563eb, #1e3a5f);
+      color: #eff6ff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .feature-type-reaction::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      content: "\f2ea"; /* fa-rotate-left */
+    }
+
+    /* Fear feature type */
+    .feature-type-fear {
+      background: linear-gradient(135deg, #7c3aed, #4c1d95);
+      color: #f5f3ff;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    }
+    .feature-type-fear::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      content: "\f54c"; /* fa-skull */
+    }
 
     .feature-desc-input {
       color: var(--text-secondary);
@@ -3222,6 +3465,7 @@
     }
 
     .feature-name-readonly {
+      font-family: var(--font-slab);
       font-weight: 600;
       color: var(--text-primary);
     }
@@ -3230,6 +3474,81 @@
       font-size: 0.85rem;
       color: var(--text-secondary);
       line-height: 1.5;
+    }
+
+    /* Dice roll highlighting */
+    .dice-roll {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: rgba(201, 162, 39, 0.15);
+      color: var(--accent);
+      padding: 0.1rem 0.35rem;
+      border-radius: 3px;
+      font-family: var(--font-slab);
+      font-weight: 500;
+      font-size: 0.95em;
+      cursor: help;
+      position: relative;
+      border-bottom: 1px dotted var(--accent);
+      transition: all 0.2s;
+    }
+
+    .dice-roll::before {
+      font-family: "Font Awesome 6 Free";
+      font-weight: 900;
+      content: "\f6cf"; /* fa-dice-d20 */
+      font-size: 0.8em;
+      opacity: 0.7;
+    }
+
+    .dice-roll:hover {
+      background: rgba(201, 162, 39, 0.25);
+      transform: translateY(-1px);
+    }
+
+    /* Dice tooltip */
+    .dice-roll[data-range]::after {
+      content: attr(data-range);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(-4px);
+      background: var(--bg-dark);
+      color: var(--text-primary);
+      padding: 0.35rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-family: var(--font-body);
+      font-weight: 400;
+      white-space: nowrap;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+      z-index: 100;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+      border: 1px solid var(--accent);
+    }
+
+    .dice-roll:hover[data-range]::after {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(-8px);
+    }
+
+    :root.light-mode .dice-roll {
+      background: rgba(173, 36, 35, 0.1);
+      color: var(--accent);
+      border-bottom-color: var(--accent);
+    }
+
+    :root.light-mode .dice-roll:hover {
+      background: rgba(173, 36, 35, 0.2);
+    }
+
+    :root.light-mode .dice-roll[data-range]::after {
+      background: #2d2d2d;
+      color: #f5f0e6;
     }
 
     .tags-section-readonly {
@@ -3874,10 +4193,11 @@
     }
 
     .dh-card-name {
-      font-weight: 700;
-      font-size: 1.1rem;
+      font-family: var(--font-display);
+      font-weight: 400;
+      font-size: 1.35rem;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
+      letter-spacing: 0.02em;
       margin-bottom: 0.15rem;
     }
 
@@ -4263,9 +4583,12 @@
 
     .modal-header h2 {
       margin: 0;
-      font-size: 1.25rem;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
       color: var(--accent);
-      font-weight: 900;
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
     }
 
     .modal-close {
@@ -4356,6 +4679,96 @@
       font-size: 0.8rem;
       color: var(--text-secondary);
       margin-top: 0.75rem;
+    }
+
+    /* FAQ Modal */
+    .faq-modal {
+      max-width: 700px;
+    }
+
+    .faq-body {
+      max-height: 70vh;
+      overflow-y: auto;
+    }
+
+    .faq-section {
+      margin-bottom: 1.75rem;
+    }
+
+    .faq-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .faq-section h3 {
+      font-family: var(--font-display);
+      color: var(--accent);
+      font-size: 1.3rem;
+      font-weight: 400;
+      margin-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 0.5rem;
+      letter-spacing: 0.02em;
+    }
+
+    .faq-section p {
+      color: var(--text-primary);
+      line-height: 1.6;
+      margin-bottom: 0.75rem;
+    }
+
+    .faq-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.75rem 0;
+      font-size: 0.9rem;
+    }
+
+    .faq-table th,
+    .faq-table td {
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      border: 1px solid var(--border);
+    }
+
+    .faq-table th {
+      background: var(--bg-input);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .faq-table td {
+      background: var(--bg-card);
+      color: var(--text-primary);
+    }
+
+    .faq-table tr:hover td {
+      background: var(--bg-input);
+    }
+
+    .faq-list {
+      list-style: none;
+      padding: 0;
+      margin: 0.75rem 0;
+    }
+
+    .faq-list li {
+      padding: 0.5rem 0;
+      padding-left: 1.25rem;
+      position: relative;
+      color: var(--text-primary);
+      line-height: 1.5;
+    }
+
+    .faq-list li::before {
+      content: "•";
+      position: absolute;
+      left: 0;
+      color: var(--accent);
+      font-weight: bold;
+    }
+
+    .faq-list li strong {
+      color: var(--accent);
     }
 
     /* Share button */
@@ -4641,6 +5054,13 @@
       </div>
 
       <div class="navbar-right">
+        <button class="faq-link" onclick="openFAQModal()" title="How It Works">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+            <circle cx="12" cy="12" r="10"/>
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+            <line x1="12" y1="17" x2="12.01" y2="17"/>
+          </svg>
+        </button>
         <a href="https://buymeacoffee.com/marcusu" target="_blank" rel="noopener" class="coffee-link" title="Buy me a coffee">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
             <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
@@ -5437,6 +5857,8 @@ The converter will auto-detect the source system."
   <footer class="site-footer">
     <p>This tool is not affiliated with, endorsed, or sponsored by Wizards of the Coast, Paizo Inc., or Darrington Press. All product names and trademarks are property of their respective owners.</p>
     <div class="footer-links">
+      <a href="#" onclick="openFAQModal(); return false;">How's This Work?</a>
+      <span class="footer-divider">|</span>
       <a href="#" onclick="openPrivacyModal(); return false;">Privacy Policy</a>
       <span class="footer-divider">|</span>
       <a href="https://buymeacoffee.com/marcusu" target="_blank" rel="noopener" class="coffee-footer-link">
@@ -5471,12 +5893,178 @@ The converter will auto-detect the source system."
     <div class="toast-progress" id="toastProgress"></div>
   </div>
 
+  <!-- FAQ Modal -->
+  <div id="faqModal" class="modal-overlay hidden" onclick="closeFAQModal(event)">
+    <div class="modal-content faq-modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>How the Converter Works</h2>
+        <button class="modal-close" onclick="closeFAQModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body faq-body">
+
+        <section class="faq-section">
+          <h3>Overview</h3>
+          <p>This tool converts stat blocks from D&D 5e (and other systems) into Daggerheart format. It analyzes the original creature's statistics and translates them into Daggerheart's streamlined adversary system.</p>
+        </section>
+
+        <section class="faq-section">
+          <h3>How are Tiers determined?</h3>
+          <p>Daggerheart uses a 4-tier system instead of D&D's 30-level Challenge Rating scale. The conversion maps CR to tier as follows:</p>
+          <table class="faq-table">
+            <thead>
+              <tr><th>D&D Challenge Rating</th><th>Daggerheart Tier</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>CR 0-1</td><td>Tier 1</td></tr>
+              <tr><td>CR 2-4</td><td>Tier 2</td></tr>
+              <tr><td>CR 5-10</td><td>Tier 3</td></tr>
+              <tr><td>CR 11+</td><td>Tier 4</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="faq-section">
+          <h3>How are Hit Points scaled?</h3>
+          <p>Daggerheart uses much smaller HP pools than D&D 5e. Instead of directly converting HP, the tool assigns HP based on the creature's tier and type:</p>
+          <table class="faq-table">
+            <thead>
+              <tr><th>Tier</th><th>Base HP</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Tier 1</td><td>3 HP</td></tr>
+              <tr><td>Tier 2</td><td>5 HP</td></tr>
+              <tr><td>Tier 3</td><td>8 HP</td></tr>
+              <tr><td>Tier 4</td><td>12 HP</td></tr>
+            </tbody>
+          </table>
+          <p>Adversary types then modify this base HP. For example, Bruisers add +3 HP while Minions are always reduced to just 1 HP.</p>
+        </section>
+
+        <section class="faq-section">
+          <h3>How is Difficulty set?</h3>
+          <p>Difficulty is the target number players need to hit for attacks and ability checks against this adversary. It's determined purely by tier:</p>
+          <table class="faq-table">
+            <thead>
+              <tr><th>Tier</th><th>Difficulty</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Tier 1</td><td>11</td></tr>
+              <tr><td>Tier 2</td><td>14</td></tr>
+              <tr><td>Tier 3</td><td>17</td></tr>
+              <tr><td>Tier 4</td><td>20</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="faq-section">
+          <h3>How are Damage Thresholds calculated?</h3>
+          <p>Damage thresholds determine when an adversary takes a Hit (Major threshold) or two Hits (Severe threshold). Base thresholds are set by tier:</p>
+          <table class="faq-table">
+            <thead>
+              <tr><th>Tier</th><th>Major Threshold</th><th>Severe Threshold</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Tier 1</td><td>7</td><td>12</td></tr>
+              <tr><td>Tier 2</td><td>10</td><td>20</td></tr>
+              <tr><td>Tier 3</td><td>20</td><td>32</td></tr>
+              <tr><td>Tier 4</td><td>25</td><td>45</td></tr>
+            </tbody>
+          </table>
+          <p>These are then modified by adversary type. Bruisers have 20% higher thresholds (harder to hurt), while Hordes have 20% lower thresholds (easier to damage).</p>
+        </section>
+
+        <section class="faq-section">
+          <h3>How are Adversary Types chosen?</h3>
+          <p>The converter analyzes the original creature to suggest the most appropriate Daggerheart adversary type:</p>
+          <ul class="faq-list">
+            <li><strong>Solo:</strong> Creatures with Legendary Actions become Solo adversaries (designed to fight an entire party)</li>
+            <li><strong>Leader:</strong> High-CR creatures with Multiattack become Leaders (commanders that buff allies)</li>
+            <li><strong>Bruiser:</strong> High-HP creatures (50+ HP) at CR 2+ become Bruisers (tough, close-quarters fighters)</li>
+            <li><strong>Ranged:</strong> Creatures whose primary attack is ranged become Ranged adversaries</li>
+            <li><strong>Skulk:</strong> Creatures with Stealth proficiency or ambush abilities become Skulks (hit-and-run tactics)</li>
+            <li><strong>Support:</strong> Creatures with healing/buffing abilities at low CR become Support</li>
+            <li><strong>Minion:</strong> Very low CR creatures (1/4 or less) become Minions (1 HP, defeated in groups)</li>
+            <li><strong>Standard:</strong> Default for creatures that don't fit other categories</li>
+          </ul>
+        </section>
+
+        <section class="faq-section">
+          <h3>Type Modifiers</h3>
+          <p>Each adversary type applies specific modifiers to the base statistics:</p>
+          <table class="faq-table">
+            <thead>
+              <tr><th>Type</th><th>HP Mod</th><th>Stress Mod</th><th>Threshold Mod</th><th>Attack Mod</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>Bruiser</td><td>+3</td><td>+1</td><td>+20%</td><td>+0</td></tr>
+              <tr><td>Horde</td><td>-1</td><td>+0</td><td>-20%</td><td>+0</td></tr>
+              <tr><td>Leader</td><td>+1</td><td>+2</td><td>+10%</td><td>+1</td></tr>
+              <tr><td>Minion</td><td>=1</td><td>+0</td><td>-50%</td><td>-1</td></tr>
+              <tr><td>Ranged</td><td>-1</td><td>+0</td><td>-10%</td><td>+1</td></tr>
+              <tr><td>Skulk</td><td>+0</td><td>+1</td><td>-10%</td><td>+0</td></tr>
+              <tr><td>Social</td><td>-1</td><td>+2</td><td>-30%</td><td>-1</td></tr>
+              <tr><td>Solo</td><td>+5</td><td>+3</td><td>+50%</td><td>+1</td></tr>
+              <tr><td>Standard</td><td>+0</td><td>+0</td><td>+0%</td><td>+0</td></tr>
+              <tr><td>Support</td><td>-1</td><td>+1</td><td>-20%</td><td>+0</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="faq-section">
+          <h3>Damage Type Conversion</h3>
+          <p>D&D has many damage types. Daggerheart simplifies these into two categories:</p>
+          <ul class="faq-list">
+            <li><strong>Physical (phy):</strong> Slashing, Piercing, Bludgeoning</li>
+            <li><strong>Magic (mag):</strong> Fire, Cold, Lightning, Acid, Poison, Necrotic, Radiant, Force, Psychic, Thunder</li>
+          </ul>
+        </section>
+
+        <section class="faq-section">
+          <h3>Range Conversion</h3>
+          <p>D&D ranges in feet are converted to Daggerheart's abstract range bands:</p>
+          <table class="faq-table">
+            <thead>
+              <tr><th>D&D Range</th><th>Daggerheart Range</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>5 ft</td><td>Melee</td></tr>
+              <tr><td>10 ft</td><td>Very Close</td></tr>
+              <tr><td>11-30 ft</td><td>Close</td></tr>
+              <tr><td>31-60 ft</td><td>Far</td></tr>
+              <tr><td>60+ ft</td><td>Very Far</td></tr>
+            </tbody>
+          </table>
+        </section>
+
+        <section class="faq-section">
+          <h3>Supported Input Formats</h3>
+          <p>The converter accepts stat blocks in multiple formats:</p>
+          <ul class="faq-list">
+            <li><strong>Text:</strong> Copy-pasted stat blocks from PDFs, digital toolsets, VTTs, etc.</li>
+            <li><strong>JSON:</strong> Most popular monster/creature JSON export formats are supported</li>
+          </ul>
+          <p>The system auto-detects the format - just paste and convert!</p>
+        </section>
+
+        <section class="faq-section">
+          <h3>But these calculations SUCK!</h3>
+          <p>You're kind of right. These calculations are not perfect for every adversary.</p>
+          <p>A small fae may make more thematic sense to be difficult to hit. A beefy bruiser might be easy to hit but have a ton of HP. A cunning spellcaster might have low thresholds but dangerous abilities.</p>
+          <p><strong>It is your job as the GM to edit these to fit your campaign.</strong></p>
+          <p>I've given you the ability to edit every field after conversion and I highly recommend you do so to make the monster the best it can be. Use the converted stats as a starting point, then tweak the numbers until the adversary feels right for your table.</p>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
   <!-- Load the modules -->
   <script src="/parsers/parser-manager.js"></script>
   <script src="/parsers/dnd5e-parser.js"></script>
   <script src="/parsers/pf2e-parser.js"></script>
   <script src="/parsers/dnd35e-parser.js"></script>
   <script src="/parsers/osr-parser.js"></script>
+  <script src="/parsers/json-parser.js"></script>
   <script src="/dnd-parser.js"></script>
   <script src="/daggerheart-converter.js"></script>
 
@@ -6007,6 +6595,23 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
             ? input.split(/\n-{3,}\n/)[0]
             : input;
 
+          let parsed;
+
+          // Check for JSON input first (supports 5e.tools, Open5e, World Anvil, CritterDB, Foundry, Improved Initiative)
+          if (typeof JSONParser !== 'undefined' && isJSONInput(firstBlock)) {
+            try {
+              parsed = JSONParser.parse(firstBlock);
+              detectedSystem = parsed._meta?.system || 'json';
+              updateDetectedSystemDisplay(parsed._meta?.detected);
+              renderLivePreview(parsed);
+              document.getElementById('liveParsePreview').classList.remove('hidden');
+              return;
+            } catch (e) {
+              // Fall through to text parsers
+              console.log('JSON parse failed, trying text parsers:', e.message);
+            }
+          }
+
           // Detect system if in auto mode
           if (typeof ParserManager !== 'undefined' && currentSystem === 'auto') {
             const detected = ParserManager.detectSystem(firstBlock);
@@ -6015,7 +6620,6 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
           }
 
           // Parse using appropriate parser
-          let parsed;
           if (typeof ParserManager !== 'undefined') {
             parsed = ParserManager.parse(firstBlock, { system: currentSystem });
           } else {
@@ -6165,6 +6769,20 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
     }
 
     function convertSingle(input) {
+      // Check for JSON input first (supports 5e.tools, Open5e, World Anvil, CritterDB, Foundry, Improved Initiative)
+      if (typeof JSONParser !== 'undefined' && isJSONInput(input)) {
+        try {
+          currentParsed = JSONParser.parse(input);
+          detectedSystem = currentParsed._meta?.system || 'json';
+          updateDetectedSystemDisplay(currentParsed._meta?.detected);
+          document.getElementById('adjustments').classList.remove('hidden');
+          reconvert();
+          return;
+        } catch (e) {
+          console.log('JSON parse failed, trying text parsers:', e.message);
+        }
+      }
+
       // Use ParserManager if available, otherwise fall back to DnDParser
       if (typeof ParserManager !== 'undefined') {
         currentParsed = ParserManager.parse(input, { system: currentSystem });
@@ -6177,6 +6795,13 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       }
       document.getElementById('adjustments').classList.remove('hidden');
       reconvert();
+    }
+
+    // Helper to detect if input looks like JSON
+    function isJSONInput(input) {
+      const trimmed = input.trim();
+      return (trimmed.startsWith('{') && trimmed.endsWith('}')) ||
+             (trimmed.startsWith('[') && trimmed.endsWith(']'));
     }
 
     function convertBatch(input) {
@@ -6510,11 +7135,13 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       // Build features HTML
       const featuresHTML = (c.features || []).map(f => {
         const typeClass = (f.type || 'passive').toLowerCase();
+        // Escape first, then highlight dice rolls
+        const descWithDice = highlightDiceRolls(escapeHtml(f.desc || ''));
         return `
           <div class="dh-stat-block-feature">
             <span class="dh-stat-block-feature-name">${escapeHtml(f.name)}</span> -
             <span class="dh-stat-block-feature-type ${typeClass}">${f.type || 'Passive'}:</span>
-            ${escapeHtml(f.desc || '')}
+            ${descWithDice}
           </div>
         `;
       }).join('');
@@ -6537,12 +7164,13 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
         `;
       }
 
-      // Build attack line
+      // Build attack line with dice highlighting
       let attackLine = '';
       if (c.atkMod) {
+        const damageWithHighlight = highlightDiceRolls(escapeHtml(c.damage || '?'));
         attackLine = `
           <div class="dh-stat-block-stats-line">
-            <span class="label">ATK:</span> ${c.atkMod}<span class="separator">|</span><span class="label">${escapeHtml(c.weapon || 'Attack')}:</span> ${c.range || 'Melee'}<span class="separator">|</span>${c.damage || '?'} ${c.dmgType || 'phy'}
+            <span class="label">ATK:</span> ${c.atkMod}<span class="separator">|</span><span class="label">${escapeHtml(c.weapon || 'Attack')}:</span> ${c.range || 'Melee'}<span class="separator">|</span>${damageWithHighlight} ${c.dmgType || 'phy'}
           </div>
         `;
       }
@@ -6781,6 +7409,65 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       const div = document.createElement('div');
       div.textContent = text;
       return div.innerHTML;
+    }
+
+    /**
+     * Calculate dice roll range (min and max)
+     * @param {string} diceNotation - e.g., "2d6+3", "1d8", "3d12-2"
+     * @returns {object} - { min, max, avg }
+     */
+    function calculateDiceRange(diceNotation) {
+      // Pattern: XdY+Z or XdY-Z or just XdY
+      const match = diceNotation.match(/(\d+)d(\d+)([+-]\d+)?/i);
+      if (!match) return null;
+
+      const numDice = parseInt(match[1]);
+      const dieSize = parseInt(match[2]);
+      const modifier = match[3] ? parseInt(match[3]) : 0;
+
+      const min = numDice + modifier; // All 1s
+      const max = (numDice * dieSize) + modifier; // All max
+      const avg = Math.floor((min + max) / 2);
+
+      return { min, max, avg };
+    }
+
+    /**
+     * Highlight dice notation in text with interactive tooltips
+     * @param {string} text - Text containing dice notation
+     * @returns {string} - HTML with highlighted dice rolls
+     */
+    function highlightDiceRolls(text) {
+      if (!text) return '';
+
+      // Pattern to match dice notation: 1d6, 2d8+3, 3d12-2, etc.
+      const dicePattern = /(\d+d\d+(?:[+-]\d+)?)/gi;
+
+      return text.replace(dicePattern, (match) => {
+        const range = calculateDiceRange(match);
+        if (range) {
+          const rangeText = `Range: ${range.min}–${range.max} (avg ${range.avg})`;
+          return `<span class="dice-roll" data-range="${rangeText}">${match}</span>`;
+        }
+        return match;
+      });
+    }
+
+    // Escape for use in JavaScript string literals inside HTML attributes
+    // Must escape for JS first, then HTML-encode for the attribute context
+    function escapeJsString(text) {
+      if (!text) return '';
+      return String(text)
+        // First: escape for JavaScript
+        .replace(/\\/g, '\\\\')
+        .replace(/'/g, "\\'")
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        // Then: HTML-encode special chars for the HTML attribute context
+        .replace(/&/g, '&amp;')
+        .replace(/"/g, '&quot;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
     }
 
     function autoResizeTextarea(textarea) {
@@ -7574,7 +8261,7 @@ Tags: ${c.tags.join(', ')}`;
             <td>
               <div class="admin-actions">
                 <button class="admin-btn" onclick="adminTogglePublish('${c.id}', ${!c.isPublished})">${c.isPublished ? 'Hide' : 'Show'}</button>
-                <button class="admin-btn danger" onclick="adminDeleteConversion('${c.id}', '${escapeHtml(c.name)}')">Delete</button>
+                <button class="admin-btn danger" onclick="adminDeleteConversion('${c.id}', '${escapeJsString(c.name)}')">Delete</button>
               </div>
             </td>
           </tr>
@@ -7693,12 +8380,15 @@ Tags: ${c.tags.join(', ')}`;
 
       try {
         const response = await fetch(`/api/admin/conversions/${id}`, { method: 'DELETE' });
-        if (!response.ok) throw new Error('Failed to delete');
+        if (!response.ok) {
+          const data = await response.json().catch(() => ({}));
+          throw new Error(data.error || 'Failed to delete');
+        }
         showToast('Conversion deleted', 'success');
         loadAdminConversions(adminConversionsPage);
         loadAdminStats();
       } catch (err) {
-        showToast('Failed to delete conversion', 'error');
+        showToast(err.message || 'Failed to delete conversion', 'error');
       }
     }
 
@@ -8388,6 +9078,17 @@ Tags: ${c.tags.join(', ')}`;
 
     function closePrivacyModal() {
       document.getElementById('privacyModal').classList.remove('active');
+    }
+
+    function openFAQModal() {
+      document.getElementById('faqModal').classList.remove('hidden');
+      document.getElementById('faqModal').classList.add('active');
+    }
+
+    function closeFAQModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('faqModal').classList.remove('active');
+      document.getElementById('faqModal').classList.add('hidden');
     }
 
     function toggleUserMenu() {

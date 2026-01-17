@@ -46,6 +46,38 @@ const SUSPICIOUS_PATTERNS = [
   /gore|guro/i,
 ];
 
+// Sanitize name to remove JSON artifacts from improperly pasted data
+function sanitizeName(name) {
+  if (!name || typeof name !== 'string') return name;
+
+  let cleaned = name.trim();
+
+  // Remove common JSON prefixes like 'name": "' or '"name": "'
+  cleaned = cleaned.replace(/^["']?name["']?\s*:\s*["']?/i, '');
+
+  // Remove trailing JSON syntax like '", tier' or '",\n'
+  cleaned = cleaned.replace(/["'],?\s*(tier|type|description|advType|category).*$/i, '');
+
+  // Remove surrounding quotes
+  cleaned = cleaned.replace(/^["']+|["']+$/g, '');
+
+  // Remove trailing commas
+  cleaned = cleaned.replace(/,+$/, '');
+
+  // Remove any remaining JSON-like patterns at start
+  cleaned = cleaned.replace(/^\s*{\s*["']?name["']?\s*:\s*["']?/, '');
+
+  // Final trim
+  cleaned = cleaned.trim();
+
+  // If the cleaned name is empty or too short, return original (better than nothing)
+  if (cleaned.length < 2) {
+    return name.trim();
+  }
+
+  return cleaned;
+}
+
 function moderateContent(data) {
   if (!data) return { passed: true };
 
@@ -366,6 +398,9 @@ app.get('/auth/discord/callback', authLimiter, async (req, res) => {
     let user = db.prepare('SELECT * FROM users WHERE provider = ? AND provider_id = ?')
       .get('discord', discordUser.id);
 
+    // Check if this user should be an admin
+    const shouldBeAdmin = ADMIN_USER_IDS.includes(discordUser.id);
+
     if (!user) {
       const userId = generateUserId();
       const avatarUrl = discordUser.avatar
@@ -373,11 +408,14 @@ app.get('/auth/discord/callback', authLimiter, async (req, res) => {
         : null;
 
       db.prepare(`
-        INSERT INTO users (id, provider, provider_id, username, avatar_url)
-        VALUES (?, ?, ?, ?, ?)
-      `).run(userId, 'discord', discordUser.id, discordUser.username, avatarUrl);
+        INSERT INTO users (id, provider, provider_id, username, avatar_url, is_admin)
+        VALUES (?, ?, ?, ?, ?, ?)
+      `).run(userId, 'discord', discordUser.id, discordUser.username, avatarUrl, shouldBeAdmin ? 1 : 0);
 
       user = { id: userId };
+    } else {
+      // Update admin status on each login in case ADMIN_USER_IDS changed
+      db.prepare('UPDATE users SET is_admin = ? WHERE id = ?').run(shouldBeAdmin ? 1 : 0, user.id);
     }
 
     setAuthCookie(res, user.id);
@@ -592,7 +630,8 @@ app.get('/api/community/conversions/:id', apiLimiter, authenticateToken, (req, r
 
 // Submit new conversion
 app.post('/api/community/conversions', apiLimiter, authenticateToken, requireAuth, (req, res) => {
-  const { name, tier, advType, sourceSystem, data } = req.body;
+  const { tier, advType, sourceSystem, data } = req.body;
+  const name = sanitizeName(req.body.name);
 
   if (!name || !tier || !advType || !data) {
     return res.status(400).json({ error: 'Missing required fields' });
@@ -652,7 +691,8 @@ app.put('/api/community/conversions/:id', apiLimiter, authenticateToken, require
     return res.status(403).json({ error: 'You can only edit your own conversions' });
   }
 
-  const { name, tier, advType, sourceSystem, data } = req.body;
+  const { tier, advType, sourceSystem, data } = req.body;
+  const name = req.body.name ? sanitizeName(req.body.name) : null;
 
   // Content moderation check on updates
   if (data) {
@@ -1089,12 +1129,19 @@ app.delete('/api/admin/conversions/:id', apiLimiter, authenticateToken, requireA
     return res.status(404).json({ error: 'Conversion not found' });
   }
 
-  db.prepare('DELETE FROM votes WHERE conversion_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM conversion_stats WHERE conversion_id = ?').run(req.params.id);
-  db.prepare('DELETE FROM conversions WHERE id = ?').run(req.params.id);
+  try {
+    // Delete in correct order to avoid foreign key issues
+    db.prepare('DELETE FROM reports WHERE conversion_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM votes WHERE conversion_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM conversion_stats WHERE conversion_id = ?').run(req.params.id);
+    db.prepare('DELETE FROM conversions WHERE id = ?').run(req.params.id);
 
-  console.log(`Admin ${req.user.username} deleted conversion ${req.params.id} (${conversion.name})`);
-  res.json({ message: 'Conversion deleted' });
+    console.log(`Admin ${req.user.username} deleted conversion ${req.params.id} (${conversion.name})`);
+    res.json({ message: 'Conversion deleted' });
+  } catch (err) {
+    console.error('Error deleting conversion:', err);
+    res.status(500).json({ error: 'Failed to delete conversion: ' + err.message });
+  }
 });
 
 // Admin toggle publish status
