@@ -9560,7 +9560,7 @@ Tags: ${c.tags.join(', ')}`;
         if (adv.atkMod && adv.atkMod !== '?') {
           attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${adv.atkMod}</span>`;
           if (adv.weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.weapon}: ${adv.range || ''}</span>`;
-          if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.damage}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
+          if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${highlightDiceRolls(adv.damage)}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
         }
 
         return `
@@ -9715,7 +9715,7 @@ Tags: ${c.tags.join(', ')}`;
         if (atkMod && atkMod !== '?') {
           attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${atkMod}</span>`;
           if (adv.weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.weapon}: ${adv.range || ''}</span>`;
-          if (damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${damage}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
+          if (damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${highlightDiceRolls(damage)}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
         }
 
         return `
@@ -10552,7 +10552,7 @@ Tags: ${c.tags.join(', ')}`;
         if (adv.atkMod && adv.atkMod !== '?') {
           attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${adv.atkMod}</span>`;
           if (adv.weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.weapon}: ${adv.range || ''}</span>`;
-          if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.damage}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
+          if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${highlightDiceRolls(adv.damage)}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
         }
 
         return `
@@ -11279,7 +11279,7 @@ Tags: ${c.tags.join(', ')}`;
         if (atkMod && atkMod !== '?') {
           attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${atkMod}</span>`;
           if (weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${weapon}: ${range}</span>`;
-          if (damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${damage}${dmgType ? ' ' + dmgType : ''}</span>`;
+          if (damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${highlightDiceRolls(damage)}${dmgType ? ' ' + dmgType : ''}</span>`;
         }
 
         const cardTypeClass = (conv.advType || 'standard').toLowerCase().trim();
