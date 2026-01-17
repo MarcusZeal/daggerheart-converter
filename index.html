@@ -4897,14 +4897,11 @@ The converter will auto-detect the source system."
                 <button onclick="copyText(); closeCopyMenu()">Plain Text</button>
               </div>
             </div>
-            <button class="btn btn-secondary btn-small" onclick="downloadJSON()" id="downloadBtn" disabled title="Download JSON">
-              <span class="btn-icon-inline">⬇</span> Save
+            <button class="btn btn-secondary btn-small" onclick="downloadJSON()" id="downloadBtn" disabled title="Download JSON file">
+              <span class="btn-icon-inline">⬇</span> Download
             </button>
-            <button class="btn btn-secondary btn-small" onclick="addToLibrary()" id="libraryBtn" disabled title="Add to DM Screen library">
-              <span class="btn-icon-inline">📚</span> Library
-            </button>
-            <button class="btn btn-share btn-small" onclick="shareToCommunity()" id="shareBtn" disabled title="Share to community">
-              <span class="btn-icon-inline">🌐</span> Share
+            <button class="btn btn-share btn-small" onclick="saveAndPublish()" id="saveBtn" disabled title="Save to library and publish to community">
+              <span class="btn-icon-inline">💾</span> Save
             </button>
             <!-- More Actions Dropdown -->
             <div class="action-dropdown">
@@ -4924,6 +4921,8 @@ The converter will auto-detect the source system."
           <button id="groupBtn" class="hidden" disabled></button>
           <button id="printBtn" class="hidden" disabled></button>
           <button id="urlBtn" class="hidden" disabled></button>
+          <button id="libraryBtn" class="hidden" disabled></button>
+          <button id="shareBtn" class="hidden" disabled></button>
         </div>
 
         <div class="tabs" role="tablist">
@@ -5336,6 +5335,7 @@ The converter will auto-detect the source system."
           <button class="btn btn-secondary btn-small" onclick="copyMyLibraryJSON()" title="Copy JSON">Copy JSON</button>
           <button class="btn btn-secondary btn-small" onclick="moveToGroup()" title="Move to different group">Move to Group</button>
           <button class="btn btn-danger btn-small" onclick="removeFromLibrary()" title="Remove from library">Remove</button>
+          <button class="btn btn-danger btn-small hidden" id="deleteFromServerBtn" onclick="deleteFromServer()" title="Delete from community server">Delete from Server</button>
         </div>
       </div>
     </div>
@@ -6292,9 +6292,27 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       document.getElementById('libraryBtn').disabled = false;
       document.getElementById('groupBtn').disabled = false;
       document.getElementById('shareBtn').disabled = false;
+      document.getElementById('saveBtn').disabled = false;
       document.getElementById('moreBtn').disabled = false;
       document.getElementById('printBtn').disabled = false;
       document.getElementById('urlBtn').disabled = false;
+      updateSaveButtonState();
+    }
+
+    function updateSaveButtonState() {
+      const saveBtn = document.getElementById('saveBtn');
+      if (saveBtn) {
+        if (!currentUser) {
+          saveBtn.disabled = true;
+          saveBtn.title = 'Sign in to save and publish';
+        } else if (!currentConverted) {
+          saveBtn.disabled = true;
+          saveBtn.title = 'Convert a stat block first';
+        } else {
+          saveBtn.disabled = false;
+          saveBtn.title = 'Save to library and publish to community';
+        }
+      }
     }
 
     // ==================== RENDER PREVIEW ====================
@@ -7067,8 +7085,9 @@ Tags: ${c.tags.join(', ')}`;
       document.getElementById('overrideTier').value = '';
       document.getElementById('overrideType').value = '';
 
-      ['copyBtn', 'copyDropdownBtn', 'copyMdBtn', 'copyTextBtn', 'downloadBtn', 'libraryBtn', 'groupBtn', 'shareBtn', 'moreBtn', 'printBtn', 'urlBtn'].forEach(id => {
-        document.getElementById(id).disabled = true;
+      ['copyBtn', 'copyDropdownBtn', 'copyMdBtn', 'copyTextBtn', 'downloadBtn', 'libraryBtn', 'groupBtn', 'shareBtn', 'saveBtn', 'moreBtn', 'printBtn', 'urlBtn'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.disabled = true;
       });
 
       document.getElementById('statBlockPreview').innerHTML = `
@@ -7254,12 +7273,8 @@ Tags: ${c.tags.join(', ')}`;
         mySubmissionsBtn.style.display = currentUser ? '' : 'none';
       }
 
-      // Show/hide share button
-      const shareBtn = document.getElementById('shareBtn');
-      if (shareBtn) {
-        shareBtn.disabled = !currentUser;
-        shareBtn.title = currentUser ? 'Share to Community' : 'Sign in to share';
-      }
+      // Update save button state based on login
+      updateSaveButtonState();
 
       // Show/hide admin elements
       const adminNavLink = document.getElementById('adminNavLink');
@@ -8130,6 +8145,14 @@ Tags: ${c.tags.join(', ')}`;
       selectedMyLibraryAdversary = adversary;
       document.getElementById('myLibraryModalTitle').textContent = adversary.name || 'Adversary Details';
       document.getElementById('myLibraryModalStatBlock').innerHTML = renderStatBlockReadOnly(adversary);
+
+      // Show delete from server button only if user is creator and logged in
+      const deleteServerBtn = document.getElementById('deleteFromServerBtn');
+      if (deleteServerBtn) {
+        const canDeleteFromServer = currentUser && adversary._isCreator && adversary._communityId;
+        deleteServerBtn.classList.toggle('hidden', !canDeleteFromServer);
+      }
+
       document.getElementById('myLibraryModal').classList.remove('hidden');
     }
 
@@ -8174,6 +8197,62 @@ Tags: ${c.tags.join(', ')}`;
       closeMyLibraryModal();
       loadMyLibrary();
       showToast('Removed from library', 'info');
+    }
+
+    async function deleteFromServer() {
+      if (!selectedMyLibraryAdversary) return;
+      if (!currentUser) {
+        showToast('Please sign in to delete', 'error');
+        return;
+      }
+
+      const communityId = selectedMyLibraryAdversary._communityId;
+      if (!communityId) {
+        showToast('This monster is not on the server', 'error');
+        return;
+      }
+
+      if (!confirm(`Delete "${selectedMyLibraryAdversary.name}" from the community server? This will remove it for everyone and cannot be undone.`)) {
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/community/conversions/${communityId}`, {
+          method: 'DELETE'
+        });
+
+        if (!response.ok) {
+          const err = await response.json();
+          throw new Error(err.error || 'Failed to delete');
+        }
+
+        // Also remove from local library
+        const advId = selectedMyLibraryAdversary.id;
+        myLibraryGroups.forEach(g => {
+          g.adversaries = (g.adversaries || []).filter(a => a.id !== advId);
+        });
+        saveGroupsToStorage();
+
+        try {
+          let library = getAllLibraryAdversaries().filter(a => a.id !== advId);
+          localStorage.setItem('dh-user-library', JSON.stringify(library));
+        } catch (e) {
+          console.error('Failed to remove from local library:', e);
+        }
+
+        closeMyLibraryModal();
+        loadMyLibrary();
+
+        // Reload community if loaded
+        if (communityLoaded) {
+          communityPage = 1;
+          loadCommunityConversions();
+        }
+
+        showToast('Deleted from server', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
     }
 
     // ==================== ADD TO GROUP MODAL ====================
@@ -8843,7 +8922,11 @@ Tags: ${c.tags.join(', ')}`;
 
       try {
         const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
-        const data = { ...selectedConversion.data, _userCreated: true };
+        const data = {
+          ...selectedConversion.data,
+          _communityId: selectedConversion.id,
+          _isCreator: selectedConversion.isOwner || false
+        };
 
         const existing = existingLibrary.findIndex(item => item.id === data.id);
         if (existing >= 0) {
@@ -8866,7 +8949,11 @@ Tags: ${c.tags.join(', ')}`;
 
       try {
         const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
-        const data = { ...conv.data, _userCreated: true };
+        const data = {
+          ...conv.data,
+          _communityId: conv.id,
+          _isCreator: conv.isOwner || false
+        };
 
         const existingIdx = existingLibrary.findIndex(item => item.id === data.id);
         if (existingIdx >= 0) {
@@ -9058,19 +9145,20 @@ Tags: ${c.tags.join(', ')}`;
       }
     });
 
-    // ==================== SHARE TO COMMUNITY ====================
-    async function shareToCommunity() {
+    // ==================== SAVE AND PUBLISH ====================
+    async function saveAndPublish() {
       if (!currentUser) {
-        showToast('Please log in to share conversions', 'info');
+        showToast('Please sign in to save and publish', 'info');
         return;
       }
 
       if (!currentConverted) {
-        showToast('Nothing to share. Convert a stat block first.', 'error');
+        showToast('Nothing to save. Convert a stat block first.', 'error');
         return;
       }
 
       try {
+        // Publish to community
         const response = await fetch('/api/community/conversions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -9085,27 +9173,27 @@ Tags: ${c.tags.join(', ')}`;
 
         if (!response.ok) {
           const err = await response.json();
-          throw new Error(err.error || 'Failed to share');
+          throw new Error(err.error || 'Failed to save');
         }
 
-        showToast('Shared to community library!', 'success');
+        const result = await response.json();
+        const communityId = result.id;
 
-        // Also add to user's local library automatically
-        try {
-          const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
-          const exportObj = getExportObject();
-          exportObj._userCreated = true;
+        // Save to local library with creator info
+        const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+        const exportObj = getExportObject();
+        exportObj._communityId = communityId;
+        exportObj._isCreator = true;
 
-          const existingIdx = existingLibrary.findIndex(item => item.id === exportObj.id);
-          if (existingIdx >= 0) {
-            existingLibrary[existingIdx] = exportObj;
-          } else {
-            existingLibrary.push(exportObj);
-          }
-          localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
-        } catch (e) {
-          console.error('Auto-save to library failed:', e);
+        const existingIdx = existingLibrary.findIndex(item => item.id === exportObj.id);
+        if (existingIdx >= 0) {
+          existingLibrary[existingIdx] = exportObj;
+        } else {
+          existingLibrary.push(exportObj);
         }
+        localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+
+        showToast('Saved and published!', 'success');
 
         // Reload if on community tab
         if (communityLoaded) {
@@ -9116,6 +9204,11 @@ Tags: ${c.tags.join(', ')}`;
       } catch (err) {
         showToast(err.message, 'error');
       }
+    }
+
+    // Legacy function for backwards compatibility
+    async function shareToCommunity() {
+      return saveAndPublish();
     }
 
     // Close modals on Escape key
