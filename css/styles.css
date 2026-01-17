@@ -6071,7 +6071,6 @@ textarea::placeholder {
 }
 
 .pool-label.fear { color: #ef4444; }
-.pool-label.hope { color: #22c55e; }
 
 .pool-controls {
   display: flex;
@@ -6106,7 +6105,6 @@ textarea::placeholder {
 }
 
 .pool-value.fear { color: #ef4444; }
-.pool-value.hope { color: #22c55e; }
 
 .combat-actions {
   display: flex;
@@ -6474,8 +6472,8 @@ textarea::placeholder {
   border-left-color: #ef4444;
 }
 
-.log-entry.hope {
-  border-left-color: #22c55e;
+.log-entry.stress {
+  border-left-color: var(--accent);
 }
 
 .log-entry-time {

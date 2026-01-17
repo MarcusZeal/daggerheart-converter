@@ -2219,8 +2219,7 @@ let combatState = {
   active: false,
   encounterName: '',
   fear: 0,
-  hope: 0,
-  adversaries: [], // [{id, name, advType, maxHp, currentDamage, maxStress, currentStress, conditions, notes, defeated}]
+  adversaries: [], // [{id, name, advType, maxHp, currentDamage, maxStress, stressTaken, conditions, notes, defeated}]
   party: [], // [{name, hp, stress, armor}]
   log: [],
   undoStack: []
@@ -2237,7 +2236,6 @@ function startCombat() {
   combatState.active = true;
   combatState.encounterName = encounterState.name || 'Unnamed Encounter';
   combatState.fear = 0;
-  combatState.hope = 0;
   combatState.adversaries = [];
   combatState.log = [];
   combatState.undoStack = [];
@@ -2556,7 +2554,7 @@ function updateCombatNotes(advId, notes) {
   saveCombatState();
 }
 
-// Fear/Hope pools
+// Fear pool (GM resource)
 function adjustFear(amount) {
   saveUndoState();
   combatState.fear = Math.max(0, combatState.fear + amount);
@@ -2565,17 +2563,8 @@ function adjustFear(amount) {
   saveCombatState();
 }
 
-function adjustHope(amount) {
-  saveUndoState();
-  combatState.hope = Math.max(0, combatState.hope + amount);
-  updateCombatPools();
-  addCombatLog(`Hope ${amount > 0 ? 'gained' : 'spent'}: now ${combatState.hope}`, 'hope');
-  saveCombatState();
-}
-
 function updateCombatPools() {
   document.getElementById('fear-value').textContent = combatState.fear;
-  document.getElementById('hope-value').textContent = combatState.hope;
 }
 
 // Dice roller
@@ -2697,7 +2686,6 @@ function clearCombatLog() {
 function saveUndoState() {
   const state = JSON.stringify({
     fear: combatState.fear,
-    hope: combatState.hope,
     adversaries: combatState.adversaries.map(a => ({...a, conditions: [...a.conditions]}))
   });
   combatState.undoStack.push(state);
@@ -2712,7 +2700,6 @@ function undoCombatAction() {
 
   const state = JSON.parse(combatState.undoStack.pop());
   combatState.fear = state.fear;
-  combatState.hope = state.hope;
   combatState.adversaries = state.adversaries;
 
   addCombatLog('Action undone', 'info');
@@ -2766,8 +2753,7 @@ function exportCombatSummary() {
   summary += `## Results\n`;
   summary += `- Adversaries Defeated: ${defeated}\n`;
   summary += `- Adversaries Remaining: ${remaining}\n`;
-  summary += `- Final Fear: ${combatState.fear}\n`;
-  summary += `- Final Hope: ${combatState.hope}\n\n`;
+  summary += `- Final Fear: ${combatState.fear}\n\n`;
 
   summary += `## Adversary Status\n`;
   combatState.adversaries.forEach(adv => {
