@@ -5275,23 +5275,33 @@ function updateModalSaveStar() {
 function toggleModalLibrarySave() {
   if (!selectedConversion?.data) return;
 
-  const inLibrary = isInLibrary(selectedConversion.data.id);
+  try {
+    const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+    const data = {
+      ...selectedConversion.data,
+      _communityId: selectedConversion.id,
+      _isCreator: selectedConversion.isOwner || false
+    };
 
-  if (inLibrary) {
-    // Remove from library
-    myLibrary = myLibrary.filter(item => item.id !== selectedConversion.data.id);
-    saveLibraryToStorage();
-    showToast('Removed from library', 'info');
-  } else {
-    // Add to library
-    myLibrary.push(selectedConversion.data);
-    saveLibraryToStorage();
-    showToast('Added to library!', 'success');
+    const existingIdx = existingLibrary.findIndex(item => item.id === data.id);
+    if (existingIdx >= 0) {
+      // Already in library - remove it
+      existingLibrary.splice(existingIdx, 1);
+      localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+      showToast('Removed from library', 'info');
+    } else {
+      // Add to library
+      existingLibrary.push(data);
+      localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+      showToast('Saved to library!', 'success');
+    }
+
+    updateModalSaveStar();
+    renderCommunityList(); // Update star states in the list
+    loadMyLibrary(); // Refresh library view if visible
+  } catch (err) {
+    showToast('Could not save: ' + err.message, 'error');
   }
-
-  updateModalSaveStar();
-  renderCommunityList(); // Update star states in the list
-  renderMyLibrary(); // Update library view if visible
 }
 
 async function deleteMyConversion() {
