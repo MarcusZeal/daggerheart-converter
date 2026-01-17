@@ -2291,6 +2291,107 @@
       color: var(--accent);
     }
 
+    .image-input-row {
+      display: flex;
+      gap: 0.5rem;
+      align-items: center;
+      margin-bottom: 0.5rem;
+    }
+
+    .image-input-row .image-url-input {
+      flex: 1;
+      margin-bottom: 0;
+    }
+
+    .image-upload-btn {
+      padding: 0.4rem 0.75rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      color: var(--text-primary);
+      cursor: pointer;
+      font-size: 0.85rem;
+      white-space: nowrap;
+      transition: all 0.2s;
+    }
+
+    .image-upload-btn:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    .image-upload-input {
+      display: none;
+    }
+
+    .image-hint {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .image-hint-icon {
+      position: relative;
+      cursor: help;
+      width: 14px;
+      height: 14px;
+      border: 1px solid var(--text-secondary);
+      border-radius: 50%;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.65rem;
+      font-weight: bold;
+    }
+
+    .image-hint-icon:hover .image-tooltip {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    .image-tooltip {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      font-size: 0.75rem;
+      font-weight: normal;
+      color: var(--text-primary);
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.2s;
+      z-index: 100;
+    }
+
+    .image-tooltip::after {
+      content: '';
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      border: 6px solid transparent;
+      border-top-color: var(--border);
+    }
+
+    .image-tooltip a {
+      color: var(--accent);
+      text-decoration: underline;
+    }
+
+    .image-processing {
+      font-size: 0.8rem;
+      color: var(--accent);
+      margin-top: 0.25rem;
+    }
+
     /* Collapsible sections */
     .collapsible {
       border-top: 1px solid var(--border);
@@ -5738,11 +5839,25 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
 
         <div class="stat-block-image-section">
           ${imageHTML}
-          <input type="url" id="imageUrlInput" class="image-url-input"
-                 placeholder="Paste image URL here (optional)"
-                 value="${c.imageUrl ? escapeHtml(c.imageUrl) : ''}"
-                 onchange="updateImageUrl(this.value)"
-                 aria-label="Image URL">
+          <div class="image-input-row">
+            <input type="url" id="imageUrlInput" class="image-url-input"
+                   placeholder="Paste image URL or upload file"
+                   value="${c.imageUrl ? escapeHtml(c.imageUrl) : ''}"
+                   onchange="updateImageUrl(this.value)"
+                   aria-label="Image URL">
+            <label class="image-upload-btn" for="imageFileInput">Upload</label>
+            <input type="file" id="imageFileInput" class="image-upload-input"
+                   accept="image/*" onchange="handleImageUpload(this)">
+          </div>
+          <div class="image-hint">
+            Max 1MB. Auto-resized to 600px wide, converted to WebP.
+            <span class="image-hint-icon">?
+              <span class="image-tooltip">
+                Large image? Try <a href="https://squoosh.app" target="_blank" rel="noopener">Squoosh.app</a> to compress it first.
+              </span>
+            </span>
+          </div>
+          <div id="imageProcessing" class="image-processing" style="display: none;">Processing image...</div>
         </div>
 
         <div class="stat-block-desc">${escapeHtml(c.description)}</div>
@@ -5966,6 +6081,84 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
         renderJSON();
         renderMarkdown();
         renderText();
+      }
+    }
+
+    async function handleImageUpload(input) {
+      const file = input.files?.[0];
+      if (!file) return;
+
+      const MAX_SIZE = 1 * 1024 * 1024; // 1MB
+      const TARGET_WIDTH = 600;
+
+      // Check file size
+      if (file.size > MAX_SIZE) {
+        showToast('Image too large. Max size is 1MB. Try compressing it with Squoosh.app', 'error');
+        input.value = '';
+        return;
+      }
+
+      const processingEl = document.getElementById('imageProcessing');
+      if (processingEl) processingEl.style.display = 'block';
+
+      try {
+        // Read file as data URL
+        const dataUrl = await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+
+        // Load image
+        const img = await new Promise((resolve, reject) => {
+          const image = new Image();
+          image.onload = () => resolve(image);
+          image.onerror = reject;
+          image.src = dataUrl;
+        });
+
+        // Calculate new dimensions (resize to 600px wide, maintain aspect ratio)
+        let width = img.width;
+        let height = img.height;
+
+        if (width > TARGET_WIDTH) {
+          height = Math.round((height * TARGET_WIDTH) / width);
+          width = TARGET_WIDTH;
+        }
+
+        // Create canvas and draw resized image
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Convert to WebP
+        const webpDataUrl = canvas.toDataURL('image/webp', 0.85);
+
+        // Check final size
+        const base64Length = webpDataUrl.length - 'data:image/webp;base64,'.length;
+        const finalSize = Math.ceil(base64Length * 0.75);
+
+        if (finalSize > MAX_SIZE) {
+          showToast('Processed image still too large. Try a smaller image or use Squoosh.app', 'error');
+          input.value = '';
+          return;
+        }
+
+        // Update the image URL input and save
+        document.getElementById('imageUrlInput').value = webpDataUrl;
+        updateImageUrl(webpDataUrl);
+
+        const sizeKB = Math.round(finalSize / 1024);
+        showToast(`Image uploaded: ${width}x${height}, ${sizeKB}KB`, 'success');
+
+      } catch (err) {
+        showToast('Failed to process image: ' + err.message, 'error');
+      } finally {
+        if (processingEl) processingEl.style.display = 'none';
+        input.value = ''; // Reset input for future uploads
       }
     }
 
