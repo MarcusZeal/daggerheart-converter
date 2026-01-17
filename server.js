@@ -113,6 +113,31 @@ app.set('trust proxy', 1);
 app.use(express.json());
 app.use(cookieParser());
 
+// Security headers
+app.use((req, res, next) => {
+  // Content Security Policy
+  res.setHeader('Content-Security-Policy', [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline'",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' data: https://cdn.discordapp.com",
+    "font-src 'self'",
+    "connect-src 'self'",
+    "frame-ancestors 'none'",
+    "base-uri 'self'",
+    "form-action 'self'"
+  ].join('; '));
+
+  // Other security headers
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  res.setHeader('X-Frame-Options', 'DENY');
+  res.setHeader('X-XSS-Protection', '1; mode=block');
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
+
+  next();
+});
+
 // Rate limiting
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
@@ -323,14 +348,30 @@ app.get('/api/community/conversions', apiLimiter, authenticateToken, (req, res) 
     params.push(`%${search}%`);
   }
 
+  // Handle multiple tiers (comma-separated) with OR logic
   if (tier) {
-    whereClause += ' AND c.tier = ?';
-    params.push(tier);
+    const tiers = tier.split(',').map(t => t.trim()).filter(t => t);
+    if (tiers.length === 1) {
+      whereClause += ' AND c.tier = ?';
+      params.push(tiers[0]);
+    } else if (tiers.length > 1) {
+      const placeholders = tiers.map(() => '?').join(', ');
+      whereClause += ` AND c.tier IN (${placeholders})`;
+      params.push(...tiers);
+    }
   }
 
+  // Handle multiple types (comma-separated) with OR logic
   if (type) {
-    whereClause += ' AND c.adv_type = ?';
-    params.push(type);
+    const types = type.split(',').map(t => t.trim()).filter(t => t);
+    if (types.length === 1) {
+      whereClause += ' AND c.adv_type = ?';
+      params.push(types[0]);
+    } else if (types.length > 1) {
+      const placeholders = types.map(() => '?').join(', ');
+      whereClause += ` AND c.adv_type IN (${placeholders})`;
+      params.push(...types);
+    }
   }
 
   let orderBy = 'cs.score DESC, c.created_at DESC';

@@ -12,6 +12,7 @@
       --text-primary: #e4e4e7;
       --text-secondary: #c4c4cc;
       --accent: #c9a227;
+      --accent-rgb: 201, 162, 39;
       --accent-hover: #e4b82e;
       --accent-secondary: #6366f1;
       --accent-secondary-hover: #818cf8;
@@ -27,11 +28,12 @@
     :root.light-mode {
       --bg-dark: #f5f5f7;
       --bg-card: #ffffff;
-      --bg-input: #e8e8ed;
+      --bg-input: #f0f0f5;
       --text-primary: #1a1a2e;
-      --text-secondary: #52525b;
-      --border: #d4d4d8;
+      --text-secondary: #64748b;
+      --border: #e2e8f0;
       --focus-ring: 0 0 0 2px var(--bg-card), 0 0 0 4px var(--accent);
+      --card-shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.06);
     }
 
     :root.light-mode .json-output {
@@ -40,6 +42,27 @@
 
     :root.light-mode .stat-block {
       background: var(--bg-card);
+      box-shadow: var(--card-shadow);
+    }
+
+    :root.light-mode .panel {
+      box-shadow: var(--card-shadow);
+    }
+
+    :root.light-mode .community-item {
+      box-shadow: var(--card-shadow);
+    }
+
+    :root.light-mode .stat-card {
+      box-shadow: var(--card-shadow);
+    }
+
+    :root.light-mode .dropdown-menu {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    :root.light-mode .navbar {
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
     }
 
     * {
@@ -226,6 +249,99 @@
       color: var(--text-secondary);
     }
 
+    /* Keyboard Shortcuts Modal */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 1rem;
+    }
+
+    .modal-overlay.hidden {
+      display: none;
+    }
+
+    .keyboard-modal {
+      background: var(--bg-card);
+      border-radius: 12px;
+      width: 100%;
+      max-width: 450px;
+      max-height: 90vh;
+      overflow: auto;
+    }
+
+    .keyboard-modal .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.25rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .keyboard-modal .modal-header h2 {
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    .keyboard-modal .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 1.5rem;
+      cursor: pointer;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .keyboard-modal .modal-close:hover {
+      color: var(--text-primary);
+    }
+
+    .keyboard-modal .modal-body {
+      padding: 1.5rem;
+    }
+
+    .shortcut-section {
+      margin-bottom: 1.5rem;
+    }
+
+    .shortcut-section:last-child {
+      margin-bottom: 0;
+    }
+
+    .shortcut-section h3 {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.75rem;
+    }
+
+    .shortcut-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.5rem 0;
+    }
+
+    .shortcut-row kbd {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 0.2rem 0.5rem;
+      font-family: inherit;
+      font-size: 0.85rem;
+      margin-right: 0.25rem;
+    }
+
+    .shortcut-row span {
+      color: var(--text-secondary);
+    }
+
     .btn-sso {
       display: flex;
       align-items: center;
@@ -328,7 +444,7 @@
     }
 
     .stat-value {
-      font-size: 2rem;
+      font-size: 1.75rem;
       font-weight: 700;
       color: var(--accent);
       line-height: 1;
@@ -336,8 +452,10 @@
     }
 
     .stat-label {
-      font-size: 0.85rem;
+      font-size: 0.8rem;
       color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
     }
 
     .admin-tabs {
@@ -1327,9 +1445,11 @@
     }
 
     .panel-title {
-      font-size: 1.1rem;
+      font-size: 0.9rem;
       font-weight: 600;
-      color: var(--accent);
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     /* Focus indicators for accessibility */
@@ -1448,6 +1568,13 @@
       background: #16a34a;
     }
 
+    .btn.copied {
+      background: var(--success) !important;
+      color: white !important;
+      transform: scale(1.05);
+      transition: all 0.2s ease;
+    }
+
     .btn-small {
       padding: 0.4rem 0.8rem;
       font-size: 0.8rem;
@@ -1469,6 +1596,87 @@
       display: flex;
       gap: 0.5rem;
       flex-wrap: wrap;
+    }
+
+    /* Action Dropdowns */
+    .output-actions {
+      align-items: center;
+    }
+
+    .action-dropdown {
+      position: relative;
+      display: flex;
+    }
+
+    .action-dropdown .btn:first-child {
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    .action-dropdown .dropdown-toggle {
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+      padding: 0.4rem 0.5rem;
+      margin-left: -1px;
+      min-width: unset;
+    }
+
+    .dropdown-menu {
+      position: absolute;
+      top: 100%;
+      left: 0;
+      margin-top: 4px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      z-index: 100;
+      min-width: 140px;
+      display: none;
+    }
+
+    .dropdown-menu.show {
+      display: block;
+    }
+
+    .dropdown-menu-right {
+      left: auto;
+      right: 0;
+    }
+
+    .dropdown-menu button {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      width: 100%;
+      padding: 0.6rem 1rem;
+      background: none;
+      border: none;
+      color: var(--text-primary);
+      font-size: 0.85rem;
+      cursor: pointer;
+      text-align: left;
+      transition: background 0.15s;
+    }
+
+    .dropdown-menu button:hover {
+      background: var(--bg-input);
+    }
+
+    .dropdown-menu button:first-child {
+      border-radius: 6px 6px 0 0;
+    }
+
+    .dropdown-menu button:last-child {
+      border-radius: 0 0 6px 6px;
+    }
+
+    .dropdown-menu button span {
+      font-size: 1rem;
+    }
+
+    .btn-icon-inline {
+      font-size: 0.9rem;
     }
 
     .form-group {
@@ -1733,6 +1941,182 @@
       font-family: 'Segoe UI', sans-serif;
     }
 
+    .parser-error {
+      background: var(--bg-input);
+      border: 2px solid var(--error);
+      border-radius: 8px;
+      padding: 1.5rem;
+    }
+
+    .parser-error h3 {
+      color: var(--error);
+      margin-bottom: 1rem;
+    }
+
+    .parser-error h4 {
+      color: var(--text-primary);
+      margin: 1rem 0 0.5rem;
+      font-size: 0.95rem;
+    }
+
+    .parser-error p {
+      margin-bottom: 0.5rem;
+    }
+
+    .parser-error ul {
+      margin-left: 1.5rem;
+      color: var(--text-secondary);
+    }
+
+    .parser-error li {
+      margin-bottom: 0.25rem;
+    }
+
+    /* Daggerheart Rulebook-Style Stat Block (Modal) */
+    .dh-stat-block {
+      background: #f5f0e6;
+      border: 2px solid #2d2d2d;
+      border-radius: 4px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      color: #2d2d2d;
+      overflow: hidden;
+    }
+
+    .dh-stat-block-header {
+      background: #2d2d2d;
+      color: #fff;
+      padding: 1rem 1.25rem;
+    }
+
+    .dh-stat-block-name {
+      font-size: 1.5rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.2rem;
+    }
+
+    .dh-stat-block-tier {
+      font-size: 0.9rem;
+      color: #ccc;
+      font-weight: 500;
+    }
+
+    .dh-stat-block-body {
+      padding: 1rem 1.25rem;
+    }
+
+    .dh-stat-block-desc {
+      font-style: italic;
+      color: #444;
+      margin-bottom: 0.75rem;
+      line-height: 1.5;
+    }
+
+    .dh-stat-block-motives {
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+    }
+
+    .dh-stat-block-motives strong {
+      font-weight: 600;
+    }
+
+    .dh-stat-block-stats-line {
+      font-size: 0.9rem;
+      margin-bottom: 0.4rem;
+      line-height: 1.4;
+    }
+
+    .dh-stat-block-stats-line .label {
+      font-weight: 600;
+    }
+
+    .dh-stat-block-stats-line .separator {
+      color: #888;
+      margin: 0 0.4rem;
+    }
+
+    .dh-stat-block-experience {
+      font-size: 0.9rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .dh-stat-block-experience strong {
+      font-weight: 600;
+    }
+
+    .dh-stat-block-features {
+      border-top: 2px solid #2d2d2d;
+      margin-top: 1rem;
+      padding-top: 1rem;
+    }
+
+    .dh-stat-block-features-title {
+      font-size: 1rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 0.75rem;
+      color: #2d2d2d;
+    }
+
+    .dh-stat-block-feature {
+      margin-bottom: 0.75rem;
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .dh-stat-block-feature:last-child {
+      margin-bottom: 0;
+    }
+
+    .dh-stat-block-feature-name {
+      font-weight: 700;
+    }
+
+    .dh-stat-block-feature-type {
+      font-weight: 600;
+      font-style: italic;
+    }
+
+    .dh-stat-block-feature-type.action {
+      color: #b45309;
+    }
+
+    .dh-stat-block-feature-type.reaction {
+      color: #7c3aed;
+    }
+
+    .dh-stat-block-feature-type.passive {
+      color: #059669;
+    }
+
+    .dh-stat-block-image {
+      max-width: 180px;
+      float: right;
+      margin: 0 0 1rem 1rem;
+      border-radius: 4px;
+      border: 1px solid #d4cfc3;
+    }
+
+    .dh-stat-block-tags {
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid #d4cfc3;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+
+    .dh-stat-block-tag {
+      font-size: 0.75rem;
+      padding: 0.2rem 0.5rem;
+      background: rgba(0,0,0,0.08);
+      border-radius: 3px;
+      color: #555;
+    }
+
+    /* Legacy classes for backwards compatibility */
     .stat-block-header {
       border-bottom: 2px solid var(--accent);
       padding-bottom: 0.75rem;
@@ -1949,18 +2333,25 @@
 
     /* Features Section */
     .features-section {
-      padding-top: 0.5rem;
+      padding-top: 1rem;
+      margin-top: 0.5rem;
     }
 
     .feature {
-      margin-bottom: 0.75rem;
-      padding: 0.5rem;
-      border-radius: 4px;
+      margin-bottom: 1rem;
+      padding: 0.75rem;
+      border-radius: 6px;
       transition: background 0.2s;
+      border-left: 3px solid transparent;
     }
 
     .feature:hover {
       background: rgba(201, 162, 39, 0.05);
+      border-left-color: var(--accent);
+    }
+
+    .feature:last-child {
+      margin-bottom: 0;
     }
 
     .feature-header {
@@ -1968,6 +2359,7 @@
       align-items: center;
       gap: 0.5rem;
       flex-wrap: wrap;
+      margin-bottom: 0.35rem;
     }
 
     .feature-name-input {
@@ -2411,13 +2803,26 @@
     .empty-state {
       text-align: center;
       color: var(--text-secondary);
-      padding: 3rem;
+      padding: 3rem 2rem;
+      background: linear-gradient(135deg, rgba(201, 162, 39, 0.03) 0%, transparent 50%);
+      border-radius: 8px;
+      border: 1px dashed var(--border);
     }
 
     .empty-state-icon {
-      font-size: 3rem;
+      font-size: 3.5rem;
       margin-bottom: 1rem;
-      opacity: 0.5;
+      opacity: 0.6;
+      display: inline-block;
+    }
+
+    .empty-state p, .empty-state div {
+      line-height: 1.6;
+    }
+
+    .empty-state kbd {
+      background: var(--bg-card);
+      padding: 0.2rem 0.5rem;
     }
 
     .pulse {
@@ -2427,6 +2832,57 @@
     @keyframes pulse {
       0%, 100% { opacity: 1; }
       50% { opacity: 0.5; }
+    }
+
+    /* Skeleton Loading */
+    .skeleton {
+      background: linear-gradient(90deg, var(--bg-input) 25%, var(--bg-card) 50%, var(--bg-input) 75%);
+      background-size: 200% 100%;
+      animation: skeleton-loading 1.5s infinite;
+      border-radius: 4px;
+    }
+
+    @keyframes skeleton-loading {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
+    }
+
+    .skeleton-card {
+      padding: 1.25rem;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+    }
+
+    .skeleton-title {
+      height: 1.1rem;
+      width: 60%;
+      margin-bottom: 0.75rem;
+    }
+
+    .skeleton-text {
+      height: 0.85rem;
+      width: 80%;
+      margin-bottom: 0.5rem;
+    }
+
+    .skeleton-text-short {
+      height: 0.85rem;
+      width: 40%;
+    }
+
+    .skeleton-tags {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.75rem;
+      padding-top: 0.5rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .skeleton-tag {
+      height: 1.5rem;
+      width: 3rem;
+      border-radius: 4px;
     }
 
     .draft-indicator {
@@ -2572,7 +3028,7 @@
       }
     }
 
-    /* Screen reader only */
+    /* Screen reader only - becomes visible on focus for skip link */
     .sr-only {
       position: absolute;
       width: 1px;
@@ -2583,6 +3039,25 @@
       clip: rect(0, 0, 0, 0);
       white-space: nowrap;
       border: 0;
+    }
+
+    .sr-only:focus {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: auto;
+      height: auto;
+      padding: 1rem 1.5rem;
+      margin: 0;
+      overflow: visible;
+      clip: auto;
+      white-space: normal;
+      background: var(--accent);
+      color: var(--bg-dark);
+      font-weight: 600;
+      z-index: 9999;
+      text-decoration: none;
+      border-radius: 0 0 8px 0;
     }
 
     /* Auth UI */
@@ -2763,136 +3238,158 @@
       gap: 1rem;
     }
 
+    /* Daggerheart Rulebook-Style Cards */
     .community-item {
       display: flex;
       flex-direction: column;
-      padding: 1rem;
-      background: var(--bg-input);
-      border: 1px solid var(--border);
-      border-radius: 8px;
+      background: #f5f0e6;
+      border: 2px solid #2d2d2d;
+      border-radius: 4px;
       cursor: pointer;
       transition: all 0.2s;
-      gap: 0.5rem;
       position: relative;
+      overflow: hidden;
+      font-family: 'Segoe UI', system-ui, sans-serif;
     }
 
     .community-item:hover {
-      border-color: var(--accent);
-      box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+      border-color: #1a1a1a;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
       transform: translateY(-2px);
     }
 
-    .community-item-main {
-      flex: 1;
-      min-width: 0;
+    /* Dark header section */
+    .dh-card-header {
+      background: #2d2d2d;
+      color: #fff;
+      padding: 0.75rem 1rem;
+      padding-right: 3.5rem;
     }
 
-    .community-item-header {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      margin-bottom: 0.35rem;
-      padding-right: 36px;
+    .dh-card-name {
+      font-weight: 700;
+      font-size: 1.1rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 0.15rem;
     }
 
-    .community-item-name {
-      font-weight: 600;
-      font-size: 1rem;
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-
-    .community-item-source {
-      font-size: 0.7rem;
-      padding: 0.1rem 0.4rem;
-      border-radius: 3px;
-      background: var(--accent);
-      color: var(--bg-dark);
+    .dh-card-tier-type {
+      font-size: 0.8rem;
+      color: #ccc;
       font-weight: 500;
-      white-space: nowrap;
     }
 
-    .community-item-stats {
-      display: flex;
-      gap: 1rem;
+    /* Card body - stats section */
+    .dh-card-body {
+      padding: 0.75rem 1rem;
+      color: #2d2d2d;
+      font-size: 0.85rem;
+      line-height: 1.4;
+      border-bottom: 1px solid #d4cfc3;
+    }
+
+    .dh-card-description {
+      font-style: italic;
+      color: #444;
+      margin-bottom: 0.5rem;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .dh-card-motives {
       font-size: 0.8rem;
-      color: var(--text-secondary);
-      margin-bottom: 0.35rem;
-      flex-wrap: wrap;
+      color: #555;
+      margin-bottom: 0.5rem;
     }
 
-    .community-item-stat {
-      display: flex;
-      align-items: center;
-      gap: 0.25rem;
+    .dh-card-motives strong {
+      color: #2d2d2d;
     }
 
-    .community-item-stat strong {
-      color: var(--text-primary);
-    }
-
-    .community-item-meta {
-      display: flex;
-      gap: 0.5rem;
+    .dh-card-stats {
       font-size: 0.8rem;
-      color: var(--text-secondary);
-      flex-wrap: wrap;
-      align-items: center;
+      color: #2d2d2d;
     }
 
-    .community-item-tag {
-      background: var(--bg-dark);
-      padding: 0.15rem 0.4rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
+    .dh-card-stats-row {
+      margin-bottom: 0.25rem;
     }
 
-    .community-item-tag.tier {
-      background: var(--accent);
-      color: var(--bg-dark);
+    .dh-card-stats-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .dh-stat-label {
       font-weight: 600;
     }
 
-    .community-item-author {
-      display: flex;
-      align-items: center;
-      gap: 0.35rem;
+    .dh-stat-separator {
+      color: #888;
+      margin: 0 0.35rem;
     }
 
-    .community-item-author img {
+    /* Card footer - author info */
+    .dh-card-footer {
+      padding: 0.5rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #ebe6da;
+      font-size: 0.75rem;
+      color: #666;
+    }
+
+    .dh-card-author {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+
+    .dh-card-author img {
       width: 18px;
       height: 18px;
       border-radius: 50%;
     }
 
-    .community-item-votes {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.25rem;
-      padding: 0.5rem;
-      min-width: 50px;
+    .dh-card-source {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      background: rgba(0,0,0,0.08);
+      color: #555;
     }
 
-    .community-item-actions {
+    /* Voting buttons */
+    .community-item-votes {
       position: absolute;
       top: 0.5rem;
       right: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.15rem;
+      background: rgba(255,255,255,0.95);
+      border-radius: 4px;
+      padding: 0.3rem;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
 
     .share-link-btn {
+      position: absolute;
+      bottom: 0.5rem;
+      right: 0.5rem;
       background: transparent;
       border: none;
       border-radius: 4px;
       cursor: pointer;
-      color: var(--text-secondary);
+      color: #888;
       padding: 0.2rem 0.35rem;
       font-size: 0.75rem;
-      opacity: 0.5;
+      opacity: 0.6;
       transition: all 0.2s;
-      margin-left: 0;
-      flex-shrink: 0;
     }
 
     .share-link-btn:hover {
@@ -2928,39 +3425,125 @@
       border-color: var(--accent);
     }
 
+    /* Filter Select Buttons (replaces dropdowns) */
+    .filter-select-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0.75rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text-primary);
+      transition: all 0.2s;
+      min-width: 120px;
+    }
+
+    .filter-select-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .filter-select-btn.has-selection {
+      border-color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.1);
+    }
+
+    .filter-arrow {
+      margin-left: auto;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    /* Filter Modal Styles */
+    .filter-modal {
+      max-width: 320px;
+      width: 90%;
+    }
+
+    .filter-options {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .filter-option {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .filter-option:hover {
+      border-color: var(--accent);
+    }
+
+    .filter-option.selected {
+      border-color: var(--accent);
+      background: rgba(var(--accent-rgb), 0.1);
+    }
+
+    .filter-option input[type="checkbox"] {
+      width: 18px;
+      height: 18px;
+      accent-color: var(--accent);
+      cursor: pointer;
+    }
+
+    .filter-option label {
+      flex: 1;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+
+    .filter-modal-footer {
+      display: flex;
+      justify-content: space-between;
+      gap: 0.5rem;
+    }
+
     .vote-btn {
       background: none;
       border: none;
       cursor: pointer;
-      padding: 0.25rem;
-      color: var(--text-secondary);
+      padding: 0.2rem;
+      color: #888;
       transition: color 0.2s;
-      font-size: 1.1rem;
+      font-size: 0.9rem;
+      line-height: 1;
     }
 
     .vote-btn:hover {
-      color: var(--accent);
+      color: #c9a227;
     }
 
     .vote-btn.active.upvote {
-      color: var(--success);
+      color: #22c55e;
     }
 
     .vote-btn.active.downvote {
-      color: var(--error);
+      color: #ef4444;
     }
 
     .vote-score {
-      font-weight: bold;
-      font-size: 1rem;
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: #333;
+      line-height: 1;
     }
 
     .vote-score.positive {
-      color: var(--success);
+      color: #22c55e;
     }
 
     .vote-score.negative {
-      color: var(--error);
+      color: #ef4444;
     }
 
     .community-empty {
@@ -3412,6 +3995,55 @@
     </div>
   </div>
 
+  <!-- Keyboard Shortcuts Modal -->
+  <div id="keyboardModal" class="modal-overlay hidden" onclick="closeKeyboardModal(event)">
+    <div class="modal-content keyboard-modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Keyboard Shortcuts</h2>
+        <button class="modal-close" onclick="closeKeyboardModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="shortcut-section">
+          <h3>Converter</h3>
+          <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>Enter</kbd><span>Convert stat block</span></div>
+          <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd><span>Copy JSON</span></div>
+          <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>Z</kbd><span>Undo</span></div>
+          <div class="shortcut-row"><kbd>Ctrl</kbd>+<kbd>Y</kbd><span>Redo</span></div>
+          <div class="shortcut-row"><kbd>Esc</kbd><span>Clear all</span></div>
+        </div>
+        <div class="shortcut-section">
+          <h3>Navigation</h3>
+          <div class="shortcut-row"><kbd>?</kbd><span>Show this help</span></div>
+          <div class="shortcut-row"><kbd>Esc</kbd><span>Close modals</span></div>
+        </div>
+        <div class="shortcut-section">
+          <h3>Accessibility</h3>
+          <div class="shortcut-row"><kbd>Tab</kbd><span>Navigate elements</span></div>
+          <div class="shortcut-row"><kbd>Enter</kbd>/<kbd>Space</kbd><span>Activate buttons</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Filter Multi-Select Modal -->
+  <div id="filterModal" class="modal-overlay hidden" onclick="closeFilterModal(event)">
+    <div class="modal-content filter-modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="filterModalTitle">Select Tiers</h2>
+        <button class="modal-close" onclick="closeFilterModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="filter-options" id="filterOptions">
+          <!-- Options populated by JS -->
+        </div>
+      </div>
+      <div class="modal-footer filter-modal-footer">
+        <button class="btn btn-secondary btn-small" onclick="clearFilterSelection()">Clear All</button>
+        <button class="btn btn-primary btn-small" onclick="applyFilter()">Apply</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Converter Page -->
   <div id="converterPage" class="page-view active">
     <div class="container">
@@ -3565,36 +4197,46 @@ The converter will auto-detect the source system."
             <button class="btn btn-icon btn-small" onclick="redo()" id="redoBtn" disabled
                     aria-label="Redo" title="Redo (Ctrl+Y)">↷</button>
           </div>
-          <div class="btn-group">
-            <button class="btn btn-success btn-small" onclick="copyJSON()" id="copyBtn" disabled>
-              Copy JSON
+          <div class="btn-group output-actions">
+            <!-- Copy Dropdown -->
+            <div class="action-dropdown">
+              <button class="btn btn-success btn-small" onclick="copyJSON()" id="copyBtn" disabled>
+                <span class="btn-icon-inline">📋</span> Copy
+              </button>
+              <button class="btn btn-success btn-small dropdown-toggle" onclick="toggleCopyMenu()" id="copyDropdownBtn" disabled aria-label="Copy options">▾</button>
+              <div class="dropdown-menu" id="copyMenu">
+                <button onclick="copyJSON(); closeCopyMenu()">JSON</button>
+                <button onclick="copyMarkdown(); closeCopyMenu()">Markdown</button>
+                <button onclick="copyText(); closeCopyMenu()">Plain Text</button>
+              </div>
+            </div>
+            <button class="btn btn-secondary btn-small" onclick="downloadJSON()" id="downloadBtn" disabled title="Download JSON">
+              <span class="btn-icon-inline">⬇</span> Save
             </button>
-            <button class="btn btn-secondary btn-small" onclick="copyMarkdown()" id="copyMdBtn" disabled>
-              Copy MD
+            <button class="btn btn-secondary btn-small" onclick="addToLibrary()" id="libraryBtn" disabled title="Add to DM Screen library">
+              <span class="btn-icon-inline">📚</span> Library
             </button>
-            <button class="btn btn-secondary btn-small" onclick="copyText()" id="copyTextBtn" disabled>
-              Copy Text
+            <button class="btn btn-share btn-small" onclick="shareToCommunity()" id="shareBtn" disabled title="Share to community">
+              <span class="btn-icon-inline">🌐</span> Share
             </button>
-            <button class="btn btn-secondary btn-small" onclick="downloadJSON()" id="downloadBtn" disabled>
-              Download
-            </button>
-            <button class="btn btn-secondary btn-small" onclick="addToLibrary()" id="libraryBtn" disabled
-                    title="Add to DM Screen library">
-              + Library
-            </button>
-            <button class="btn btn-secondary btn-small" onclick="addConvertedToGroup()" id="groupBtn" disabled
-                    title="Add to a group">
-              + Group
-            </button>
-            <button class="btn btn-share btn-small" onclick="shareToCommunity()" id="shareBtn" disabled
-                    title="Share to community library">
-              Share
-            </button>
-            <button class="btn btn-secondary btn-small" onclick="window.print()" id="printBtn" disabled
-                    title="Print stat block">
-              Print
-            </button>
+            <!-- More Actions Dropdown -->
+            <div class="action-dropdown">
+              <button class="btn btn-secondary btn-small" onclick="toggleMoreMenu()" id="moreBtn" disabled title="More actions">
+                ⋯
+              </button>
+              <div class="dropdown-menu dropdown-menu-right" id="moreMenu">
+                <button onclick="addConvertedToGroup(); closeMoreMenu()"><span>📁</span> Add to Group</button>
+                <button onclick="shareAsURL(); closeMoreMenu()"><span>🔗</span> Copy URL</button>
+                <button onclick="window.print(); closeMoreMenu()"><span>🖨</span> Print</button>
+              </div>
+            </div>
           </div>
+          <!-- Hidden buttons for compatibility -->
+          <button id="copyMdBtn" class="hidden" disabled></button>
+          <button id="copyTextBtn" class="hidden" disabled></button>
+          <button id="groupBtn" class="hidden" disabled></button>
+          <button id="printBtn" class="hidden" disabled></button>
+          <button id="urlBtn" class="hidden" disabled></button>
         </div>
 
         <div class="tabs" role="tablist">
@@ -3657,26 +4299,14 @@ The converter will auto-detect the source system."
         </div>
         <div class="community-filters">
           <input type="text" class="search-input" id="communitySearch" placeholder="Search conversions..." oninput="debounceCommunitySearch()">
-          <select id="communityTier" class="form-select" onchange="loadCommunityConversions()">
-            <option value="">All Tiers</option>
-            <option value="1">Tier 1</option>
-            <option value="2">Tier 2</option>
-            <option value="3">Tier 3</option>
-            <option value="4">Tier 4</option>
-          </select>
-          <select id="communityType" class="form-select" onchange="loadCommunityConversions()">
-            <option value="">All Types</option>
-            <option value="Bruiser">Bruiser</option>
-            <option value="Horde">Horde</option>
-            <option value="Leader">Leader</option>
-            <option value="Minion">Minion</option>
-            <option value="Ranged">Ranged</option>
-            <option value="Skulk">Skulk</option>
-            <option value="Social">Social</option>
-            <option value="Solo">Solo</option>
-            <option value="Standard">Standard</option>
-            <option value="Support">Support</option>
-          </select>
+          <button class="filter-select-btn" onclick="openFilterModal('tier')" id="tierFilterBtn">
+            <span id="tierFilterLabel">All Tiers</span>
+            <span class="filter-arrow">▾</span>
+          </button>
+          <button class="filter-select-btn" onclick="openFilterModal('type')" id="typeFilterBtn">
+            <span id="typeFilterLabel">All Types</span>
+            <span class="filter-arrow">▾</span>
+          </button>
           <select id="communitySort" class="form-select" onchange="loadCommunityConversions()">
             <option value="popular">Most Popular</option>
             <option value="newest">Newest</option>
@@ -4214,6 +4844,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       checkAuthState();
       handleAuthRedirect();
       handleUrlRouting();
+      loadFromURL();
     });
 
     // ==================== THEME TOGGLE ====================
@@ -4235,6 +4866,13 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', (e) => {
         if (!localStorage.getItem('dnd-dh-theme')) {
           document.documentElement.classList.toggle('light-mode', !e.matches);
+        }
+      });
+
+      // Sync theme across tabs
+      window.addEventListener('storage', (e) => {
+        if (e.key === 'dnd-dh-theme') {
+          document.documentElement.classList.toggle('light-mode', e.newValue === 'light');
         }
       });
     }
@@ -4286,6 +4924,15 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
     // ==================== KEYBOARD SHORTCUTS ====================
     function setupKeyboardShortcuts() {
       document.addEventListener('keydown', (e) => {
+        const isTyping = document.activeElement.tagName === 'TEXTAREA' ||
+                         document.activeElement.tagName === 'INPUT';
+
+        // ?: Show keyboard shortcuts (only when not typing)
+        if (e.key === '?' && !isTyping) {
+          e.preventDefault();
+          openKeyboardModal();
+          return;
+        }
         // Ctrl+Enter: Convert
         if (e.ctrlKey && e.key === 'Enter') {
           e.preventDefault();
@@ -4298,8 +4945,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
         }
         // Ctrl+Z: Undo
         if (e.ctrlKey && e.key === 'z' && !e.shiftKey) {
-          if (document.activeElement.tagName !== 'TEXTAREA' &&
-              document.activeElement.tagName !== 'INPUT') {
+          if (!isTyping) {
             e.preventDefault();
             undo();
           }
@@ -4309,8 +4955,13 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
           e.preventDefault();
           redo();
         }
-        // Escape: Clear
+        // Escape: Clear (only when not in modals)
         if (e.key === 'Escape') {
+          const keyboardModal = document.getElementById('keyboardModal');
+          if (keyboardModal && !keyboardModal.classList.contains('hidden')) {
+            closeKeyboardModal();
+            return;
+          }
           e.preventDefault();
           clearAll();
         }
@@ -4444,11 +5095,33 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       btn.setAttribute('aria-expanded', isOpen);
     }
 
-    // Close menu when clicking outside
+    function toggleCopyMenu() {
+      closeMoreMenu();
+      document.getElementById('copyMenu').classList.toggle('show');
+    }
+
+    function closeCopyMenu() {
+      document.getElementById('copyMenu').classList.remove('show');
+    }
+
+    function toggleMoreMenu() {
+      closeCopyMenu();
+      document.getElementById('moreMenu').classList.toggle('show');
+    }
+
+    function closeMoreMenu() {
+      document.getElementById('moreMenu').classList.remove('show');
+    }
+
+    // Close menus when clicking outside
     document.addEventListener('click', (e) => {
       if (!e.target.closest('.recent-dropdown')) {
         document.getElementById('recentMenu').classList.remove('show');
         document.getElementById('recentBtn').setAttribute('aria-expanded', 'false');
+      }
+      if (!e.target.closest('.action-dropdown')) {
+        closeCopyMenu();
+        closeMoreMenu();
       }
     });
 
@@ -4625,9 +5298,52 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
         clearDraft();
         showToast('Converted successfully!', 'success');
       } catch (e) {
-        console.error(e);
-        showToast('Error parsing stat block: ' + e.message, 'error');
+        console.error('Conversion error:', e);
+        handleParserError(e, input);
       }
+    }
+
+    function handleParserError(error, input) {
+      let message = 'Error parsing stat block';
+      let details = '';
+
+      // Identify common parsing issues
+      if (!input || input.length < 10) {
+        message = 'Input too short';
+        details = 'Please paste a complete stat block.';
+      } else if (error.message.includes('undefined') || error.message.includes('null')) {
+        message = 'Could not extract required fields';
+        details = 'The stat block format may not be recognized. Try a different source format.';
+      } else if (error.message.includes('name')) {
+        message = 'Could not find creature name';
+        details = 'Make sure the stat block includes the creature name at the top.';
+      } else if (error.message.includes('HP') || error.message.includes('hit point')) {
+        message = 'Could not parse hit points';
+        details = 'Check that HP/Hit Points are included in the stat block.';
+      } else if (error.message.includes('AC') || error.message.includes('armor')) {
+        message = 'Could not parse armor class';
+        details = 'Check that AC is included in the stat block.';
+      } else {
+        details = error.message;
+      }
+
+      showToast(`${message}: ${details}`, 'error');
+
+      // Show more help in the preview area
+      document.getElementById('statBlockPreview').innerHTML = `
+        <div class="parser-error">
+          <h3>Parsing Failed</h3>
+          <p><strong>${message}</strong></p>
+          <p>${details}</p>
+          <h4>Tips:</h4>
+          <ul>
+            <li>Make sure you're pasting a complete stat block</li>
+            <li>Try selecting "Auto-detect" for the source system</li>
+            <li>Supported formats: D&D 5e, D&D 2024, Pathfinder 2e, 13th Age</li>
+            <li>Copy stat blocks from official sources or VTTs</li>
+          </ul>
+        </div>
+      `;
     }
 
     function convertSingle(input) {
@@ -4751,13 +5467,16 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
 
     function enableButtons() {
       document.getElementById('copyBtn').disabled = false;
+      document.getElementById('copyDropdownBtn').disabled = false;
       document.getElementById('copyMdBtn').disabled = false;
       document.getElementById('copyTextBtn').disabled = false;
       document.getElementById('downloadBtn').disabled = false;
       document.getElementById('libraryBtn').disabled = false;
       document.getElementById('groupBtn').disabled = false;
       document.getElementById('shareBtn').disabled = false;
+      document.getElementById('moreBtn').disabled = false;
       document.getElementById('printBtn').disabled = false;
+      document.getElementById('urlBtn').disabled = false;
     }
 
     // ==================== RENDER PREVIEW ====================
@@ -4933,107 +5652,91 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       header.setAttribute('aria-expanded', !el.classList.contains('collapsed'));
     }
 
-    // Read-only version for community viewing
+    // Read-only version for community viewing - Daggerheart rulebook style
     function renderStatBlockReadOnly(c) {
       if (!c) return '<p>No data available</p>';
 
-      const featuresHTML = (c.features || []).map(f => `
-        <div class="feature-readonly">
-          <div class="feature-header-readonly">
-            <span class="feature-name-readonly">${escapeHtml(f.name)}</span>
-            <span class="feature-type feature-type-${(f.type || 'passive').toLowerCase()}">${f.type || 'Passive'}</span>
+      // Build features HTML
+      const featuresHTML = (c.features || []).map(f => {
+        const typeClass = (f.type || 'passive').toLowerCase();
+        return `
+          <div class="dh-stat-block-feature">
+            <span class="dh-stat-block-feature-name">${escapeHtml(f.name)}</span> -
+            <span class="dh-stat-block-feature-type ${typeClass}">${f.type || 'Passive'}:</span>
+            ${escapeHtml(f.desc || '')}
           </div>
-          <div class="feature-desc-readonly">${escapeHtml(f.desc || '')}</div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
 
+      // Build tags HTML
       const tagsHTML = (c.tags || []).map(t => `
-        <span class="tag-readonly">${escapeHtml(t)}</span>
+        <span class="dh-stat-block-tag">${escapeHtml(t)}</span>
       `).join('');
 
+      // Build motives & tactics line
+      let motivesLine = '';
+      if (c.motives || c.tactics) {
+        const parts = [];
+        if (c.motives) parts.push(escapeHtml(c.motives));
+        if (c.tactics) parts.push(escapeHtml(c.tactics));
+        motivesLine = `
+          <div class="dh-stat-block-motives">
+            <strong>Motives & Tactics:</strong> ${parts.join('. ')}
+          </div>
+        `;
+      }
+
+      // Build attack line
+      let attackLine = '';
+      if (c.atkMod) {
+        attackLine = `
+          <div class="dh-stat-block-stats-line">
+            <span class="label">ATK:</span> ${c.atkMod}<span class="separator">|</span><span class="label">${escapeHtml(c.weapon || 'Attack')}:</span> ${c.range || 'Melee'}<span class="separator">|</span>${c.damage || '?'} ${c.dmgType || 'phy'}
+          </div>
+        `;
+      }
+
+      // Build experience line
+      let expLine = '';
+      if (c.experience) {
+        expLine = `
+          <div class="dh-stat-block-experience">
+            <strong>Experience:</strong> ${escapeHtml(c.experience)}
+          </div>
+        `;
+      }
+
+      // Image (floated right if present)
       const imageHTML = c.imageUrl
-        ? `<img src="${escapeHtml(c.imageUrl)}" alt="${escapeHtml(c.name)}" class="stat-block-image-readonly">`
+        ? `<img src="${escapeHtml(c.imageUrl)}" alt="${escapeHtml(c.name)}" class="dh-stat-block-image">`
         : '';
 
       return `
-        <div class="stat-block-header">
-          <div class="stat-block-name">${escapeHtml(c.name || 'Unknown')}</div>
-          <div class="stat-block-type">Tier ${c.tier || '?'} ${c.advType || 'Standard'}</div>
-        </div>
-
-        ${imageHTML ? `<div class="stat-block-image-section-readonly">${imageHTML}</div>` : ''}
-
-        ${c.description ? `<div class="stat-block-desc">${escapeHtml(c.description)}</div>` : ''}
-
-        ${c.motives ? `
-          <div class="stat-line-readonly">
-            <span class="stat-label">Motives:</span>
-            <span class="stat-value">${escapeHtml(c.motives)}</span>
+        <div class="dh-stat-block">
+          <div class="dh-stat-block-header">
+            <div class="dh-stat-block-name">${escapeHtml(c.name || 'Unknown')}</div>
+            <div class="dh-stat-block-tier">Tier ${c.tier || '?'} ${c.advType || 'Standard'}</div>
           </div>
-        ` : ''}
-
-        ${c.tactics ? `
-          <div class="stat-line-readonly">
-            <span class="stat-label">Tactics:</span>
-            <span class="stat-value">${escapeHtml(c.tactics)}</span>
-          </div>
-        ` : ''}
-
-        <div class="stat-grid-readonly">
-          <div class="stat-item-readonly">
-            <div class="stat-item-label">Difficulty</div>
-            <div class="stat-item-value">${c.difficulty || '?'}</div>
-          </div>
-          <div class="stat-item-readonly">
-            <div class="stat-item-label">Major</div>
-            <div class="stat-item-value">${c.majorThresh || '?'}</div>
-          </div>
-          <div class="stat-item-readonly">
-            <div class="stat-item-label">Severe</div>
-            <div class="stat-item-value">${c.severeThresh || '?'}</div>
-          </div>
-          <div class="stat-item-readonly">
-            <div class="stat-item-label">HP</div>
-            <div class="stat-item-value">${c.hp || '?'}</div>
-          </div>
-          <div class="stat-item-readonly">
-            <div class="stat-item-label">Stress</div>
-            <div class="stat-item-value">${c.stress || '?'}</div>
-          </div>
-          <div class="stat-item-readonly">
-            <div class="stat-item-label">Attack</div>
-            <div class="stat-item-value">${c.atkMod || '?'}</div>
+          <div class="dh-stat-block-body">
+            ${imageHTML}
+            ${c.description ? `<div class="dh-stat-block-desc">${escapeHtml(c.description)}</div>` : ''}
+            ${motivesLine}
+            <div class="dh-stat-block-stats-line">
+              <span class="label">Difficulty:</span> ${c.difficulty || '?'}<span class="separator">|</span><span class="label">Thresholds:</span> ${c.majorThresh || '?'}/${c.severeThresh || '?'}<span class="separator">|</span><span class="label">HP:</span> ${c.hp || '?'}<span class="separator">|</span><span class="label">Stress:</span> ${c.stress || '?'}
+            </div>
+            ${attackLine}
+            ${expLine}
+            ${(c.features && c.features.length > 0) ? `
+              <div class="dh-stat-block-features">
+                <div class="dh-stat-block-features-title">Features</div>
+                ${featuresHTML}
+              </div>
+            ` : ''}
+            ${(c.tags && c.tags.length > 0) ? `
+              <div class="dh-stat-block-tags">${tagsHTML}</div>
+            ` : ''}
           </div>
         </div>
-
-        <div class="stat-line-readonly">
-          <span class="stat-label">Weapon:</span>
-          <span class="stat-value">${escapeHtml(c.weapon || 'None')} (${c.range || 'Melee'})</span>
-        </div>
-        <div class="stat-line-readonly">
-          <span class="stat-label">Damage:</span>
-          <span class="stat-value">${c.damage || '?'} ${c.dmgType || 'phy'}</span>
-        </div>
-        ${c.experience ? `
-          <div class="stat-line-readonly">
-            <span class="stat-label">Experience:</span>
-            <span class="stat-value">${escapeHtml(c.experience)}</span>
-          </div>
-        ` : ''}
-
-        ${(c.features && c.features.length > 0) ? `
-          <div class="features-section-readonly">
-            <h4 class="section-title">Features</h4>
-            ${featuresHTML}
-          </div>
-        ` : ''}
-
-        ${(c.tags && c.tags.length > 0) ? `
-          <div class="tags-section-readonly">
-            <h4 class="section-title">Tags</h4>
-            <div class="tags-readonly">${tagsHTML}</div>
-          </div>
-        ` : ''}
       `;
     }
 
@@ -5243,6 +5946,17 @@ Tags: ${c.tags.join(', ')}`;
       return exportObj;
     }
 
+    function animateCopyButton(buttonId, originalText) {
+      const btn = document.getElementById(buttonId);
+      if (!btn) return;
+      btn.innerHTML = '✓ Copied!';
+      btn.classList.add('copied');
+      setTimeout(() => {
+        btn.innerHTML = originalText;
+        btn.classList.remove('copied');
+      }, 2000);
+    }
+
     function copyJSON() {
       if (!currentConverted) {
         showToast('Nothing to copy. Convert a stat block first.', 'error');
@@ -5250,7 +5964,10 @@ Tags: ${c.tags.join(', ')}`;
       }
       const exportObj = getExportObject();
       navigator.clipboard.writeText(JSON.stringify(exportObj, null, 2))
-        .then(() => showToast('JSON copied!', 'success'))
+        .then(() => {
+          showToast('JSON copied!', 'success');
+          animateCopyButton('copyBtn', 'Copy JSON');
+        })
         .catch(() => showToast('Failed to copy', 'error'));
     }
 
@@ -5260,7 +5977,10 @@ Tags: ${c.tags.join(', ')}`;
         return;
       }
       navigator.clipboard.writeText(document.getElementById('markdownOutput').textContent)
-        .then(() => showToast('Markdown copied!', 'success'))
+        .then(() => {
+          showToast('Markdown copied!', 'success');
+          animateCopyButton('copyMdBtn', 'Copy MD');
+        })
         .catch(() => showToast('Failed to copy', 'error'));
     }
 
@@ -5270,7 +5990,10 @@ Tags: ${c.tags.join(', ')}`;
         return;
       }
       navigator.clipboard.writeText(document.getElementById('textOutput').textContent)
-        .then(() => showToast('Text copied!', 'success'))
+        .then(() => {
+          showToast('Text copied!', 'success');
+          animateCopyButton('copyTextBtn', 'Copy Text');
+        })
         .catch(() => showToast('Failed to copy', 'error'));
     }
 
@@ -5288,6 +6011,65 @@ Tags: ${c.tags.join(', ')}`;
       a.click();
       URL.revokeObjectURL(url);
       showToast('Downloaded: ' + currentConverted.id + '.json', 'success');
+    }
+
+    function shareAsURL() {
+      if (!currentConverted) {
+        showToast('Nothing to share. Convert a stat block first.', 'error');
+        return;
+      }
+      try {
+        const exportObj = getExportObject();
+        const json = JSON.stringify(exportObj);
+        const encoded = btoa(encodeURIComponent(json));
+        const shareUrl = `${window.location.origin}${window.location.pathname}?d=${encoded}`;
+
+        if (shareUrl.length > 8000) {
+          showToast('Conversion too large to share via URL. Use JSON copy instead.', 'warning');
+          return;
+        }
+
+        navigator.clipboard.writeText(shareUrl)
+          .then(() => {
+            showToast('Share URL copied! Anyone with this link can view this conversion.', 'success');
+            animateCopyButton('urlBtn', 'URL');
+          })
+          .catch(() => showToast('Failed to copy URL', 'error'));
+      } catch (e) {
+        console.error('Share URL error:', e);
+        showToast('Failed to create share URL', 'error');
+      }
+    }
+
+    function loadFromURL() {
+      const params = new URLSearchParams(window.location.search);
+      const data = params.get('d');
+
+      if (data) {
+        try {
+          const json = decodeURIComponent(atob(data));
+          const conversion = JSON.parse(json);
+
+          // Validate it looks like a conversion
+          if (!conversion.name || !conversion.category) {
+            throw new Error('Invalid conversion data');
+          }
+
+          // Load the conversion
+          currentConverted = conversion;
+          renderAll();
+          enableButtons();
+
+          // Clear the URL parameter to avoid confusion
+          window.history.replaceState({}, '', window.location.pathname);
+
+          showToast(`Loaded shared conversion: ${conversion.name}`, 'success');
+          showPage('converter');
+        } catch (e) {
+          console.error('Failed to load from URL:', e);
+          showToast('Invalid or corrupted share link', 'error');
+        }
+      }
     }
 
     function addToLibrary() {
@@ -5363,7 +6145,7 @@ Tags: ${c.tags.join(', ')}`;
       document.getElementById('overrideTier').value = '';
       document.getElementById('overrideType').value = '';
 
-      ['copyBtn', 'copyMdBtn', 'copyTextBtn', 'downloadBtn', 'libraryBtn', 'groupBtn', 'shareBtn', 'printBtn'].forEach(id => {
+      ['copyBtn', 'copyDropdownBtn', 'copyMdBtn', 'copyTextBtn', 'downloadBtn', 'libraryBtn', 'groupBtn', 'shareBtn', 'moreBtn', 'printBtn', 'urlBtn'].forEach(id => {
         document.getElementById(id).disabled = true;
       });
 
@@ -6313,6 +7095,16 @@ Tags: ${c.tags.join(', ')}`;
       document.getElementById('loginModal').classList.add('hidden');
     }
 
+    // ==================== KEYBOARD SHORTCUTS MODAL ====================
+    function openKeyboardModal() {
+      document.getElementById('keyboardModal').classList.remove('hidden');
+    }
+
+    function closeKeyboardModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('keyboardModal').classList.add('hidden');
+    }
+
     // ==================== PRIVACY MODAL ====================
     function openPrivacyModal() {
       document.getElementById('privacyModal').classList.add('active');
@@ -6356,29 +7148,153 @@ Tags: ${c.tags.join(', ')}`;
     let communitySearchDebounce = null;
     let selectedConversion = null;
 
+    // Multi-select filter state
+    let selectedTiers = [];
+    let selectedTypes = [];
+    let currentFilterType = null; // 'tier' or 'type'
+
+    const TIER_OPTIONS = [
+      { value: '1', label: 'Tier 1' },
+      { value: '2', label: 'Tier 2' },
+      { value: '3', label: 'Tier 3' },
+      { value: '4', label: 'Tier 4' }
+    ];
+
+    const TYPE_OPTIONS = [
+      { value: 'Bruiser', label: 'Bruiser' },
+      { value: 'Horde', label: 'Horde' },
+      { value: 'Leader', label: 'Leader' },
+      { value: 'Minion', label: 'Minion' },
+      { value: 'Ranged', label: 'Ranged' },
+      { value: 'Skulk', label: 'Skulk' },
+      { value: 'Social', label: 'Social' },
+      { value: 'Solo', label: 'Solo' },
+      { value: 'Standard', label: 'Standard' },
+      { value: 'Support', label: 'Support' }
+    ];
+
+    function openFilterModal(filterType) {
+      currentFilterType = filterType;
+      const modal = document.getElementById('filterModal');
+      const title = document.getElementById('filterModalTitle');
+      const optionsContainer = document.getElementById('filterOptions');
+
+      const options = filterType === 'tier' ? TIER_OPTIONS : TYPE_OPTIONS;
+      const selected = filterType === 'tier' ? selectedTiers : selectedTypes;
+
+      title.textContent = filterType === 'tier' ? 'Select Tiers' : 'Select Types';
+
+      optionsContainer.innerHTML = options.map(opt => `
+        <div class="filter-option ${selected.includes(opt.value) ? 'selected' : ''}" onclick="toggleFilterOption('${opt.value}')">
+          <input type="checkbox" id="filter-${opt.value}" ${selected.includes(opt.value) ? 'checked' : ''}>
+          <label for="filter-${opt.value}">${opt.label}</label>
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+    }
+
+    function closeFilterModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('filterModal').classList.add('hidden');
+      currentFilterType = null;
+    }
+
+    function toggleFilterOption(value) {
+      const selected = currentFilterType === 'tier' ? selectedTiers : selectedTypes;
+      const index = selected.indexOf(value);
+
+      if (index === -1) {
+        selected.push(value);
+      } else {
+        selected.splice(index, 1);
+      }
+
+      // Update UI
+      const optionEl = document.querySelector(`.filter-option input[id="filter-${value}"]`);
+      if (optionEl) {
+        optionEl.checked = selected.includes(value);
+        optionEl.closest('.filter-option').classList.toggle('selected', selected.includes(value));
+      }
+    }
+
+    function clearFilterSelection() {
+      if (currentFilterType === 'tier') {
+        selectedTiers = [];
+      } else {
+        selectedTypes = [];
+      }
+
+      // Uncheck all
+      document.querySelectorAll('.filter-option').forEach(opt => {
+        opt.classList.remove('selected');
+        opt.querySelector('input').checked = false;
+      });
+    }
+
+    function applyFilter() {
+      updateFilterButtonLabels();
+      closeFilterModal();
+      communityPage = 1;
+      loadCommunityConversions();
+    }
+
+    function updateFilterButtonLabels() {
+      const tierBtn = document.getElementById('tierFilterBtn');
+      const typeBtn = document.getElementById('typeFilterBtn');
+      const tierLabel = document.getElementById('tierFilterLabel');
+      const typeLabel = document.getElementById('typeFilterLabel');
+
+      if (selectedTiers.length === 0) {
+        tierLabel.textContent = 'All Tiers';
+        tierBtn.classList.remove('has-selection');
+      } else if (selectedTiers.length === 1) {
+        tierLabel.textContent = `Tier ${selectedTiers[0]}`;
+        tierBtn.classList.add('has-selection');
+      } else {
+        tierLabel.textContent = `${selectedTiers.length} Tiers`;
+        tierBtn.classList.add('has-selection');
+      }
+
+      if (selectedTypes.length === 0) {
+        typeLabel.textContent = 'All Types';
+        typeBtn.classList.remove('has-selection');
+      } else if (selectedTypes.length === 1) {
+        typeLabel.textContent = selectedTypes[0];
+        typeBtn.classList.add('has-selection');
+      } else {
+        typeLabel.textContent = `${selectedTypes.length} Types`;
+        typeBtn.classList.add('has-selection');
+      }
+    }
+
     async function loadCommunityConversions() {
       const listEl = document.getElementById('communityList');
       listEl.innerHTML = `
-        <div class="community-loading">
-          <div class="loading-spinner"></div>
-          <span>Loading community conversions...</span>
-        </div>
+        <div class="skeleton-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton-tags"><div class="skeleton skeleton-tag"></div><div class="skeleton skeleton-tag"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton-tags"><div class="skeleton skeleton-tag"></div><div class="skeleton skeleton-tag"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton-tags"><div class="skeleton skeleton-tag"></div><div class="skeleton skeleton-tag"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton-tags"><div class="skeleton skeleton-tag"></div><div class="skeleton skeleton-tag"></div></div></div>
       `;
 
       try {
         const search = document.getElementById('communitySearch').value;
-        const tier = document.getElementById('communityTier').value;
-        const type = document.getElementById('communityType').value;
         const sort = document.getElementById('communitySort').value;
 
         const params = new URLSearchParams({
           page: communityPage,
           limit: 20,
           search,
-          tier,
-          type,
           sort
         });
+
+        // Add multi-select filters as comma-separated values
+        if (selectedTiers.length > 0) {
+          params.set('tier', selectedTiers.join(','));
+        }
+        if (selectedTypes.length > 0) {
+          params.set('type', selectedTypes.join(','));
+        }
 
         const response = await fetch(`/api/community/conversions?${params}`);
         const data = await response.json();
@@ -6417,39 +7333,58 @@ Tags: ${c.tags.join(', ')}`;
       listEl.innerHTML = communityConversions.map(conv => {
         const data = conv.data || {};
         const hp = data.hp || '?';
+        const stress = data.stress || '?';
         const difficulty = data.difficulty || '?';
+        const majorThresh = data.majorThresh || data.thresholds?.major || '?';
+        const severeThresh = data.severeThresh || data.thresholds?.severe || '?';
+        const description = data.description || '';
+        const motives = data.motives || '';
+        const atkMod = data.atkMod || data.attack?.modifier || '?';
+        const weapon = data.weapon || data.attack?.name || '';
+        const range = data.range || data.attack?.range || '';
+        const damage = data.damage || data.attack?.damage || '';
+        const dmgType = data.dmgType || data.attack?.type || '';
         const sourceSystem = conv.sourceSystem || data.sourceSystem;
         const authorAvatar = conv.author?.avatarUrl
           ? `<img src="${conv.author.avatarUrl}" alt="">`
           : '';
 
+        // Build attack line
+        let attackLine = '';
+        if (atkMod && atkMod !== '?') {
+          attackLine = `<span class="dh-stat-label">ATK:</span> ${atkMod}`;
+          if (weapon) attackLine += `<span class="dh-stat-separator">|</span>${weapon}: ${range}`;
+          if (damage) attackLine += `<span class="dh-stat-separator">|</span>${damage}${dmgType ? ' ' + dmgType : ''}`;
+        }
+
         return `
           <div class="community-item" onclick="openCommunityModal('${conv.id}')">
-            <div class="community-item-main">
-              <div class="community-item-header">
-                <div class="community-item-name">${escapeHtml(conv.name)}</div>
-                ${sourceSystem ? `<span class="community-item-source">${escapeHtml(sourceSystem)}</span>` : ''}
-                <button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>
-              </div>
-              <div class="community-item-stats">
-                <span class="community-item-stat"><strong>Diff:</strong> ${difficulty}</span>
-                <span class="community-item-stat"><strong>HP:</strong> ${hp}</span>
-              </div>
-              <div class="community-item-meta">
-                <span class="community-item-tag tier">T${conv.tier}</span>
-                <span class="community-item-tag">${conv.advType}</span>
-                <span class="community-item-author">${authorAvatar}@${escapeHtml(conv.author?.username || 'Unknown')}</span>
+            <div class="dh-card-header">
+              <div class="dh-card-name">${escapeHtml(conv.name)}</div>
+              <div class="dh-card-tier-type">Tier ${conv.tier} ${conv.advType}</div>
+            </div>
+            <div class="dh-card-body">
+              ${description ? `<div class="dh-card-description">${escapeHtml(description)}</div>` : ''}
+              ${motives ? `<div class="dh-card-motives"><strong>Motives & Tactics:</strong> ${escapeHtml(motives)}</div>` : ''}
+              <div class="dh-card-stats">
+                <div class="dh-card-stats-row">
+                  <span class="dh-stat-label">Difficulty:</span> ${difficulty}<span class="dh-stat-separator">|</span><span class="dh-stat-label">Thresholds:</span> ${majorThresh}/${severeThresh}<span class="dh-stat-separator">|</span><span class="dh-stat-label">HP:</span> ${hp}<span class="dh-stat-separator">|</span><span class="dh-stat-label">Stress:</span> ${stress}
+                </div>
+                ${attackLine ? `<div class="dh-card-stats-row">${attackLine}</div>` : ''}
               </div>
             </div>
-            <div class="community-item-actions">
-              <div class="community-item-votes">
-                <button class="vote-btn upvote ${conv.userVote === 1 ? 'active' : ''}"
-                        onclick="event.stopPropagation(); quickVote('${conv.id}', 1)">&#9650;</button>
-                <span class="vote-score ${conv.score > 0 ? 'positive' : conv.score < 0 ? 'negative' : ''}">${conv.score}</span>
-                <button class="vote-btn downvote ${conv.userVote === -1 ? 'active' : ''}"
-                        onclick="event.stopPropagation(); quickVote('${conv.id}', -1)">&#9660;</button>
-              </div>
+            <div class="dh-card-footer">
+              <div class="dh-card-author">${authorAvatar}@${escapeHtml(conv.author?.username || 'Unknown')}</div>
+              ${sourceSystem ? `<span class="dh-card-source">${escapeHtml(sourceSystem)}</span>` : ''}
             </div>
+            <div class="community-item-votes">
+              <button class="vote-btn upvote ${conv.userVote === 1 ? 'active' : ''}"
+                      onclick="event.stopPropagation(); quickVote('${conv.id}', 1)">&#9650;</button>
+              <span class="vote-score ${conv.score > 0 ? 'positive' : conv.score < 0 ? 'negative' : ''}">${conv.score}</span>
+              <button class="vote-btn downvote ${conv.userVote === -1 ? 'active' : ''}"
+                      onclick="event.stopPropagation(); quickVote('${conv.id}', -1)">&#9660;</button>
+            </div>
+            <button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>
           </div>
         `;
       }).join('');
@@ -6757,10 +7692,8 @@ Tags: ${c.tags.join(', ')}`;
     async function loadMySubmissions() {
       const listEl = document.getElementById('communityList');
       listEl.innerHTML = `
-        <div class="community-loading">
-          <div class="loading-spinner"></div>
-          <span>Loading your submissions...</span>
-        </div>
+        <div class="skeleton-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton-tags"><div class="skeleton skeleton-tag"></div><div class="skeleton skeleton-tag"></div></div></div>
+        <div class="skeleton-card"><div class="skeleton skeleton-title"></div><div class="skeleton skeleton-text"></div><div class="skeleton-tags"><div class="skeleton skeleton-tag"></div><div class="skeleton skeleton-tag"></div></div></div>
       `;
 
       try {
@@ -6865,7 +7798,11 @@ Tags: ${c.tags.join(', ')}`;
       if (e.key === 'Escape') {
         const communityModal = document.getElementById('communityModal');
         const loginModal = document.getElementById('loginModal');
+        const keyboardModal = document.getElementById('keyboardModal');
 
+        if (keyboardModal && !keyboardModal.classList.contains('hidden')) {
+          closeKeyboardModal();
+        }
         if (communityModal && !communityModal.classList.contains('hidden')) {
           closeCommunityModal();
         }
