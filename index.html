@@ -5622,6 +5622,49 @@
       border: 1px solid var(--border);
       border-radius: 4px;
       background: var(--bg-input);
+      padding: 1rem;
+    }
+
+    /* Grid layout for library cards */
+    #encounter-library-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    #encounter-library-list .community-item {
+      margin: 0;
+    }
+
+    /* BP overlay badge on cards */
+    .encounter-bp-overlay {
+      position: absolute;
+      top: 0.5rem;
+      left: 0.5rem;
+      background: var(--accent);
+      color: var(--bg-dark);
+      padding: 0.25rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      font-weight: 700;
+      z-index: 10;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .encounter-library-card {
+      position: relative;
+    }
+
+    /* Drop zone styling */
+    .encounter-drop-zone {
+      transition: background 0.2s, border-color 0.2s;
+      min-height: 200px;
+    }
+
+    .encounter-drop-zone.drag-over {
+      background: rgba(201, 162, 39, 0.15);
+      border-color: var(--accent);
+      border-style: dashed;
     }
 
     .encounter-item {
@@ -5632,9 +5675,12 @@
       border-bottom: 1px solid var(--border);
       cursor: pointer;
       transition: background 0.2s;
+      background: var(--bg-card);
+      border-radius: 4px;
+      margin-bottom: 0.5rem;
     }
 
-    .encounter-item:last-child { border-bottom: none; }
+    .encounter-item:last-child { border-bottom: none; margin-bottom: 0; }
     .encounter-item:hover { background: rgba(201, 162, 39, 0.1); }
 
     .encounter-item-info {
@@ -6236,7 +6282,10 @@ The converter will auto-detect the source system."
           <input type="text" id="encounter-name"
                  placeholder="Encounter Name (optional)"
                  oninput="encounterState.name = this.value">
-          <div id="encounter-roster" class="encounter-list"></div>
+          <div id="encounter-roster" class="encounter-list encounter-drop-zone"
+               ondragover="handleEncounterRosterDragOver(event)"
+               ondragleave="handleEncounterRosterDragLeave(event)"
+               ondrop="handleEncounterRosterDrop(event)"></div>
           <div class="encounter-total">
             Total: <strong id="encounter-total-bp">0</strong> BP
           </div>
@@ -8376,6 +8425,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
 
       // Use event delegation on document to catch all dice rolls
       document.addEventListener('mouseenter', (e) => {
+        if (!e.target || typeof e.target.closest !== 'function') return;
         const diceRoll = e.target.closest('.dice-roll[data-range]');
         if (!diceRoll) return;
 
@@ -8414,6 +8464,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       }, true);
 
       document.addEventListener('mouseleave', (e) => {
+        if (!e.target || typeof e.target.closest !== 'function') return;
         const diceRoll = e.target.closest('.dice-roll[data-range]');
         if (!diceRoll) return;
         tooltip.classList.remove('visible');
@@ -9140,16 +9191,138 @@ Tags: ${c.tags.join(', ')}`;
 
       container.innerHTML = adversaries.map(adv => {
         const bp = getAdvTypeBattlePoints(adv.advType);
+        const cardTypeClass = (adv.advType || 'standard').toLowerCase().trim();
+        const difficulty = adv.difficulty || '?';
+        const hp = adv.hp || '?';
+        const stress = adv.stress || '?';
+        const majorThresh = adv.majorThresh || '?';
+        const severeThresh = adv.severeThresh || '?';
+        const description = adv.description || '';
+        const motives = adv.motives || adv.tactics || '';
+
+        // Build attack line
+        let attackLine = '';
+        if (adv.atkMod && adv.atkMod !== '?') {
+          attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${adv.atkMod}</span>`;
+          if (adv.weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.weapon}: ${adv.range || ''}</span>`;
+          if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.damage}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
+        }
+
         return `
-          <div class="encounter-item" data-adversary-id="${escapeHtmlEncounter(adv.id)}" onclick="addToEncounter('${escapeHtmlEncounter(adv.id)}')">
-            <div class="encounter-item-info">
-              <span class="encounter-item-name">${escapeHtmlEncounter(adv.name)}</span>
-              <span class="encounter-item-meta">T${escapeHtmlEncounter(String(adv.tier || '?'))} ${escapeHtmlEncounter(adv.advType || 'Standard')}</span>
+          <div class="community-item library-draggable encounter-library-card"
+               draggable="true"
+               data-adversary-id="${escapeHtmlEncounter(adv.id)}"
+               ondragstart="handleEncounterDragStart(event, '${escapeHtmlEncounter(adv.id)}')"
+               ondragend="handleEncounterDragEnd(event)"
+               onclick="addToEncounter('${escapeHtmlEncounter(adv.id)}')">
+            <div class="dh-card-header" data-type="${cardTypeClass}">
+              <div class="dh-card-name">${escapeHtmlEncounter(adv.name || 'Unknown')}</div>
+              <div class="dh-card-tier-type">Tier ${adv.tier || '?'} ${adv.advType || 'Standard'}</div>
             </div>
-            <span class="encounter-bp-badge">${bp} BP</span>
+            <div class="dh-card-body">
+              ${description ? `<div class="dh-card-description">${escapeHtmlEncounter(description)}</div>` : ''}
+              ${motives ? `<div class="dh-card-motives"><strong>Motives & Tactics:</strong> ${escapeHtmlEncounter(motives)}</div>` : ''}
+              <div class="mini-stats-container">
+                <div class="mini-vitals-row">
+                  <div class="mini-vital-box difficulty">
+                    <span class="mini-vital-value">${difficulty}</span>
+                    <span class="mini-vital-label">Diff</span>
+                  </div>
+                  <div class="mini-vital-box hp">
+                    <span class="mini-vital-value">${hp}</span>
+                    <span class="mini-vital-label">HP</span>
+                  </div>
+                  <div class="mini-vital-box stress">
+                    <span class="mini-vital-value">${stress}</span>
+                    <span class="mini-vital-label">Stress</span>
+                  </div>
+                </div>
+                <div class="mini-damage-tracker">
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -874.223 1942.978 L -874.223 1442.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Minor</span>
+                  </div>
+                  <div class="mini-connector"><span class="mini-connector-number">${majorThresh}</span></div>
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                        <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Major</span>
+                  </div>
+                  <div class="mini-connector"><span class="mini-connector-number">${severeThresh}</span></div>
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                        <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Severe</span>
+                  </div>
+                </div>
+                ${attackLine ? `<div class="dh-card-stats-row">${attackLine}</div>` : ''}
+              </div>
+            </div>
+            <div class="encounter-bp-overlay">${bp} BP</div>
+            <div class="library-drag-hint">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/>
+                <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
+                <circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/>
+              </svg>
+            </div>
           </div>
         `;
       }).join('');
+    }
+
+    // Encounter-specific drag handlers
+    let encounterDraggedAdversary = null;
+
+    function handleEncounterDragStart(event, adversaryId) {
+      const adv = getAllLibraryAdversaries().find(a => a.id === adversaryId);
+      if (!adv) return;
+
+      encounterDraggedAdversary = adv;
+      event.target.classList.add('dragging');
+      event.dataTransfer.setData('text/plain', adversaryId);
+      event.dataTransfer.effectAllowed = 'copy';
+    }
+
+    function handleEncounterDragEnd(event) {
+      event.target.classList.remove('dragging');
+      encounterDraggedAdversary = null;
+      document.getElementById('encounter-roster')?.classList.remove('drag-over');
+    }
+
+    function handleEncounterRosterDragOver(event) {
+      event.preventDefault();
+      event.dataTransfer.dropEffect = 'copy';
+      document.getElementById('encounter-roster')?.classList.add('drag-over');
+    }
+
+    function handleEncounterRosterDragLeave(event) {
+      // Only remove if leaving the roster entirely
+      if (!event.currentTarget.contains(event.relatedTarget)) {
+        document.getElementById('encounter-roster')?.classList.remove('drag-over');
+      }
+    }
+
+    function handleEncounterRosterDrop(event) {
+      event.preventDefault();
+      document.getElementById('encounter-roster')?.classList.remove('drag-over');
+
+      const adversaryId = event.dataTransfer.getData('text/plain');
+      if (adversaryId) {
+        addToEncounter(adversaryId);
+      }
     }
 
     function renderEncounterRoster() {
