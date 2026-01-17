@@ -6247,28 +6247,30 @@ textarea::placeholder {
   font-weight: 600;
 }
 
-.combat-stress-pips {
+.combat-stress-boxes {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.25rem;
 }
 
-.stress-pip {
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
+.stress-box {
+  width: 24px;
+  height: 24px;
   border: 2px solid var(--accent);
+  border-radius: 4px;
   background: transparent;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s ease;
 }
 
-.stress-pip.filled {
+.stress-box:hover {
+  border-color: var(--accent-hover);
+  transform: scale(1.1);
+}
+
+.stress-box.filled {
   background: var(--accent);
-}
-
-.stress-pip.spent {
-  background: var(--text-secondary);
-  border-color: var(--text-secondary);
+  border-color: var(--accent);
 }
 
 /* Damage controls */

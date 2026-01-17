@@ -2263,7 +2263,7 @@ function startCombat() {
         majorThresh,
         severeThresh,
         maxStress: stress,
-        currentStress: stress,
+        stressTaken: 0,
         damage: scaled.damage || adv.damage || '2d6+3',
         conditions: [],
         notes: '',
@@ -2340,11 +2340,11 @@ function renderCombatAdversaries() {
     }
     hpBoxesHtml += '</div>';
 
-    // Build stress pips
-    let stressHtml = '<div class="combat-stress-pips">';
+    // Build stress boxes (fill up like HP)
+    let stressHtml = '<div class="combat-stress-boxes">';
     for (let i = 0; i < adv.maxStress; i++) {
-      const isAvailable = i < adv.currentStress;
-      stressHtml += `<div class="stress-pip ${isAvailable ? 'filled' : 'spent'}" onclick="toggleStressPip('${adv.id}', ${i})" title="${isAvailable ? 'Spend stress' : 'Restore stress'}"></div>`;
+      const isFilled = i < adv.stressTaken;
+      stressHtml += `<div class="stress-box ${isFilled ? 'filled' : ''}" onclick="toggleStressBox('${adv.id}', ${i})" title="Click to ${isFilled ? 'remove' : 'mark'} stress"></div>`;
     }
     stressHtml += '</div>';
 
@@ -2494,20 +2494,20 @@ function healDamage(advId, amount) {
 }
 
 // Toggle stress pip
-function toggleStressPip(advId, pipIndex) {
+function toggleStressBox(advId, boxIndex) {
   const adv = combatState.adversaries.find(a => a.id === advId);
   if (!adv) return;
 
   saveUndoState();
 
-  if (pipIndex < adv.currentStress) {
-    // Spend stress
-    adv.currentStress = pipIndex;
-    addCombatLog(`${adv.name} spent stress (${adv.currentStress}/${adv.maxStress} remaining)`, 'info');
+  if (boxIndex < adv.stressTaken) {
+    // Remove stress (clicking a filled box)
+    adv.stressTaken = boxIndex;
+    addCombatLog(`${adv.name} cleared stress (${adv.stressTaken}/${adv.maxStress})`, 'heal');
   } else {
-    // Restore stress
-    adv.currentStress = pipIndex + 1;
-    addCombatLog(`${adv.name} restored stress (${adv.currentStress}/${adv.maxStress})`, 'info');
+    // Add stress (clicking an empty box)
+    adv.stressTaken = boxIndex + 1;
+    addCombatLog(`${adv.name} took stress (${adv.stressTaken}/${adv.maxStress})`, 'stress');
   }
 
   renderCombatAdversaries();
