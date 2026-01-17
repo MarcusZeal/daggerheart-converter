@@ -2379,98 +2379,121 @@
       font-weight: 300;
     }
 
-    /* Threshold Track - Daggerheart Character Sheet Banner Style */
-    .dh-threshold-track {
+    /* Damage Tracker - Daggerheart Character Sheet Style */
+    .damage-tracker-container {
+      container-type: inline-size;
+      container-name: damage-tracker;
+      width: 100%;
       display: flex;
-      align-items: flex-start;
       justify-content: center;
-      margin: 0.75rem 0;
-      padding: 0.25rem 0;
+      margin: 1rem 0 2.5rem 0;
     }
 
-    .dh-threshold-segment {
+    .damage-scale-wrapper {
       display: flex;
-      flex-direction: column;
+      justify-content: center;
+    }
+
+    /* Container query responsive scaling */
+    @container damage-tracker (max-width: 700px) { .damage-scale-wrapper { zoom: 0.85; } }
+    @container damage-tracker (max-width: 600px) { .damage-scale-wrapper { zoom: 0.75; } }
+    @container damage-tracker (max-width: 500px) { .damage-scale-wrapper { zoom: 0.65; } }
+    @container damage-tracker (max-width: 400px) { .damage-scale-wrapper { zoom: 0.55; } }
+    @container damage-tracker (max-width: 300px) { .damage-scale-wrapper { zoom: 0.45; } }
+
+    .damage-cards-row {
+      display: flex;
       align-items: center;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .damage-card-wrapper {
+      position: relative;
+      z-index: 2;
+    }
+
+    .damage-card-container {
+      position: relative;
+      width: 180px;
+      height: 86px;
+    }
+
+    .damage-card-body {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .damage-card-body svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .damage-card-text {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      text-align: center;
+      color: white;
+      font-family: var(--font-display);
+      font-size: 16px;
+      font-weight: 400;
+      line-height: 1.2;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    .damage-card-footer {
+      position: absolute;
+      bottom: -26px;
+      left: 18px;
+      right: 18px;
       text-align: center;
     }
 
-    /* Banner badge with chevron cutouts using clip-path */
-    .dh-threshold-badge {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-direction: column;
-      background: #5a5a6e;
-      color: #fff;
-      font-family: var(--font-display);
-      font-size: 0.7rem;
-      font-weight: 400;
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      padding: 0.4rem 0.9rem;
-      min-width: 85px;
-      height: 42px;
-      position: relative;
-      line-height: 1.15;
-      /* Middle segment: arrow on both sides */
-      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
-    }
-
-    /* First segment: flat left, arrow right */
-    .dh-threshold-segment:first-child .dh-threshold-badge {
-      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 0 100%);
-      padding-left: 0.7rem;
-      border-radius: 3px 0 0 3px;
-    }
-
-    /* Last segment: arrow left, flat right */
-    .dh-threshold-segment:last-child .dh-threshold-badge {
-      clip-path: polygon(10px 0, 100% 0, 100% 100%, 10px 100%, 0 50%);
-      padding-right: 0.7rem;
-      border-radius: 0 3px 3px 0;
-    }
-
-    .dh-threshold-hp {
-      font-family: var(--font-body);
-      font-size: 0.7rem;
+    .damage-card-footer-text {
       color: var(--text-secondary);
-      margin-top: 0.3rem;
+      font-family: var(--font-body);
+      font-size: 12px;
       font-weight: 500;
+      margin: 0;
     }
 
-    /* Arrow connector with threshold value */
-    .dh-threshold-arrow {
+    /* Connector rectangles between cards */
+    .damage-connector {
+      width: 100px;
+      height: 50px;
+      background: var(--bg-card);
       display: flex;
       align-items: center;
       justify-content: center;
-      background: #5a5a6e;
-      color: #fff;
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 400;
-      min-width: 44px;
-      height: 42px;
+      margin: 0 -29px;
+      z-index: 1;
       position: relative;
-      /* Diamond/arrow shape */
-      clip-path: polygon(10px 0, calc(100% - 10px) 0, 100% 50%, calc(100% - 10px) 100%, 10px 100%, 0 50%);
-      margin: 0 -1px;
+      border: 3px solid #5f6975;
     }
 
-    /* Light mode colors */
-    :root.light-mode .dh-threshold-badge,
-    :root.light-mode .dh-threshold-arrow {
-      background: #6b6b7d;
+    .damage-connector-number {
+      color: #5F6975;
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 400;
     }
 
-    /* Dark mode colors */
-    :root:not(.light-mode) .dh-threshold-badge,
-    :root:not(.light-mode) .dh-threshold-arrow {
-      background: #4a4a5c;
+    /* Light mode connector */
+    :root.light-mode .damage-connector {
+      background: #fff;
     }
 
-    :root:not(.light-mode) .dh-threshold-hp {
-      color: var(--text-muted);
+    :root.light-mode .damage-card-footer-text {
+      color: #4a4a4a;
     }
 
     /* HP and Stress boxes */
@@ -2543,17 +2566,8 @@
       color: var(--text-secondary);
     }
 
-    :root:not(.light-mode) .dh-threshold-hp {
-      color: var(--text-muted);
-    }
-
-    /* Responsive adjustments */
-    @media (max-width: 580px) {
-      .dh-threshold-track {
-        transform: scale(0.85);
-        transform-origin: center;
-      }
-
+    /* Responsive adjustments for vitals */
+    @media (max-width: 480px) {
       .dh-vitals-row {
         gap: 0.75rem;
       }
@@ -2565,22 +2579,6 @@
 
       .dh-vital-value {
         font-size: 1.25rem;
-      }
-    }
-
-    @media (max-width: 400px) {
-      .dh-threshold-track {
-        transform: scale(0.7);
-      }
-
-      .dh-threshold-badge {
-        min-width: 70px;
-        font-size: 0.6rem;
-      }
-
-      .dh-threshold-arrow {
-        min-width: 36px;
-        font-size: 0.9rem;
       }
     }
 
@@ -7404,20 +7402,72 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
                 <span class="dh-vital-label">Stress</span>
               </div>
             </div>
-            <div class="dh-threshold-track">
-              <div class="dh-threshold-segment">
-                <div class="dh-threshold-badge">Minor<br>Damage</div>
-                <span class="dh-threshold-hp">Mark 1 HP</span>
-              </div>
-              <div class="dh-threshold-arrow">${c.majorThresh || '?'}</div>
-              <div class="dh-threshold-segment">
-                <div class="dh-threshold-badge">Major<br>Damage</div>
-                <span class="dh-threshold-hp">Mark 2 HP</span>
-              </div>
-              <div class="dh-threshold-arrow">${c.severeThresh || '?'}</div>
-              <div class="dh-threshold-segment">
-                <div class="dh-threshold-badge">Severe<br>Damage</div>
-                <span class="dh-threshold-hp">Mark 3 HP</span>
+            <div class="damage-tracker-container">
+              <div class="damage-scale-wrapper">
+                <div class="damage-cards-row">
+                  <!-- Card 1: Minor Damage (Symmetrical notches) -->
+                  <div class="damage-card-wrapper">
+                    <div class="damage-card-container">
+                      <div class="damage-card-body">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 120">
+                          <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975" stroke="none">
+                            <path d="M -974.223 2292.978 L -974.223 2042.978 L -874.223 1942.978 L -874.223 1442.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                          </g>
+                        </svg>
+                      </div>
+                      <div class="damage-card-text">Minor<br>Damage</div>
+                    </div>
+                    <div class="damage-card-footer">
+                      <p class="damage-card-footer-text">Mark 1 HP</p>
+                    </div>
+                  </div>
+
+                  <!-- Connector 1 -->
+                  <div class="damage-connector">
+                    <span class="damage-connector-number">${c.majorThresh || '?'}</span>
+                  </div>
+
+                  <!-- Card 2: Major Damage (Arrow on left) -->
+                  <div class="damage-card-wrapper">
+                    <div class="damage-card-container">
+                      <div class="damage-card-body">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 120">
+                          <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975" stroke="none">
+                            <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                            <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                          </g>
+                        </svg>
+                      </div>
+                      <div class="damage-card-text">Major<br>Damage</div>
+                    </div>
+                    <div class="damage-card-footer">
+                      <p class="damage-card-footer-text">Mark 2 HP</p>
+                    </div>
+                  </div>
+
+                  <!-- Connector 2 -->
+                  <div class="damage-connector">
+                    <span class="damage-connector-number">${c.severeThresh || '?'}</span>
+                  </div>
+
+                  <!-- Card 3: Severe Damage (Arrow on left) -->
+                  <div class="damage-card-wrapper">
+                    <div class="damage-card-container">
+                      <div class="damage-card-body">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 120">
+                          <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975" stroke="none">
+                            <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                            <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                          </g>
+                        </svg>
+                      </div>
+                      <div class="damage-card-text">Severe<br>Damage</div>
+                    </div>
+                    <div class="damage-card-footer">
+                      <p class="damage-card-footer-text">Mark 3 HP</p>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
             ${attackLine}
