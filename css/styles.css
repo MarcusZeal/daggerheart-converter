@@ -6332,6 +6332,7 @@ textarea::placeholder {
   display: flex;
   gap: 1.5rem;
   margin-bottom: 0.75rem;
+  flex-wrap: wrap;
 }
 
 .combat-tracking-label {
@@ -6344,7 +6345,9 @@ textarea::placeholder {
 /* HP and Stress sections */
 .combat-hp-section,
 .combat-stress-section {
-  flex: 0 0 auto;
+  flex: 1 1 auto;
+  min-width: 120px;
+  max-width: 100%;
 }
 
 .combat-conditions-section {
