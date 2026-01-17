@@ -2795,6 +2795,15 @@
 
     .dh-modal-card .dh-stat-block {
       border-radius: 6px 6px 0 0;
+      overflow: visible; /* Override to allow sticky header */
+    }
+
+    .dh-modal-card .dh-stat-block-header {
+      border-radius: 6px 6px 0 0;
+    }
+
+    .dh-modal-card .dh-stat-block-header.compact {
+      border-radius: 0;
     }
 
     .dh-modal-close {
