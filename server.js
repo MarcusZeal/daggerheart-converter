@@ -23,6 +23,83 @@ const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS || '').split(',').filter(Boolean);
 
 // ============================================================================
+// CONTENT MODERATION
+// ============================================================================
+
+// Blocklist of forbidden terms (case-insensitive)
+// This catches obviously inappropriate content
+const BLOCKED_TERMS = [
+  // Explicit content
+  'porn', 'xxx', 'nude', 'naked', 'sex', 'erotic', 'hentai', 'nsfw',
+  // Slurs and hate speech (abbreviated list - expand as needed)
+  'n-word', 'f-word-slur', // Using placeholders - add actual terms in production
+  // Violence against real people/groups
+  'kill all', 'murder all', 'genocide',
+  // Illegal content references
+  'child abuse', 'cp ', 'pedo',
+];
+
+// Patterns that are suspicious and should be auto-flagged for review
+const SUSPICIOUS_PATTERNS = [
+  /\b(18\+|adult only|mature content)\b/i,
+  /explicit/i,
+  /gore|guro/i,
+];
+
+function moderateContent(data) {
+  if (!data) return { passed: true };
+
+  // Combine all text fields to check
+  const textToCheck = [
+    data.name || '',
+    data.description || '',
+    data.motives || '',
+    data.tactics || '',
+    ...(data.features || []).map(f => `${f.name} ${f.desc}`),
+    ...(data.tags || []),
+  ].join(' ').toLowerCase();
+
+  // Check for blocked terms
+  for (const term of BLOCKED_TERMS) {
+    if (textToCheck.includes(term.toLowerCase())) {
+      return {
+        passed: false,
+        reason: 'Content contains prohibited material',
+        blocked: true
+      };
+    }
+  }
+
+  // Check for suspicious patterns (flag but don't block)
+  for (const pattern of SUSPICIOUS_PATTERNS) {
+    if (pattern.test(textToCheck)) {
+      return {
+        passed: true,
+        flagged: true,
+        reason: 'Content flagged for review'
+      };
+    }
+  }
+
+  // Check for suspicious image URLs
+  if (data.imageUrl) {
+    const imageUrl = data.imageUrl.toLowerCase();
+    const suspiciousImageDomains = ['nsfw', 'xxx', 'porn', 'adult'];
+    for (const domain of suspiciousImageDomains) {
+      if (imageUrl.includes(domain)) {
+        return {
+          passed: false,
+          reason: 'Image URL appears to contain inappropriate content',
+          blocked: true
+        };
+      }
+    }
+  }
+
+  return { passed: true };
+}
+
+// ============================================================================
 // DATABASE SETUP
 // ============================================================================
 
@@ -518,6 +595,16 @@ app.post('/api/community/conversions', apiLimiter, authenticateToken, requireAut
     return res.status(400).json({ error: 'Missing required fields' });
   }
 
+  // Content moderation check
+  const moderation = moderateContent(data);
+  if (!moderation.passed) {
+    console.log(`Content blocked from user ${req.user.id}: ${moderation.reason}`);
+    return res.status(400).json({
+      error: 'Submission rejected',
+      reason: moderation.reason
+    });
+  }
+
   const id = generateConversionId();
 
   try {
@@ -531,6 +618,16 @@ app.post('/api/community/conversions', apiLimiter, authenticateToken, requireAut
       INSERT INTO conversion_stats (conversion_id, upvotes, downvotes, score)
       VALUES (?, 0, 0, 0)
     `).run(id);
+
+    // If content was flagged, auto-create a report for admin review
+    if (moderation.flagged) {
+      const reportId = 'rpt_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+      db.prepare(`
+        INSERT INTO reports (id, conversion_id, reporter_id, reason, status)
+        VALUES (?, ?, ?, ?, 'pending')
+      `).run(reportId, id, 'system', `Auto-flagged: ${moderation.reason}`);
+      console.log(`Content auto-flagged for review: ${id}`);
+    }
 
     res.status(201).json({ id, message: 'Conversion submitted successfully' });
 
@@ -553,6 +650,18 @@ app.put('/api/community/conversions/:id', apiLimiter, authenticateToken, require
   }
 
   const { name, tier, advType, sourceSystem, data } = req.body;
+
+  // Content moderation check on updates
+  if (data) {
+    const moderation = moderateContent(data);
+    if (!moderation.passed) {
+      console.log(`Content update blocked from user ${req.user.id}: ${moderation.reason}`);
+      return res.status(400).json({
+        error: 'Update rejected',
+        reason: moderation.reason
+      });
+    }
+  }
 
   db.prepare(`
     UPDATE conversions
@@ -770,6 +879,89 @@ app.get('/api/admin/stats', apiLimiter, authenticateToken, requireAdmin, (req, r
   };
 
   res.json(stats);
+});
+
+// Get analytics data for charts
+app.get('/api/admin/analytics', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const days = parseInt(req.query.days) || 30;
+
+  // Activity over time (conversions per day)
+  const conversionsOverTime = db.prepare(`
+    SELECT date(created_at) as date, COUNT(*) as count
+    FROM conversions
+    WHERE created_at >= datetime('now', '-${days} days')
+    GROUP BY date(created_at)
+    ORDER BY date ASC
+  `).all();
+
+  // Users over time
+  const usersOverTime = db.prepare(`
+    SELECT date(created_at) as date, COUNT(*) as count
+    FROM users
+    WHERE created_at >= datetime('now', '-${days} days')
+    GROUP BY date(created_at)
+    ORDER BY date ASC
+  `).all();
+
+  // Reports over time
+  const reportsOverTime = db.prepare(`
+    SELECT date(created_at) as date, COUNT(*) as count
+    FROM reports
+    WHERE created_at >= datetime('now', '-${days} days')
+    GROUP BY date(created_at)
+    ORDER BY date ASC
+  `).all();
+
+  // Votes over time
+  const votesOverTime = db.prepare(`
+    SELECT date(created_at) as date, COUNT(*) as count
+    FROM votes
+    WHERE created_at >= datetime('now', '-${days} days')
+    GROUP BY date(created_at)
+    ORDER BY date ASC
+  `).all();
+
+  // Suspicious activity indicators
+  const suspiciousActivity = {
+    // Users with unusually high activity
+    highActivityUsers: db.prepare(`
+      SELECT u.username, u.id,
+        (SELECT COUNT(*) FROM conversions WHERE user_id = u.id AND created_at >= datetime('now', '-1 day')) as conversions_24h,
+        (SELECT COUNT(*) FROM votes WHERE user_id = u.id AND created_at >= datetime('now', '-1 day')) as votes_24h
+      FROM users u
+      WHERE (
+        (SELECT COUNT(*) FROM conversions WHERE user_id = u.id AND created_at >= datetime('now', '-1 day')) > 10
+        OR (SELECT COUNT(*) FROM votes WHERE user_id = u.id AND created_at >= datetime('now', '-1 day')) > 50
+      )
+    `).all(),
+
+    // Multiple reports on same conversion
+    heavilyReported: db.prepare(`
+      SELECT c.name, c.id, COUNT(r.id) as report_count
+      FROM conversions c
+      JOIN reports r ON c.id = r.conversion_id
+      WHERE r.status = 'pending'
+      GROUP BY c.id
+      HAVING report_count > 1
+      ORDER BY report_count DESC
+    `).all(),
+
+    // Recent bans
+    recentBans: db.prepare(`
+      SELECT username, id FROM users
+      WHERE is_banned = 1
+      ORDER BY created_at DESC
+      LIMIT 5
+    `).all()
+  };
+
+  res.json({
+    conversionsOverTime,
+    usersOverTime,
+    reportsOverTime,
+    votesOverTime,
+    suspiciousActivity
+  });
 });
 
 // Get all conversions (admin view - includes unpublished)

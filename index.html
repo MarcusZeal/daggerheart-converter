@@ -577,6 +577,144 @@
       max-width: 400px;
     }
 
+    /* Analytics Section */
+    .admin-analytics {
+      margin-bottom: 1.5rem;
+    }
+
+    .analytics-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .analytics-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .chart-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .chart-card h3 {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    .chart-container {
+      height: 150px;
+      position: relative;
+    }
+
+    .chart-canvas {
+      width: 100%;
+      height: 100%;
+    }
+
+    .chart-empty {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+    }
+
+    .suspicious-section {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+    }
+
+    .suspicious-section h3 {
+      font-size: 0.9rem;
+      color: var(--error);
+      margin-bottom: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .suspicious-section h3::before {
+      content: '⚠';
+    }
+
+    .suspicious-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+    }
+
+    @media (max-width: 900px) {
+      .suspicious-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .suspicious-card {
+      background: var(--bg-input);
+      border-radius: 6px;
+      padding: 0.75rem;
+    }
+
+    .suspicious-card h4 {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.5rem;
+    }
+
+    .suspicious-card ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    .suspicious-card li {
+      font-size: 0.85rem;
+      padding: 0.25rem 0;
+      color: var(--text-primary);
+    }
+
+    .suspicious-card .empty {
+      font-size: 0.8rem;
+      color: var(--success);
+      font-style: italic;
+    }
+
+    .analytics-toggle {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 0.5rem;
+    }
+
+    .analytics-toggle button {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      padding: 0.4rem 0.75rem;
+      border-radius: 4px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-size: 0.8rem;
+      transition: all 0.2s;
+    }
+
+    .analytics-toggle button:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
     .admin-table-container {
       overflow-x: auto;
     }
@@ -3745,30 +3883,43 @@
       opacity: 1;
     }
 
-    /* Voting buttons */
+    /* Voting buttons - compact horizontal layout */
     .community-item-votes {
       position: absolute;
       top: 0.5rem;
       right: 0.5rem;
       display: flex;
-      flex-direction: column;
+      flex-direction: row;
       align-items: center;
-      gap: 0.15rem;
+      gap: 0.25rem;
       background: rgba(255,255,255,0.95);
       border-radius: 4px;
-      padding: 0.3rem;
+      padding: 0.25rem 0.4rem;
       box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    }
+
+    .community-item-votes .vote-btn {
+      padding: 0.15rem 0.25rem;
+      font-size: 0.65rem;
+    }
+
+    .community-item-votes .vote-score {
+      font-size: 0.75rem;
+      min-width: 1.25rem;
     }
 
     .quick-save-btn {
       background: none;
       border: none;
       cursor: pointer;
-      font-size: 1rem;
-      padding: 0.15rem;
+      font-size: 0.9rem;
+      padding: 0.1rem 0.2rem;
       color: #888;
       transition: all 0.2s;
       line-height: 1;
+      margin-left: 0.15rem;
+      border-left: 1px solid #ddd;
+      padding-left: 0.35rem;
     }
 
     .quick-save-btn:hover {
@@ -4166,11 +4317,13 @@
       }
 
       .community-item-votes {
-        flex-direction: row;
+        position: static;
         justify-content: center;
         border-top: 1px solid var(--border);
         margin-top: 0.75rem;
         padding-top: 0.75rem;
+        background: transparent;
+        box-shadow: none;
       }
 
       .modal-footer {
@@ -4784,6 +4937,65 @@ The converter will auto-detect the source system."
         <div class="stat-card">
           <div class="stat-value" id="statRecentConversions">-</div>
           <div class="stat-label">New (7 days)</div>
+        </div>
+      </div>
+
+      <!-- Analytics Section -->
+      <div class="admin-analytics" id="adminAnalytics">
+        <div class="analytics-toggle">
+          <button onclick="toggleAnalytics()">Show/Hide Analytics</button>
+        </div>
+        <div id="analyticsContent" style="display: none;">
+          <div class="analytics-grid">
+            <div class="chart-card">
+              <h3>Conversions (30 days)</h3>
+              <div class="chart-container">
+                <canvas id="conversionsChart" class="chart-canvas"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <h3>Users (30 days)</h3>
+              <div class="chart-container">
+                <canvas id="usersChart" class="chart-canvas"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <h3>Reports (30 days)</h3>
+              <div class="chart-container">
+                <canvas id="reportsChart" class="chart-canvas"></canvas>
+              </div>
+            </div>
+            <div class="chart-card">
+              <h3>Votes (30 days)</h3>
+              <div class="chart-container">
+                <canvas id="votesChart" class="chart-canvas"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <div class="suspicious-section">
+            <h3>Suspicious Activity Monitor</h3>
+            <div class="suspicious-grid">
+              <div class="suspicious-card">
+                <h4>High Activity Users (24h)</h4>
+                <ul id="suspiciousHighActivity">
+                  <li class="empty">None detected</li>
+                </ul>
+              </div>
+              <div class="suspicious-card">
+                <h4>Heavily Reported Content</h4>
+                <ul id="suspiciousHeavilyReported">
+                  <li class="empty">None detected</li>
+                </ul>
+              </div>
+              <div class="suspicious-card">
+                <h4>Recently Banned Users</h4>
+                <ul id="suspiciousRecentBans">
+                  <li class="empty">None</li>
+                </ul>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -7023,6 +7235,174 @@ Tags: ${c.tags.join(', ')}`;
         }
       } catch (err) {
         console.error('Failed to load admin stats:', err);
+      }
+    }
+
+    let analyticsVisible = false;
+
+    function toggleAnalytics() {
+      analyticsVisible = !analyticsVisible;
+      const content = document.getElementById('analyticsContent');
+      content.style.display = analyticsVisible ? 'block' : 'none';
+      if (analyticsVisible) {
+        loadAdminAnalytics();
+      }
+    }
+
+    async function loadAdminAnalytics() {
+      try {
+        const response = await fetch('/api/admin/analytics?days=30');
+        if (!response.ok) throw new Error('Failed to load analytics');
+        const data = await response.json();
+
+        // Render charts
+        renderLineChart('conversionsChart', data.conversionsOverTime, '#22c55e');
+        renderLineChart('usersChart', data.usersOverTime, '#3b82f6');
+        renderLineChart('reportsChart', data.reportsOverTime, '#ef4444');
+        renderLineChart('votesChart', data.votesOverTime, '#e1b74a');
+
+        // Render suspicious activity
+        renderSuspiciousActivity(data.suspiciousActivity);
+      } catch (err) {
+        console.error('Failed to load analytics:', err);
+      }
+    }
+
+    function renderLineChart(canvasId, data, color) {
+      const canvas = document.getElementById(canvasId);
+      if (!canvas) return;
+
+      const ctx = canvas.getContext('2d');
+      const rect = canvas.parentElement.getBoundingClientRect();
+      canvas.width = rect.width * window.devicePixelRatio;
+      canvas.height = rect.height * window.devicePixelRatio;
+      ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+
+      const width = rect.width;
+      const height = rect.height;
+      const padding = { top: 10, right: 10, bottom: 25, left: 35 };
+      const chartWidth = width - padding.left - padding.right;
+      const chartHeight = height - padding.top - padding.bottom;
+
+      ctx.clearRect(0, 0, width, height);
+
+      if (!data || data.length === 0) {
+        ctx.fillStyle = '#888';
+        ctx.font = '12px system-ui';
+        ctx.textAlign = 'center';
+        ctx.fillText('No data', width / 2, height / 2);
+        return;
+      }
+
+      // Fill dates for last 30 days
+      const today = new Date();
+      const filledData = [];
+      for (let i = 29; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(date.getDate() - i);
+        const dateStr = date.toISOString().split('T')[0];
+        const existing = data.find(d => d.date === dateStr);
+        filledData.push({ date: dateStr, count: existing ? existing.count : 0 });
+      }
+
+      const maxValue = Math.max(...filledData.map(d => d.count), 1);
+      const xStep = chartWidth / (filledData.length - 1 || 1);
+
+      // Draw grid lines
+      ctx.strokeStyle = '#e0e0e0';
+      ctx.lineWidth = 0.5;
+      for (let i = 0; i <= 4; i++) {
+        const y = padding.top + (chartHeight / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding.left, y);
+        ctx.lineTo(width - padding.right, y);
+        ctx.stroke();
+      }
+
+      // Draw line
+      ctx.strokeStyle = color;
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      filledData.forEach((d, i) => {
+        const x = padding.left + i * xStep;
+        const y = padding.top + chartHeight - (d.count / maxValue) * chartHeight;
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+
+      // Fill area under line
+      ctx.globalAlpha = 0.1;
+      ctx.fillStyle = color;
+      ctx.lineTo(padding.left + (filledData.length - 1) * xStep, padding.top + chartHeight);
+      ctx.lineTo(padding.left, padding.top + chartHeight);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha = 1;
+
+      // Draw dots on data points
+      ctx.fillStyle = color;
+      filledData.forEach((d, i) => {
+        if (d.count > 0) {
+          const x = padding.left + i * xStep;
+          const y = padding.top + chartHeight - (d.count / maxValue) * chartHeight;
+          ctx.beginPath();
+          ctx.arc(x, y, 3, 0, Math.PI * 2);
+          ctx.fill();
+        }
+      });
+
+      // Draw Y-axis labels
+      ctx.fillStyle = '#888';
+      ctx.font = '10px system-ui';
+      ctx.textAlign = 'right';
+      for (let i = 0; i <= 4; i++) {
+        const value = Math.round((maxValue / 4) * (4 - i));
+        const y = padding.top + (chartHeight / 4) * i + 3;
+        ctx.fillText(value.toString(), padding.left - 5, y);
+      }
+
+      // Draw X-axis labels (first and last date)
+      ctx.textAlign = 'center';
+      ctx.fillText(filledData[0].date.slice(5), padding.left, height - 5);
+      ctx.fillText(filledData[filledData.length - 1].date.slice(5), width - padding.right, height - 5);
+    }
+
+    function renderSuspiciousActivity(data) {
+      // High activity users
+      const highActivityEl = document.getElementById('suspiciousHighActivity');
+      if (highActivityEl) {
+        if (data.highActivityUsers && data.highActivityUsers.length > 0) {
+          highActivityEl.innerHTML = data.highActivityUsers.map(u =>
+            `<li>@${escapeHtml(u.username)} - ${u.conversions_24h} conversions, ${u.votes_24h} votes</li>`
+          ).join('');
+        } else {
+          highActivityEl.innerHTML = '<li class="empty">None detected</li>';
+        }
+      }
+
+      // Heavily reported
+      const heavilyReportedEl = document.getElementById('suspiciousHeavilyReported');
+      if (heavilyReportedEl) {
+        if (data.heavilyReported && data.heavilyReported.length > 0) {
+          heavilyReportedEl.innerHTML = data.heavilyReported.map(c =>
+            `<li>"${escapeHtml(c.name)}" - ${c.report_count} reports</li>`
+          ).join('');
+        } else {
+          heavilyReportedEl.innerHTML = '<li class="empty">None detected</li>';
+        }
+      }
+
+      // Recent bans
+      const recentBansEl = document.getElementById('suspiciousRecentBans');
+      if (recentBansEl) {
+        if (data.recentBans && data.recentBans.length > 0) {
+          recentBansEl.innerHTML = data.recentBans.map(u =>
+            `<li>@${escapeHtml(u.username)}</li>`
+          ).join('');
+        } else {
+          recentBansEl.innerHTML = '<li class="empty">None</li>';
+        }
       }
     }
 
