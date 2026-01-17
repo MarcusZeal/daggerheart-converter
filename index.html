@@ -2325,6 +2325,7 @@
       top: 0;
       z-index: 5;
       transition: padding 0.2s ease, box-shadow 0.2s ease;
+      border-bottom: 3px solid var(--accent);
     }
 
     .dh-stat-block-header.compact {
@@ -2761,9 +2762,8 @@
     /* Card-style Modal (Community & Library) */
     .dh-modal-card {
       position: relative;
-      max-width: 600px;
       width: 100%;
-      max-height: 90vh;
+      max-height: 85vh;
       overflow-y: auto;
       border-radius: 6px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.3);
@@ -2806,27 +2806,41 @@
       border-radius: 0;
     }
 
+    /* Modal wrapper for positioning close button outside */
+    .dh-modal-wrapper {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      max-width: 600px;
+      width: 100%;
+    }
+
     .dh-modal-close {
       position: absolute;
-      top: 0.5rem;
-      right: 0.5rem;
+      top: -40px;
+      right: 0;
       z-index: 10;
-      background: rgba(0,0,0,0.5);
-      border: none;
+      background: var(--accent);
+      border: 2px solid rgba(255,255,255,0.3);
       color: #fff;
-      width: 32px;
-      height: 32px;
+      width: 36px;
+      height: 36px;
       border-radius: 50%;
-      font-size: 1.25rem;
+      font-size: 1.5rem;
+      font-weight: 300;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.2s;
+      transition: all 0.2s;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
     }
 
     .dh-modal-close:hover {
-      background: rgba(0,0,0,0.7);
+      background: #d4a84b;
+      transform: scale(1.1);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.4);
     }
 
     .dh-modal-footer {
@@ -4459,10 +4473,24 @@
     /* Dark header section */
     .dh-card-header {
       background: #2d2d2d;
+      background: linear-gradient(135deg, #2d2d2d 0%, var(--type-color, #2d2d2d) 100%);
       color: #fff;
       padding: 0.75rem 1rem;
       padding-right: 3.5rem;
+      border-bottom: 2px solid var(--accent);
     }
+
+    /* Adversary type colors for cards */
+    .dh-card-header[data-type="bruiser"] { --type-color: #8B2635; }
+    .dh-card-header[data-type="horde"] { --type-color: #B5651D; }
+    .dh-card-header[data-type="leader"] { --type-color: #6B3FA0; }
+    .dh-card-header[data-type="minion"] { --type-color: #4a4a4a; }
+    .dh-card-header[data-type="ranged"] { --type-color: #2E5984; }
+    .dh-card-header[data-type="skulk"] { --type-color: #2D5A3D; }
+    .dh-card-header[data-type="social"] { --type-color: #1D6B6B; }
+    .dh-card-header[data-type="solo"] { --type-color: #8B7500; }
+    .dh-card-header[data-type="standard"] { --type-color: #3d3d3d; }
+    .dh-card-header[data-type="support"] { --type-color: #7B3F7B; }
 
     .dh-card-name {
       font-family: var(--font-display);
@@ -5999,15 +6027,17 @@ The converter will auto-detect the source system."
 
   <!-- Adversary Detail Modal for My Library -->
   <div id="myLibraryModal" class="modal-overlay hidden" onclick="closeMyLibraryModal(event)">
-    <div class="dh-modal-card" onclick="event.stopPropagation()">
+    <div class="dh-modal-wrapper">
       <button class="dh-modal-close" onclick="closeMyLibraryModal()" aria-label="Close">&times;</button>
-      <div id="myLibraryModalStatBlock"></div>
-      <div class="dh-modal-footer">
-        <div class="dh-modal-actions">
-          <button class="btn" onclick="copyMyLibraryJSON()" title="Copy JSON">JSON</button>
-          <button class="btn" onclick="moveToGroup()" title="Move to different group">Move</button>
-          <button class="btn btn-danger" onclick="removeFromLibrary()" title="Remove from library">Remove</button>
-          <button class="btn btn-danger hidden" id="deleteFromServerBtn" onclick="deleteFromServer()" title="Delete from community server">Delete from Server</button>
+      <div class="dh-modal-card" onclick="event.stopPropagation()">
+        <div id="myLibraryModalStatBlock"></div>
+        <div class="dh-modal-footer">
+          <div class="dh-modal-actions">
+            <button class="btn" onclick="copyMyLibraryJSON()" title="Copy JSON">JSON</button>
+            <button class="btn" onclick="moveToGroup()" title="Move to different group">Move</button>
+            <button class="btn btn-danger" onclick="removeFromLibrary()" title="Remove from library">Remove</button>
+            <button class="btn btn-danger hidden" id="deleteFromServerBtn" onclick="deleteFromServer()" title="Delete from community server">Delete from Server</button>
+          </div>
         </div>
       </div>
     </div>
@@ -6015,26 +6045,28 @@ The converter will auto-detect the source system."
 
   <!-- Community Detail Modal -->
   <div id="communityModal" class="modal-overlay hidden" onclick="closeCommunityModal(event)">
-    <div class="dh-modal-card" onclick="event.stopPropagation()">
+    <div class="dh-modal-wrapper">
       <button class="dh-modal-close" onclick="closeCommunityModal()" aria-label="Close">&times;</button>
-      <div id="modalStatBlock"></div>
-      <div class="dh-modal-footer">
-        <div class="dh-modal-votes" id="modalVoteSection">
-          <button class="vote-btn upvote" id="modalUpvoteBtn" onclick="voteOnConversion(1)" title="Upvote">&#9650;</button>
-          <span class="vote-score" id="modalVoteScore">0</span>
-          <button class="vote-btn downvote" id="modalDownvoteBtn" onclick="voteOnConversion(-1)" title="Downvote">&#9660;</button>
-        </div>
-        <div class="dh-modal-actions">
-          <button class="btn" onclick="copyShareLink()" title="Copy share link">Share</button>
-          <button class="btn" onclick="copyModalJSON()" title="Copy JSON">JSON</button>
-          <button class="btn btn-save" onclick="addModalToLibrary()" title="Add to your library">Save</button>
-          <button class="btn" onclick="addModalToGroup()" title="Add to a group">Group</button>
-        </div>
-        <div class="dh-modal-secondary">
-          <span class="dh-modal-author" id="modalAuthor"></span>
-          <div class="dh-modal-secondary-actions">
-            <button class="dh-modal-delete hidden" id="modalDeleteBtn" onclick="deleteMyConversion()" title="Delete your submission">Delete</button>
-            <button class="dh-modal-report" onclick="openReportModal()" title="Report this conversion">Report</button>
+      <div class="dh-modal-card" onclick="event.stopPropagation()">
+        <div id="modalStatBlock"></div>
+        <div class="dh-modal-footer">
+          <div class="dh-modal-votes" id="modalVoteSection">
+            <button class="vote-btn upvote" id="modalUpvoteBtn" onclick="voteOnConversion(1)" title="Upvote">&#9650;</button>
+            <span class="vote-score" id="modalVoteScore">0</span>
+            <button class="vote-btn downvote" id="modalDownvoteBtn" onclick="voteOnConversion(-1)" title="Downvote">&#9660;</button>
+          </div>
+          <div class="dh-modal-actions">
+            <button class="btn" onclick="copyShareLink()" title="Copy share link">Share</button>
+            <button class="btn" onclick="copyModalJSON()" title="Copy JSON">JSON</button>
+            <button class="btn btn-save" onclick="addModalToLibrary()" title="Add to your library">Save</button>
+            <button class="btn" onclick="addModalToGroup()" title="Add to a group">Group</button>
+          </div>
+          <div class="dh-modal-secondary">
+            <span class="dh-modal-author" id="modalAuthor"></span>
+            <div class="dh-modal-secondary-actions">
+              <button class="dh-modal-delete hidden" id="modalDeleteBtn" onclick="deleteMyConversion()" title="Delete your submission">Delete</button>
+              <button class="dh-modal-report" onclick="openReportModal()" title="Report this conversion">Report</button>
+            </div>
           </div>
         </div>
       </div>
@@ -9751,9 +9783,11 @@ Tags: ${c.tags.join(', ')}`;
           if (damage) attackLine += `<span class="dh-stat-separator">|</span>${damage}${dmgType ? ' ' + dmgType : ''}`;
         }
 
+        const cardTypeClass = (conv.advType || 'standard').toLowerCase().trim();
+
         return `
           <div class="community-item" onclick="openCommunityModal('${conv.id}')">
-            <div class="dh-card-header">
+            <div class="dh-card-header" data-type="${cardTypeClass}">
               <div class="dh-card-name">${escapeHtml(conv.name)}</div>
               <div class="dh-card-tier-type">Tier ${conv.tier} ${conv.advType}</div>
             </div>
