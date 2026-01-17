@@ -2387,7 +2387,12 @@ function renderCombatAdversaries() {
       <div class="${cardClass}" id="combat-card-${adv.id}">
         <div class="dh-card-header" data-type="${cardTypeClass}">
           <div class="dh-card-name">${isDefeated ? '<s>' + adv.name + '</s>' : adv.name}${isDefeated ? ' <span class="defeated-badge">DEFEATED</span>' : ''}</div>
-          <div class="dh-card-tier-type">Tier ${adv.tier} ${adv.advType}</div>
+          <div class="dh-card-header-actions">
+            <span class="dh-card-tier-type">Tier ${adv.tier} ${adv.advType}</span>
+            <button class="combat-expand-btn" onclick="event.stopPropagation(); openCombatAdversaryModal('${adv.libraryId}')" title="View full card">
+              <i class="fas fa-expand"></i>
+            </button>
+          </div>
         </div>
 
         <div class="dh-card-body combat-card-body">
@@ -2495,12 +2500,6 @@ function renderCombatAdversaries() {
 
             <textarea class="combat-notes-input" placeholder="Notes..." rows="1" onclick="event.stopPropagation();" onchange="updateCombatNotes('${adv.id}', this.value)">${adv.notes}</textarea>
           </div>
-        </div>
-
-        <div class="dh-card-footer combat-card-footer">
-          <button class="combat-view-full-btn" onclick="event.stopPropagation(); openCombatAdversaryModal('${adv.libraryId}')">
-            <i class="fas fa-expand"></i> View Full Card
-          </button>
         </div>
       </div>
     `;
