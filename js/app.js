@@ -2285,10 +2285,10 @@ function startCombat() {
   // Log combat start
   addCombatLog(`Combat started: ${combatState.encounterName}`, 'info');
 
-  // Show combat mode
-  document.querySelector('.encounter-builder-container').classList.add('combat-active');
-  document.getElementById('combat-mode').classList.add('active');
+  // Show combat tab and switch to combat view
+  document.getElementById('combat-tab-btn').style.display = 'flex';
   document.getElementById('combat-encounter-name').textContent = combatState.encounterName;
+  switchEncounterTab('combat');
 
   renderCombatAdversaries();
   updateCombatPools();
@@ -2300,11 +2300,25 @@ function endCombat() {
   if (!confirm('End combat and return to encounter builder?')) return;
 
   combatState.active = false;
-  document.querySelector('.encounter-builder-container').classList.remove('combat-active');
-  document.getElementById('combat-mode').classList.remove('active');
+
+  // Hide combat tab and switch back to builder
+  document.getElementById('combat-tab-btn').style.display = 'none';
+  switchEncounterTab('builder');
 
   addCombatLog('Combat ended', 'info');
   localStorage.removeItem('dh-active-combat');
+}
+
+// Switch between encounter builder and combat views
+function switchEncounterTab(tabName) {
+  // Update tab buttons
+  document.querySelectorAll('.encounter-tab').forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.tab === tabName);
+  });
+
+  // Update views
+  document.getElementById('builder-view').classList.toggle('active', tabName === 'builder');
+  document.getElementById('combat-view').classList.toggle('active', tabName === 'combat');
 }
 
 // Render combat adversary cards (full card design matching site style)
@@ -2380,53 +2394,86 @@ function renderCombatAdversaries() {
           ${adv.description ? `<div class="dh-card-description">${escapeHtml(adv.description)}</div>` : ''}
           ${adv.motives ? `<div class="dh-card-motives"><strong>Motives & Tactics:</strong> ${escapeHtml(adv.motives)}</div>` : ''}
 
-          <div class="mini-stats-container">
-            <div class="mini-vitals-row">
-              <div class="mini-vital-box difficulty">
-                <span class="mini-vital-value">${adv.difficulty}</span>
-                <span class="mini-vital-label">Diff</span>
-              </div>
-              <div class="mini-vital-box hp">
-                <span class="mini-vital-value">${adv.maxHp}</span>
-                <span class="mini-vital-label">HP</span>
-              </div>
-              <div class="mini-vital-box stress">
-                <span class="mini-vital-value">${adv.maxStress}</span>
-                <span class="mini-vital-label">Stress</span>
-              </div>
+          <div class="dh-vitals-row">
+            <div class="dh-vital-box difficulty">
+              <span class="dh-vital-value">${adv.difficulty}</span>
+              <span class="dh-vital-label">Difficulty</span>
             </div>
-            <div class="mini-damage-tracker">
-              <div class="mini-damage-card ${adv.currentDamage > 0 && adv.currentDamage <= adv.majorThresh ? 'active' : ''}">
-                <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
-                  <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
-                    <path d="M -974.223 2292.978 L -974.223 2042.978 L -874.223 1942.978 L -874.223 1442.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
-                  </g>
-                </svg>
-                <span class="mini-card-label">Minor</span>
-              </div>
-              <div class="mini-connector"><span class="mini-connector-number">${adv.majorThresh}</span></div>
-              <div class="mini-damage-card ${isMajor ? 'active major' : ''}">
-                <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
-                  <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
-                    <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
-                    <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
-                  </g>
-                </svg>
-                <span class="mini-card-label">Major</span>
-              </div>
-              <div class="mini-connector"><span class="mini-connector-number">${adv.severeThresh}</span></div>
-              <div class="mini-damage-card ${isSevere || isDefeated ? 'active severe' : ''}">
-                <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
-                  <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
-                    <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
-                    <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
-                  </g>
-                </svg>
-                <span class="mini-card-label">Severe</span>
-              </div>
+            <div class="dh-vital-box hp">
+              <span class="dh-vital-value">${adv.maxHp}</span>
+              <span class="dh-vital-label">HP</span>
             </div>
-            ${attackLine ? `<div class="dh-card-stats-row">${attackLine}</div>` : ''}
+            <div class="dh-vital-box stress">
+              <span class="dh-vital-value">${adv.maxStress}</span>
+              <span class="dh-vital-label">Stress</span>
+            </div>
           </div>
+
+          <div class="damage-tracker-container combat-damage-tracker">
+            <div class="damage-scale-wrapper">
+              <div class="damage-cards-row">
+                <div class="damage-card-wrapper">
+                  <div class="damage-card-container ${adv.currentDamage > 0 && adv.currentDamage < adv.majorThresh ? 'active' : ''}">
+                    <div class="damage-card-body">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 120">
+                        <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975" stroke="none">
+                          <path d="M -974.223 2292.978 L -974.223 2042.978 L -874.223 1942.978 L -874.223 1442.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                        </g>
+                      </svg>
+                    </div>
+                    <div class="damage-card-text">Minor<br>Damage</div>
+                  </div>
+                  <div class="damage-card-footer">
+                    <p class="damage-card-footer-text">Mark 1 HP</p>
+                  </div>
+                </div>
+                <div class="damage-connector">
+                  <span class="damage-connector-number">${adv.majorThresh}</span>
+                </div>
+                <div class="damage-card-wrapper">
+                  <div class="damage-card-container ${isMajor ? 'active major' : ''}">
+                    <div class="damage-card-body">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 120">
+                        <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975" stroke="none">
+                          <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                          <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                        </g>
+                      </svg>
+                    </div>
+                    <div class="damage-card-text">Major<br>Damage</div>
+                  </div>
+                  <div class="damage-card-footer">
+                    <p class="damage-card-footer-text">Mark 2 HP</p>
+                  </div>
+                </div>
+                <div class="damage-connector">
+                  <span class="damage-connector-number">${adv.severeThresh}</span>
+                </div>
+                <div class="damage-card-wrapper">
+                  <div class="damage-card-container ${isSevere || isDefeated ? 'active severe' : ''}">
+                    <div class="damage-card-body">
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 250 120">
+                        <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975" stroke="none">
+                          <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                          <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                        </g>
+                      </svg>
+                    </div>
+                    <div class="damage-card-text">Severe<br>Damage</div>
+                  </div>
+                  <div class="damage-card-footer">
+                    <p class="damage-card-footer-text">Mark 3 HP</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          ${attackLine ? `
+          <div class="dh-stat-block-stats-line">
+            <span class="stat-item"><span class="label">ATK:</span> ${adv.atkMod}</span>${adv.weapon ? `<span class="separator">|</span><span class="stat-item"><span class="label">${adv.weapon}:</span> ${adv.range || 'Melee'}</span>` : ''}${adv.damage ? `<span class="separator">|</span><span class="stat-item">${highlightDiceRolls(adv.damage)} ${adv.dmgType || 'phy'}</span>` : ''}
+          </div>
+          ` : ''}
 
           <div class="combat-tracking-section">
             <div class="combat-tracking-row">
@@ -2462,12 +2509,19 @@ function renderCombatAdversaries() {
 
 // Open modal for combat adversary
 function openCombatAdversaryModal(libraryId) {
-  const adversary = getAllLibraryAdversaries().find(a => a.id === libraryId);
-  if (adversary) {
-    openAdversaryModal(adversary);
-  } else {
-    showToast('Adversary not found in library', 'error');
-  }
+  openMyLibraryAdversary(libraryId);
+}
+
+// Toggle compressed view for combat cards
+function toggleCompressedCombat() {
+  const container = document.getElementById('combat-adversaries');
+  container.classList.toggle('compressed');
+
+  const btn = document.getElementById('compress-toggle-btn');
+  const isCompressed = container.classList.contains('compressed');
+  btn.innerHTML = isCompressed
+    ? '<i class="fas fa-expand-alt"></i> Expand'
+    : '<i class="fas fa-compress-alt"></i> Compact';
 }
 
 // Toggle HP box (click to fill/unfill)
@@ -2746,9 +2800,11 @@ function loadCombatState() {
 // Resume combat if there was an active combat
 function checkForActiveCombat() {
   if (loadCombatState() && combatState.active) {
-    document.querySelector('.encounter-builder-container').classList.add('combat-active');
-    document.getElementById('combat-mode').classList.add('active');
+    // Show combat tab and switch to it
+    document.getElementById('combat-tab-btn').style.display = 'flex';
     document.getElementById('combat-encounter-name').textContent = combatState.encounterName;
+    switchEncounterTab('combat');
+
     renderCombatAdversaries();
     updateCombatPools();
     renderCombatLog();

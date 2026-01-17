@@ -454,9 +454,31 @@ The converter will auto-detect the source system."
   <!-- Encounter Builder Page -->
   <div id="encounter-builderPage" class="page-view">
     <div class="encounter-builder-container">
-      <!-- Header with party size and budget -->
-      <div class="encounter-header">
-        <h2>Encounter Builder</h2>
+      <!-- Tab Navigation for Builder/Combat toggle -->
+      <div class="encounter-tabs" id="encounter-tabs">
+        <button class="encounter-tab active" data-tab="builder" onclick="switchEncounterTab('builder')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+            <polyline points="14 2 14 8 20 8"/>
+            <line x1="12" y1="18" x2="12" y2="12"/>
+            <line x1="9" y1="15" x2="15" y2="15"/>
+          </svg>
+          Encounter Builder
+        </button>
+        <button class="encounter-tab" data-tab="combat" onclick="switchEncounterTab('combat')" id="combat-tab-btn" style="display: none;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 3v18M6 3v18M3 12h18M3 6h5M3 18h5M16 6h5M16 18h5"/>
+          </svg>
+          Combat Mode
+          <span class="combat-active-indicator" id="combat-active-dot"></span>
+        </button>
+      </div>
+
+      <!-- BUILDER VIEW -->
+      <div class="encounter-view builder-view active" id="builder-view">
+        <!-- Header with party size and budget -->
+        <div class="encounter-header">
+          <h2>Encounter Builder</h2>
         <div class="encounter-controls">
           <div class="party-size-control">
             <label>Party Size:</label>
@@ -554,14 +576,16 @@ The converter will auto-detect the source system."
         </div>
       </div>
 
-      <!-- Saved encounters section -->
-      <div class="saved-encounters-section">
-        <h3>Saved Encounters</h3>
-        <div id="saved-encounters-list"></div>
-      </div>
+        <!-- Saved encounters section -->
+        <div class="saved-encounters-section">
+          <h3>Saved Encounters</h3>
+          <div id="saved-encounters-list"></div>
+        </div>
+      </div><!-- End builder-view -->
 
-      <!-- Combat Mode -->
-      <div class="combat-mode" id="combat-mode">
+      <!-- COMBAT VIEW -->
+      <div class="encounter-view combat-view" id="combat-view">
+        <div class="combat-mode" id="combat-mode">
         <div class="combat-header">
           <h2 class="combat-title" id="combat-encounter-name">Combat</h2>
           <div class="combat-pools">
@@ -575,6 +599,7 @@ The converter will auto-detect the source system."
             </div>
           </div>
           <div class="combat-actions">
+            <button class="btn btn-secondary" id="compress-toggle-btn" onclick="toggleCompressedCombat()"><i class="fas fa-compress-alt"></i> Compact</button>
             <button class="btn btn-secondary" onclick="undoCombatAction()"><i class="fas fa-undo"></i> Undo</button>
             <button class="btn btn-secondary" onclick="exportCombatSummary()"><i class="fas fa-file-export"></i> Export</button>
             <button class="btn btn-primary" onclick="endCombat()" style="background: #ef4444; border-color: #ef4444;">
@@ -601,7 +626,8 @@ The converter will auto-detect the source system."
             </div>
           </div>
         </div>
-      </div>
+        </div><!-- End combat-mode -->
+      </div><!-- End combat-view -->
     </div>
   </div>
 
