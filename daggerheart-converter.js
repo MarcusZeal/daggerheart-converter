@@ -387,6 +387,76 @@ const DaggerheartConverter = (function() {
   }
 
   /**
+   * Parse fear cost from feature name or description
+   * Supports multiple formats:
+   * 1. In name: "Breath Weapon (Fear 2)" or "Breath Weapon 💀💀"
+   * 2. As prefix: "[Fear 2] Breath Weapon"
+   * 3. In description: "Fear Cost: 2" or "costs 2 Fear"
+   * 4. Daggerheart format: "Fear Feature:" prefix
+   * Returns { fearCost, cleanName, cleanDesc }
+   */
+  function parseFearCost(name, description) {
+    let fearCost = 0;
+    let cleanName = name;
+    let cleanDesc = description;
+
+    // Pattern 1: Skull emojis in name (💀💀 = 2 fear)
+    const skullMatch = name.match(/💀+/);
+    if (skullMatch) {
+      fearCost = skullMatch[0].length;
+      cleanName = name.replace(/\s*💀+\s*/, '').trim();
+    }
+
+    // Pattern 2: (Fear X) or (Fear: X) in name
+    const fearParenMatch = name.match(/\s*\(Fear\s*:?\s*(\d+)\)\s*/i);
+    if (fearParenMatch) {
+      fearCost = parseInt(fearParenMatch[1]);
+      cleanName = name.replace(fearParenMatch[0], '').trim();
+    }
+
+    // Pattern 3: [Fear X] prefix in name
+    const fearBracketMatch = name.match(/^\s*\[Fear\s*:?\s*(\d+)\]\s*/i);
+    if (fearBracketMatch) {
+      fearCost = parseInt(fearBracketMatch[1]);
+      cleanName = name.replace(fearBracketMatch[0], '').trim();
+    }
+
+    // Pattern 4: "Fear Feature:" prefix in name (Daggerheart official format)
+    if (name.match(/^Fear\s+Feature\s*:/i)) {
+      fearCost = fearCost || 1; // Default to 1 if not specified elsewhere
+      cleanName = name.replace(/^Fear\s+Feature\s*:\s*/i, '').trim();
+    }
+
+    // Pattern 5: Fear cost in description - "Fear Cost: X" or "Fear: X"
+    const descFearMatch = description.match(/Fear\s*Cost\s*:\s*(\d+)/i) ||
+                          description.match(/\bFear\s*:\s*(\d+)/i);
+    if (descFearMatch) {
+      fearCost = parseInt(descFearMatch[1]);
+      cleanDesc = description.replace(descFearMatch[0], '').trim();
+    }
+
+    // Pattern 6: "costs X Fear" or "spend X Fear" in description
+    const costsFearMatch = description.match(/(?:costs?|spends?)\s+(\d+)\s+Fear/i);
+    if (costsFearMatch) {
+      fearCost = parseInt(costsFearMatch[1]);
+      // Don't remove this from description as it's part of the mechanic explanation
+    }
+
+    // Pattern 7: Skull emojis in description
+    const descSkullMatch = description.match(/💀+/);
+    if (descSkullMatch && fearCost === 0) {
+      fearCost = descSkullMatch[0].length;
+      cleanDesc = description.replace(/\s*💀+\s*/, '').trim();
+    }
+
+    // Clean up any double spaces
+    cleanName = cleanName.replace(/\s+/g, ' ').trim();
+    cleanDesc = cleanDesc.replace(/\s+/g, ' ').trim();
+
+    return { fearCost, cleanName, cleanDesc };
+  }
+
+  /**
    * Convert D&D feature to Daggerheart feature
    */
   function convertFeature(dndFeature, tier) {
@@ -399,24 +469,35 @@ const DaggerheartConverter = (function() {
       }
     }
 
+    // Parse fear cost from name and description
+    const { fearCost, cleanName, cleanDesc: initialCleanDesc } = parseFearCost(
+      dndFeature.name,
+      dndFeature.description
+    );
+
     // Determine feature type
     let featureType = 'Passive';
 
+    // If it has a fear cost, it's typically an Action (Fear Feature)
+    if (fearCost > 0) {
+      featureType = 'Action';
+    }
+
     // Check if it's an action
     if (dndFeature.isAttack ||
-        dndFeature.description.toLowerCase().includes('can use') ||
-        dndFeature.description.toLowerCase().includes('as an action')) {
+        initialCleanDesc.toLowerCase().includes('can use') ||
+        initialCleanDesc.toLowerCase().includes('as an action')) {
       featureType = 'Action';
     }
 
     // Check if it's a reaction
-    if (dndFeature.description.toLowerCase().includes('reaction') ||
-        dndFeature.description.toLowerCase().includes('when')) {
+    if (initialCleanDesc.toLowerCase().includes('reaction') ||
+        initialCleanDesc.toLowerCase().includes('when')) {
       featureType = 'Reaction';
     }
 
     // Convert the description
-    let desc = dndFeature.description;
+    let desc = initialCleanDesc;
 
     // Replace DC references with Daggerheart difficulty
     const dcMatch = desc.match(/DC\s*(\d+)/i);
@@ -435,10 +516,10 @@ const DaggerheartConverter = (function() {
       .trim();
 
     return {
-      name: dndFeature.name,
+      name: cleanName,
       type: featureType,
       desc: desc,
-      fearCost: 0 // Default no fear cost
+      fearCost: fearCost
     };
   }
 
