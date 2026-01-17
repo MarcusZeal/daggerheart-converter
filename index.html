@@ -277,6 +277,301 @@
       color: var(--text-secondary);
     }
 
+    /* My Library Page Styles */
+    .my-library-page {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+
+    .my-library-header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+
+    .my-library-header h1 {
+      color: var(--accent);
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .my-library-header p {
+      color: var(--text-secondary);
+    }
+
+    .my-library-container {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.5rem;
+      min-height: 500px;
+    }
+
+    .groups-sidebar {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .groups-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .groups-header h3 {
+      color: var(--accent);
+      font-size: 1rem;
+      margin: 0;
+    }
+
+    .groups-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      flex: 1;
+      overflow-y: auto;
+      max-height: 400px;
+    }
+
+    .group-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-input);
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+      width: 100%;
+      text-align: left;
+      color: var(--text-primary);
+    }
+
+    .group-item:hover {
+      border-color: var(--border);
+      background: var(--bg-dark);
+    }
+
+    .group-item.active {
+      border-color: var(--accent);
+      background: var(--bg-dark);
+    }
+
+    .group-icon {
+      font-size: 1.25rem;
+    }
+
+    .group-name {
+      flex: 1;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .group-count {
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      padding: 0.15rem 0.5rem;
+      border-radius: 10px;
+      font-size: 0.8rem;
+      min-width: 24px;
+      text-align: center;
+    }
+
+    .ungrouped-section {
+      border-top: 1px solid var(--border);
+      padding-top: 0.75rem;
+      margin-top: auto;
+    }
+
+    .ungrouped-btn {
+      background: transparent;
+    }
+
+    .group-content {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .group-content-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .group-title-section {
+      display: flex;
+      align-items: baseline;
+      gap: 0.75rem;
+    }
+
+    .group-title-section h2 {
+      color: var(--accent);
+      font-size: 1.25rem;
+      margin: 0;
+    }
+
+    .group-item-count {
+      color: var(--text-secondary);
+      font-size: 0.9rem;
+    }
+
+    .group-actions {
+      display: flex;
+      gap: 0.5rem;
+    }
+
+    .group-items {
+      padding: 1.5rem;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .group-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 300px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+
+    .group-empty-state .empty-icon {
+      font-size: 3rem;
+      margin-bottom: 1rem;
+      opacity: 0.5;
+    }
+
+    .group-empty-state .empty-hint {
+      font-size: 0.85rem;
+      opacity: 0.7;
+      margin-top: 0.5rem;
+    }
+
+    .group-adversary-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    .group-adversary-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .group-adversary-card:hover {
+      border-color: var(--accent);
+      transform: translateY(-2px);
+    }
+
+    .group-adversary-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 0.5rem;
+    }
+
+    .group-adversary-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      font-size: 1.1rem;
+    }
+
+    .group-adversary-tier {
+      background: var(--accent);
+      color: var(--bg-dark);
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .group-adversary-type {
+      color: var(--text-secondary);
+      font-size: 0.85rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .group-adversary-stats {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .group-adversary-stats span {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    /* Add to Group Modal */
+    .modal-small {
+      max-width: 400px;
+    }
+
+    .add-to-group-name {
+      font-weight: 600;
+      color: var(--accent);
+      margin-bottom: 1rem;
+      font-size: 1.1rem;
+    }
+
+    .group-select-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 250px;
+      overflow-y: auto;
+      margin-bottom: 1rem;
+    }
+
+    .group-select-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .group-select-item:hover {
+      border-color: var(--accent);
+      background: var(--bg-dark);
+    }
+
+    .create-new-group-inline {
+      display: flex;
+      gap: 0.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .create-new-group-inline input {
+      flex: 1;
+    }
+
     @media (max-width: 768px) {
       .navbar-inner {
         flex-wrap: wrap;
@@ -310,6 +605,26 @@
 
       .community-page {
         padding: 1rem;
+      }
+
+      .my-library-page {
+        padding: 1rem;
+      }
+
+      .my-library-container {
+        grid-template-columns: 1fr;
+      }
+
+      .groups-sidebar {
+        order: 1;
+      }
+
+      .groups-list {
+        max-height: 200px;
+      }
+
+      .group-content {
+        order: 2;
       }
     }
 
@@ -2594,6 +2909,15 @@
           </svg>
           <span>Converter</span>
         </a>
+        <a href="#" class="nav-link" data-page="myLibrary" onclick="navigateTo('myLibrary'); return false;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+            <line x1="12" y1="6" x2="12" y2="12"/>
+            <line x1="9" y1="9" x2="15" y2="9"/>
+          </svg>
+          <span>My Library</span>
+        </a>
         <a href="#" class="nav-link" data-page="community" onclick="navigateTo('community'); return false;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
@@ -2808,6 +3132,10 @@ The converter will auto-detect the source system."
                     title="Add to DM Screen library">
               + Library
             </button>
+            <button class="btn btn-secondary btn-small" onclick="addConvertedToGroup()" id="groupBtn" disabled
+                    title="Add to a group">
+              + Group
+            </button>
             <button class="btn btn-share btn-small" onclick="shareToCommunity()" id="shareBtn" disabled
                     title="Share to community library">
               Share
@@ -2921,6 +3249,97 @@ The converter will auto-detect the source system."
     </div>
   </div>
 
+  <!-- My Library Page -->
+  <div id="myLibraryPage" class="page-view">
+    <div class="my-library-page">
+      <div class="my-library-header">
+        <h1>My Library</h1>
+        <p>Organize your converted adversaries into groups for encounters and campaigns</p>
+      </div>
+
+      <div class="my-library-container">
+        <!-- Groups Sidebar -->
+        <div class="groups-sidebar">
+          <div class="groups-header">
+            <h3>Groups</h3>
+            <button class="btn btn-small btn-success" onclick="createNewGroup()" title="Create new group">+ New Group</button>
+          </div>
+          <div class="groups-list" id="groupsList">
+            <!-- Groups populated by JavaScript -->
+          </div>
+          <div class="ungrouped-section">
+            <button class="group-item ungrouped-btn" onclick="selectGroup('ungrouped')" data-group="ungrouped">
+              <span class="group-icon">📋</span>
+              <span class="group-name">Ungrouped</span>
+              <span class="group-count" id="ungroupedCount">0</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Group Content Area -->
+        <div class="group-content">
+          <div class="group-content-header" id="groupContentHeader">
+            <div class="group-title-section">
+              <h2 id="currentGroupName">Select a Group</h2>
+              <span class="group-item-count" id="groupItemCount"></span>
+            </div>
+            <div class="group-actions" id="groupActions" style="display: none;">
+              <button class="btn btn-secondary btn-small" onclick="renameCurrentGroup()" title="Rename group">Rename</button>
+              <button class="btn btn-danger btn-small" onclick="deleteCurrentGroup()" title="Delete group">Delete</button>
+            </div>
+          </div>
+          <div class="group-items" id="groupItems">
+            <div class="group-empty-state">
+              <div class="empty-icon">📚</div>
+              <p>Select a group to view its adversaries</p>
+              <p class="empty-hint">Create a group and add adversaries from your conversions or the community library</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Add to Group Modal -->
+  <div id="addToGroupModal" class="modal-overlay hidden" onclick="closeAddToGroupModal(event)">
+    <div class="modal-content modal-small" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Add to Group</h2>
+        <button class="modal-close" onclick="closeAddToGroupModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="add-to-group-name" id="addToGroupAdversaryName"></p>
+        <div class="group-select-list" id="groupSelectList">
+          <!-- Groups populated by JavaScript -->
+        </div>
+        <div class="create-new-group-inline">
+          <input type="text" id="newGroupNameInline" placeholder="Or create new group..." class="form-input">
+          <button class="btn btn-success btn-small" onclick="createGroupAndAdd()">Create & Add</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Adversary Detail Modal for My Library -->
+  <div id="myLibraryModal" class="modal-overlay hidden" onclick="closeMyLibraryModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2 id="myLibraryModalTitle">Adversary Details</h2>
+        <button class="modal-close" onclick="closeMyLibraryModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="myLibraryModalStatBlock" class="stat-block"></div>
+      </div>
+      <div class="modal-footer">
+        <div class="btn-group">
+          <button class="btn btn-secondary btn-small" onclick="copyMyLibraryJSON()" title="Copy JSON">Copy JSON</button>
+          <button class="btn btn-secondary btn-small" onclick="moveToGroup()" title="Move to different group">Move to Group</button>
+          <button class="btn btn-danger btn-small" onclick="removeFromLibrary()" title="Remove from library">Remove</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Community Detail Modal -->
   <div id="communityModal" class="modal-overlay hidden" onclick="closeCommunityModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
@@ -2941,6 +3360,7 @@ The converter will auto-detect the source system."
           <button class="btn btn-secondary btn-small" onclick="copyShareLink()" title="Copy share link">Share Link</button>
           <button class="btn btn-secondary btn-small" onclick="copyModalJSON()" title="Copy JSON">Copy JSON</button>
           <button class="btn btn-success btn-small" onclick="addModalToLibrary()" title="Add to your library">Add to Library</button>
+          <button class="btn btn-secondary btn-small" onclick="addModalToGroup()" title="Add to a group">Add to Group</button>
         </div>
       </div>
       <div class="modal-actions-secondary">
@@ -3733,6 +4153,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       document.getElementById('copyTextBtn').disabled = false;
       document.getElementById('downloadBtn').disabled = false;
       document.getElementById('libraryBtn').disabled = false;
+      document.getElementById('groupBtn').disabled = false;
       document.getElementById('shareBtn').disabled = false;
       document.getElementById('printBtn').disabled = false;
     }
@@ -4306,6 +4727,32 @@ Tags: ${c.tags.join(', ')}`;
       }
     }
 
+    function addConvertedToGroup() {
+      if (!currentConverted) {
+        showToast('Nothing to add. Convert a stat block first.', 'error');
+        return;
+      }
+
+      // First add to library if not already there
+      try {
+        const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+        const exportObj = getExportObject();
+        exportObj._userCreated = true;
+
+        const existing = existingLibrary.findIndex(item => item.id === exportObj.id);
+        if (existing < 0) {
+          existingLibrary.push(exportObj);
+          localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+        }
+
+        // Then open group selection modal
+        addAdversaryToGroup(exportObj);
+      } catch (e) {
+        console.error(e);
+        showToast('Could not add to group: ' + e.message, 'error');
+      }
+    }
+
     // ==================== CLEAR ====================
     function clearAll() {
       document.getElementById('inputText').value = '';
@@ -4314,7 +4761,7 @@ Tags: ${c.tags.join(', ')}`;
       document.getElementById('overrideTier').value = '';
       document.getElementById('overrideType').value = '';
 
-      ['copyBtn', 'copyMdBtn', 'copyTextBtn', 'downloadBtn', 'libraryBtn', 'printBtn'].forEach(id => {
+      ['copyBtn', 'copyMdBtn', 'copyTextBtn', 'downloadBtn', 'libraryBtn', 'groupBtn', 'shareBtn', 'printBtn'].forEach(id => {
         document.getElementById(id).disabled = true;
       });
 
@@ -4555,6 +5002,398 @@ Tags: ${c.tags.join(', ')}`;
       if (page === 'community' && !communityLoaded) {
         loadCommunityConversions();
       }
+
+      // Load My Library when navigating to it
+      if (page === 'myLibrary') {
+        loadMyLibrary();
+      }
+    }
+
+    // ==================== MY LIBRARY ====================
+    let myLibraryGroups = [];
+    let selectedGroupId = null;
+    let selectedMyLibraryAdversary = null;
+    let adversaryToAdd = null;
+
+    function loadMyLibrary() {
+      loadGroupsFromStorage();
+      renderGroupsList();
+      renderUngroupedCount();
+
+      // Auto-select ungrouped if no group selected
+      if (!selectedGroupId) {
+        selectGroup('ungrouped');
+      }
+    }
+
+    function loadGroupsFromStorage() {
+      try {
+        const stored = localStorage.getItem('dh-groups');
+        myLibraryGroups = stored ? JSON.parse(stored) : [];
+      } catch (e) {
+        console.error('Failed to load groups:', e);
+        myLibraryGroups = [];
+      }
+    }
+
+    function saveGroupsToStorage() {
+      try {
+        localStorage.setItem('dh-groups', JSON.stringify(myLibraryGroups));
+      } catch (e) {
+        console.error('Failed to save groups:', e);
+        showToast('Failed to save groups', 'error');
+      }
+    }
+
+    function getUngroupedAdversaries() {
+      try {
+        const library = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+        const groupedIds = new Set();
+        myLibraryGroups.forEach(g => {
+          (g.adversaries || []).forEach(a => groupedIds.add(a.id));
+        });
+        return library.filter(a => !groupedIds.has(a.id));
+      } catch (e) {
+        return [];
+      }
+    }
+
+    function renderGroupsList() {
+      const container = document.getElementById('groupsList');
+      if (!container) return;
+
+      if (myLibraryGroups.length === 0) {
+        container.innerHTML = `
+          <div class="groups-empty">
+            <p style="color: var(--text-secondary); font-size: 0.85rem; text-align: center; padding: 1rem;">
+              No groups yet. Create one to organize your adversaries.
+            </p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = myLibraryGroups.map(group => `
+        <button class="group-item ${selectedGroupId === group.id ? 'active' : ''}"
+                onclick="selectGroup('${group.id}')"
+                data-group="${group.id}">
+          <span class="group-icon">${group.icon || '📁'}</span>
+          <span class="group-name">${escapeHtml(group.name)}</span>
+          <span class="group-count">${(group.adversaries || []).length}</span>
+        </button>
+      `).join('');
+    }
+
+    function renderUngroupedCount() {
+      const countEl = document.getElementById('ungroupedCount');
+      if (countEl) {
+        countEl.textContent = getUngroupedAdversaries().length;
+      }
+    }
+
+    function selectGroup(groupId) {
+      selectedGroupId = groupId;
+
+      // Update sidebar selection
+      document.querySelectorAll('.group-item').forEach(el => {
+        el.classList.toggle('active', el.dataset.group === groupId);
+      });
+
+      // Update content area
+      const nameEl = document.getElementById('currentGroupName');
+      const countEl = document.getElementById('groupItemCount');
+      const actionsEl = document.getElementById('groupActions');
+      const itemsEl = document.getElementById('groupItems');
+
+      if (groupId === 'ungrouped') {
+        nameEl.textContent = 'Ungrouped Adversaries';
+        actionsEl.style.display = 'none';
+        const ungrouped = getUngroupedAdversaries();
+        countEl.textContent = `(${ungrouped.length} items)`;
+        renderGroupAdversaries(ungrouped);
+      } else {
+        const group = myLibraryGroups.find(g => g.id === groupId);
+        if (group) {
+          nameEl.textContent = group.name;
+          countEl.textContent = `(${(group.adversaries || []).length} items)`;
+          actionsEl.style.display = 'flex';
+          renderGroupAdversaries(group.adversaries || []);
+        }
+      }
+    }
+
+    function renderGroupAdversaries(adversaries) {
+      const container = document.getElementById('groupItems');
+      if (!container) return;
+
+      if (!adversaries || adversaries.length === 0) {
+        container.innerHTML = `
+          <div class="group-empty-state">
+            <div class="empty-icon">⚔️</div>
+            <p>No adversaries in this group</p>
+            <p class="empty-hint">Add adversaries from the Converter or Community Library</p>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = `
+        <div class="group-adversary-grid">
+          ${adversaries.map(adv => `
+            <div class="group-adversary-card" onclick="openMyLibraryAdversary('${adv.id}')">
+              <div class="group-adversary-card-header">
+                <span class="group-adversary-name">${escapeHtml(adv.name || 'Unknown')}</span>
+                <span class="group-adversary-tier">T${adv.tier || '?'}</span>
+              </div>
+              <div class="group-adversary-type">${adv.advType || 'Standard'}</div>
+              <div class="group-adversary-stats">
+                <span>HP: ${adv.hp || '?'}</span>
+                <span>Diff: ${adv.difficulty || '?'}</span>
+                ${adv.sourceSystem ? `<span>From: ${adv.sourceSystem}</span>` : ''}
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function createNewGroup() {
+      const name = prompt('Enter group name:');
+      if (!name || !name.trim()) return;
+
+      const newGroup = {
+        id: 'grp-' + Date.now(),
+        name: name.trim(),
+        icon: '📁',
+        adversaries: [],
+        createdAt: new Date().toISOString()
+      };
+
+      myLibraryGroups.push(newGroup);
+      saveGroupsToStorage();
+      renderGroupsList();
+      selectGroup(newGroup.id);
+      showToast(`Group "${name}" created`, 'success');
+    }
+
+    function renameCurrentGroup() {
+      if (!selectedGroupId || selectedGroupId === 'ungrouped') return;
+
+      const group = myLibraryGroups.find(g => g.id === selectedGroupId);
+      if (!group) return;
+
+      const newName = prompt('Enter new name:', group.name);
+      if (!newName || !newName.trim()) return;
+
+      group.name = newName.trim();
+      saveGroupsToStorage();
+      renderGroupsList();
+      document.getElementById('currentGroupName').textContent = group.name;
+      showToast(`Group renamed to "${group.name}"`, 'success');
+    }
+
+    function deleteCurrentGroup() {
+      if (!selectedGroupId || selectedGroupId === 'ungrouped') return;
+
+      const group = myLibraryGroups.find(g => g.id === selectedGroupId);
+      if (!group) return;
+
+      if (!confirm(`Delete group "${group.name}"? Adversaries will be moved to Ungrouped.`)) {
+        return;
+      }
+
+      // Move adversaries back to ungrouped (they stay in the main library)
+      myLibraryGroups = myLibraryGroups.filter(g => g.id !== selectedGroupId);
+      saveGroupsToStorage();
+      selectedGroupId = null;
+      renderGroupsList();
+      renderUngroupedCount();
+      selectGroup('ungrouped');
+      showToast(`Group "${group.name}" deleted`, 'info');
+    }
+
+    function openMyLibraryAdversary(adversaryId) {
+      let adversary = null;
+
+      // Find in groups
+      for (const group of myLibraryGroups) {
+        adversary = (group.adversaries || []).find(a => a.id === adversaryId);
+        if (adversary) break;
+      }
+
+      // Check ungrouped
+      if (!adversary) {
+        const ungrouped = getUngroupedAdversaries();
+        adversary = ungrouped.find(a => a.id === adversaryId);
+      }
+
+      if (!adversary) {
+        showToast('Adversary not found', 'error');
+        return;
+      }
+
+      selectedMyLibraryAdversary = adversary;
+
+      document.getElementById('myLibraryModalTitle').textContent = adversary.name || 'Adversary Details';
+      document.getElementById('myLibraryModalStatBlock').innerHTML = renderStatBlockReadOnly(adversary);
+      document.getElementById('myLibraryModal').classList.remove('hidden');
+    }
+
+    function closeMyLibraryModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('myLibraryModal').classList.add('hidden');
+      selectedMyLibraryAdversary = null;
+    }
+
+    function copyMyLibraryJSON() {
+      if (!selectedMyLibraryAdversary) return;
+      navigator.clipboard.writeText(JSON.stringify(selectedMyLibraryAdversary, null, 2));
+      showToast('JSON copied to clipboard', 'success');
+    }
+
+    function moveToGroup() {
+      if (!selectedMyLibraryAdversary) return;
+      adversaryToAdd = selectedMyLibraryAdversary;
+      openAddToGroupModal(selectedMyLibraryAdversary.name, true);
+    }
+
+    function removeFromLibrary() {
+      if (!selectedMyLibraryAdversary) return;
+
+      if (!confirm(`Remove "${selectedMyLibraryAdversary.name}" from your library?`)) {
+        return;
+      }
+
+      const advId = selectedMyLibraryAdversary.id;
+
+      // Remove from groups
+      myLibraryGroups.forEach(group => {
+        group.adversaries = (group.adversaries || []).filter(a => a.id !== advId);
+      });
+      saveGroupsToStorage();
+
+      // Remove from main library
+      try {
+        let library = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+        library = library.filter(a => a.id !== advId);
+        localStorage.setItem('dh-user-library', JSON.stringify(library));
+      } catch (e) {
+        console.error('Failed to remove from library:', e);
+      }
+
+      closeMyLibraryModal();
+      loadMyLibrary();
+      showToast('Adversary removed', 'info');
+    }
+
+    // Add to Group Modal Functions
+    function openAddToGroupModal(adversaryName, isMove = false) {
+      document.getElementById('addToGroupAdversaryName').textContent =
+        isMove ? `Move "${adversaryName}" to:` : `Add "${adversaryName}" to:`;
+
+      const listEl = document.getElementById('groupSelectList');
+
+      if (myLibraryGroups.length === 0) {
+        listEl.innerHTML = `
+          <p style="color: var(--text-secondary); text-align: center; padding: 1rem;">
+            No groups yet. Create one below.
+          </p>
+        `;
+      } else {
+        listEl.innerHTML = myLibraryGroups.map(group => `
+          <div class="group-select-item" onclick="addToGroup('${group.id}')">
+            <span class="group-icon">${group.icon || '📁'}</span>
+            <span class="group-name">${escapeHtml(group.name)}</span>
+            <span class="group-count">${(group.adversaries || []).length}</span>
+          </div>
+        `).join('');
+      }
+
+      document.getElementById('newGroupNameInline').value = '';
+      document.getElementById('addToGroupModal').classList.remove('hidden');
+    }
+
+    function closeAddToGroupModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('addToGroupModal').classList.add('hidden');
+      adversaryToAdd = null;
+    }
+
+    function addToGroup(groupId) {
+      if (!adversaryToAdd) return;
+
+      const group = myLibraryGroups.find(g => g.id === groupId);
+      if (!group) {
+        showToast('Group not found', 'error');
+        return;
+      }
+
+      // Remove from other groups if moving
+      myLibraryGroups.forEach(g => {
+        g.adversaries = (g.adversaries || []).filter(a => a.id !== adversaryToAdd.id);
+      });
+
+      // Check if already in this group
+      if (!group.adversaries) group.adversaries = [];
+      const exists = group.adversaries.some(a => a.id === adversaryToAdd.id);
+      if (!exists) {
+        group.adversaries.push(adversaryToAdd);
+      }
+
+      saveGroupsToStorage();
+      closeAddToGroupModal();
+      closeMyLibraryModal();
+
+      if (currentPage === 'myLibrary') {
+        loadMyLibrary();
+        selectGroup(groupId);
+      }
+
+      showToast(`Added to "${group.name}"`, 'success');
+    }
+
+    function createGroupAndAdd() {
+      const nameInput = document.getElementById('newGroupNameInline');
+      const name = nameInput.value.trim();
+      if (!name) {
+        showToast('Enter a group name', 'error');
+        return;
+      }
+
+      const newGroup = {
+        id: 'grp-' + Date.now(),
+        name: name,
+        icon: '📁',
+        adversaries: adversaryToAdd ? [adversaryToAdd] : [],
+        createdAt: new Date().toISOString()
+      };
+
+      // Remove from other groups if we're adding to new group
+      if (adversaryToAdd) {
+        myLibraryGroups.forEach(g => {
+          g.adversaries = (g.adversaries || []).filter(a => a.id !== adversaryToAdd.id);
+        });
+      }
+
+      myLibraryGroups.push(newGroup);
+      saveGroupsToStorage();
+
+      closeAddToGroupModal();
+      closeMyLibraryModal();
+
+      if (currentPage === 'myLibrary') {
+        loadMyLibrary();
+        selectGroup(newGroup.id);
+      }
+
+      showToast(`Group "${name}" created`, 'success');
+    }
+
+    // Function to add adversary to group from converter or community
+    function addAdversaryToGroup(adversary) {
+      adversaryToAdd = adversary;
+      loadGroupsFromStorage();
+      openAddToGroupModal(adversary.name);
     }
 
     // ==================== LOGIN MODAL ====================
@@ -4941,6 +5780,27 @@ Tags: ${c.tags.join(', ')}`;
       } catch (err) {
         showToast('Could not add to library: ' + err.message, 'error');
       }
+    }
+
+    function addModalToGroup() {
+      if (!selectedConversion) return;
+
+      // First add to library if not already there
+      try {
+        const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+        const data = { ...selectedConversion.data, _userCreated: true };
+
+        const existing = existingLibrary.findIndex(item => item.id === data.id);
+        if (existing < 0) {
+          existingLibrary.push(data);
+          localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+        }
+      } catch (err) {
+        console.error('Failed to add to library:', err);
+      }
+
+      // Then open group selection modal
+      addAdversaryToGroup(selectedConversion.data);
     }
 
     function copyShareLink() {
