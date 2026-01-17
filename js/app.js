@@ -5241,6 +5241,7 @@ async function openCommunityModal(conversionId) {
   updateModalVotes();
   updateModalAuthor();
   updateDeleteButton();
+  updateModalSaveStar();
 
   // Update URL for direct linking (only if not already on this URL)
   if (window.location.pathname !== `/community/${conversionId}`) {
@@ -5259,6 +5260,38 @@ function updateDeleteButton() {
 
   // Show delete button only if user owns this conversion
   deleteBtn.classList.toggle('hidden', !selectedConversion?.isOwner);
+}
+
+function updateModalSaveStar() {
+  const starBtn = document.getElementById('modalSaveStar');
+  if (!starBtn || !selectedConversion?.data) return;
+
+  const inLibrary = isInLibrary(selectedConversion.data.id);
+  starBtn.classList.toggle('saved', inLibrary);
+  starBtn.textContent = inLibrary ? '★' : '☆';
+  starBtn.title = inLibrary ? 'Remove from library' : 'Save to library';
+}
+
+function toggleModalLibrarySave() {
+  if (!selectedConversion?.data) return;
+
+  const inLibrary = isInLibrary(selectedConversion.data.id);
+
+  if (inLibrary) {
+    // Remove from library
+    myLibrary = myLibrary.filter(item => item.id !== selectedConversion.data.id);
+    saveLibraryToStorage();
+    showToast('Removed from library', 'info');
+  } else {
+    // Add to library
+    myLibrary.push(selectedConversion.data);
+    saveLibraryToStorage();
+    showToast('Added to library!', 'success');
+  }
+
+  updateModalSaveStar();
+  renderCommunityList(); // Update star states in the list
+  renderMyLibrary(); // Update library view if visible
 }
 
 async function deleteMyConversion() {

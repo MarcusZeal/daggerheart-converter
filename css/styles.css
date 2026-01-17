@@ -557,6 +557,11 @@ body {
   .navbar-inner {
     flex-wrap: nowrap;
   }
+
+  /* Utility class to hide elements on mobile */
+  .hide-on-mobile {
+    display: none !important;
+  }
 }
 
 /* Mobile auth section in slide-out menu */
@@ -1692,7 +1697,12 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.3);
 }
 
-/* Add to Group Modal */
+/* Add to Group Modal - higher z-index to appear over card modals */
+#addToGroupModal,
+#mobileFolderPicker {
+  z-index: 1100;
+}
+
 .modal-small {
   max-width: 400px;
 }
@@ -3438,9 +3448,47 @@ textarea::placeholder {
   box-shadow: 0 4px 12px rgba(0,0,0,0.4);
 }
 
-/* Mobile touch target for dh-modal close */
+/* Modal save star button */
+.modal-save-star {
+  position: absolute;
+  top: -40px;
+  left: 0;
+  z-index: 10;
+  background: var(--card-bg);
+  border: 2px solid var(--border);
+  color: var(--text-secondary);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  font-size: 1.25rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  line-height: 1;
+}
+
+.modal-save-star:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: scale(1.1);
+}
+
+.modal-save-star.saved {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Mobile touch target for dh-modal buttons */
 @media (max-width: 768px) {
   .dh-modal-close {
+    width: 44px;
+    height: 44px;
+    top: -48px;
+  }
+  .modal-save-star {
     width: 44px;
     height: 44px;
     top: -48px;

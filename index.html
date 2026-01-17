@@ -547,7 +547,7 @@ The converter will auto-detect the source system."
           <button class="tab active" onclick="switchTab('preview')" data-tab="preview" role="tab" aria-selected="true">
             Preview
           </button>
-          <button class="tab" onclick="switchTab('json')" data-tab="json" role="tab" aria-selected="false">
+          <button class="tab hide-on-mobile" onclick="switchTab('json')" data-tab="json" role="tab" aria-selected="false">
             JSON
           </button>
           <button class="tab" onclick="switchTab('markdown')" data-tab="markdown" role="tab" aria-selected="false">
@@ -1150,7 +1150,7 @@ The converter will auto-detect the source system."
         <div id="myLibraryModalStatBlock"></div>
         <div class="dh-modal-footer">
           <div class="dh-modal-actions">
-            <button class="btn" onclick="copyMyLibraryJSON()" title="Copy JSON">JSON</button>
+            <button class="btn hide-on-mobile" onclick="copyMyLibraryJSON()" title="Copy JSON">JSON</button>
             <button class="btn" onclick="moveToGroup()" title="Move to different group">Move</button>
             <button class="btn btn-danger" onclick="removeFromLibrary()" title="Remove from library">Remove</button>
             <button class="btn btn-danger hidden" id="deleteFromServerBtn" onclick="deleteFromServer()" title="Delete from community server">Delete from Server</button>
@@ -1163,6 +1163,7 @@ The converter will auto-detect the source system."
   <!-- Community Detail Modal -->
   <div id="communityModal" class="modal-overlay hidden" onclick="closeCommunityModal(event)">
     <div class="dh-modal-wrapper">
+      <button class="modal-save-star" id="modalSaveStar" onclick="toggleModalLibrarySave()" title="Save to library">☆</button>
       <button class="dh-modal-close" onclick="closeCommunityModal()" aria-label="Close">&times;</button>
       <div class="dh-modal-card" onclick="event.stopPropagation()">
         <div id="modalStatBlock"></div>
@@ -1174,7 +1175,7 @@ The converter will auto-detect the source system."
           </div>
           <div class="dh-modal-actions">
             <button class="btn" onclick="copyShareLink()" title="Copy share link">Share</button>
-            <button class="btn" onclick="copyModalJSON()" title="Copy JSON">JSON</button>
+            <button class="btn hide-on-mobile" onclick="copyModalJSON()" title="Copy JSON">JSON</button>
             <button class="btn btn-save" onclick="addModalToLibrary()" title="Add to your library">Save</button>
             <button class="btn" onclick="addModalToGroup()" title="Add to a group">Group</button>
           </div>
