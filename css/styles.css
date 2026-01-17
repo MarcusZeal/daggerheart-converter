@@ -6172,152 +6172,43 @@ textarea::placeholder {
   padding: 1rem;
 }
 
-.combat-experience {
-  font-size: 0.85rem;
-  margin-bottom: 1rem;
-  color: var(--text-secondary);
-}
-
-/* Combat features */
-.combat-features {
-  margin-bottom: 1rem;
-  padding: 0.75rem;
-  background: rgba(0, 0, 0, 0.1);
-  border-radius: 6px;
-}
-
-.combat-features-title {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--accent);
-  margin-bottom: 0.5rem;
-  border-bottom: 1px solid var(--border-color);
-  padding-bottom: 0.25rem;
-}
-
-.combat-feature {
-  font-size: 0.85rem;
-  line-height: 1.4;
-  margin-bottom: 0.5rem;
-}
-
-.combat-feature:last-child {
-  margin-bottom: 0;
-}
-
-.combat-feature-name {
-  font-weight: 700;
-}
-
-.combat-feature-type {
-  font-style: italic;
-  color: var(--text-secondary);
-}
-
-.combat-feature-type.passive { color: #6b7280; }
-.combat-feature-type.action { color: #3b82f6; }
-.combat-feature-type.reaction { color: #f59e0b; }
-
 /* Combat tracking section */
 .combat-tracking-section {
   margin-top: 1rem;
   padding-top: 1rem;
-  border-top: 2px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+}
+
+.combat-tracking-row {
+  display: flex;
+  gap: 1.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .combat-tracking-label {
-  font-size: 0.8rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  margin-bottom: 0.5rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
   color: var(--text-secondary);
 }
 
-.tracking-hint {
-  font-weight: 400;
-  font-size: 0.7rem;
-  text-transform: none;
-  letter-spacing: normal;
-  opacity: 0.7;
-}
-
-/* HP Bar */
-.combat-hp-section {
-  margin-bottom: 1rem;
-}
-
-.combat-hp-label {
+/* Combat card footer */
+.combat-card-footer {
   display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.25rem;
-  font-size: 0.85rem;
+  justify-content: center;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-top: 1px solid var(--border-color);
 }
 
-.combat-hp-bar {
-  height: 24px;
-  background: rgba(0, 0, 0, 0.3);
-  border-radius: 4px;
-  overflow: hidden;
-  position: relative;
-}
-
-.combat-hp-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #22c55e, #4ade80);
-  transition: width 0.3s ease;
-  position: relative;
-}
-
-.combat-hp-fill.major {
-  background: linear-gradient(90deg, #eab308, #facc15);
-}
-
-.combat-hp-fill.severe {
-  background: linear-gradient(90deg, #ef4444, #f87171);
-}
-
-.combat-hp-thresholds {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  pointer-events: none;
-}
-
-.threshold-marker {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: rgba(255, 255, 255, 0.5);
-}
-
-.threshold-marker::after {
-  content: attr(data-label);
-  position: absolute;
-  top: -18px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.65rem;
-  color: var(--text-secondary);
-  white-space: nowrap;
-}
-
-/* Stress tracker */
+/* HP and Stress sections */
+.combat-hp-section,
 .combat-stress-section {
-  margin-bottom: 1rem;
+  flex: 0 0 auto;
 }
 
 .combat-conditions-section {
-  margin-bottom: 1rem;
-}
-
-.combat-notes-section {
-  margin-bottom: 0;
+  flex: 1;
 }
 
 .combat-stress-boxes {

@@ -2266,7 +2266,7 @@ function startCombat() {
         // Full adversary data for display
         description: adv.description || '',
         motives: adv.motives || '',
-        difficulty: parseInt(scaled.difficulty) || parseInt(adv.difficulty) || 14,
+        difficulty: parseInt(scaled.difficulty) || parseInt(adv.difficulty) || TIER_STATS[item.tierOverride || parseInt(adv.tier) || 2]?.difficulty || 14,
         atkMod: scaled.atkMod || adv.atkMod || '+2',
         weapon: adv.weapon || '',
         range: adv.range || 'Melee',
@@ -2359,23 +2359,6 @@ function renderCombatAdversaries() {
       </div>
     </div></div>`;
 
-    // Build features HTML
-    let featuresHtml = '';
-    if (adv.features && adv.features.length > 0) {
-      featuresHtml = '<div class="combat-features"><div class="combat-features-title">FEATURES</div>';
-      adv.features.forEach(f => {
-        const typeClass = (f.type || 'passive').toLowerCase();
-        const descWithDice = highlightDiceRolls(f.desc || f.description || '');
-        featuresHtml += `
-          <div class="combat-feature">
-            <span class="combat-feature-name">${escapeHtml(f.name)}</span> -
-            <span class="combat-feature-type ${typeClass}">${f.type || 'Passive'}</span>:
-            ${descWithDice}
-          </div>`;
-      });
-      featuresHtml += '</div>';
-    }
-
     // Build attack line
     let attackLine = '';
     if (adv.atkMod) {
@@ -2445,32 +2428,29 @@ function renderCombatAdversaries() {
             ${attackLine ? `<div class="dh-card-stats-row">${attackLine}</div>` : ''}
           </div>
 
-          ${adv.experience ? `<div class="combat-experience"><strong>Experience:</strong> ${escapeHtml(adv.experience)}</div>` : ''}
-
-          ${featuresHtml}
-
           <div class="combat-tracking-section">
-            <div class="combat-hp-section">
-              <div class="combat-tracking-label">HP Damage: ${adv.currentDamage}/${adv.maxHp} <span class="tracking-hint">(click boxes)</span></div>
-              ${hpBoxesHtml}
+            <div class="combat-tracking-row">
+              <div class="combat-hp-section">
+                <div class="combat-tracking-label">HP Damage: ${adv.currentDamage}/${adv.maxHp}</div>
+                ${hpBoxesHtml}
+              </div>
+              <div class="combat-stress-section">
+                <div class="combat-tracking-label">Stress: ${adv.stressTaken}/${adv.maxStress}</div>
+                ${stressHtml}
+              </div>
             </div>
 
-            <div class="combat-stress-section">
-              <div class="combat-tracking-label">Stress: ${adv.stressTaken}/${adv.maxStress} <span class="tracking-hint">(click boxes)</span></div>
-              ${stressHtml}
+            <div class="combat-tracking-row">
+              <div class="combat-conditions-section">
+                ${conditionsHtml}
+              </div>
             </div>
 
-            <div class="combat-conditions-section">
-              <div class="combat-tracking-label">Conditions</div>
-              ${conditionsHtml}
-            </div>
-
-            <div class="combat-notes-section">
-              <div class="combat-tracking-label">Notes</div>
-              <textarea class="combat-notes-input" placeholder="Combat notes..." rows="2" onclick="event.stopPropagation();" onchange="updateCombatNotes('${adv.id}', this.value)">${adv.notes}</textarea>
-            </div>
+            <textarea class="combat-notes-input" placeholder="Notes..." rows="1" onclick="event.stopPropagation();" onchange="updateCombatNotes('${adv.id}', this.value)">${adv.notes}</textarea>
           </div>
+        </div>
 
+        <div class="dh-card-footer combat-card-footer">
           <button class="combat-view-full-btn" onclick="event.stopPropagation(); openCombatAdversaryModal('${adv.libraryId}')">
             <i class="fas fa-expand"></i> View Full Card
           </button>
