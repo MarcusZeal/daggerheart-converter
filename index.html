@@ -3022,13 +3022,13 @@ The converter will auto-detect the source system."
   </div>
 
   <!-- Load the modules -->
-  <script src="parsers/parser-manager.js"></script>
-  <script src="parsers/dnd5e-parser.js"></script>
-  <script src="parsers/pf2e-parser.js"></script>
-  <script src="parsers/dnd35e-parser.js"></script>
-  <script src="parsers/osr-parser.js"></script>
-  <script src="dnd-parser.js"></script>
-  <script src="daggerheart-converter.js"></script>
+  <script src="/parsers/parser-manager.js"></script>
+  <script src="/parsers/dnd5e-parser.js"></script>
+  <script src="/parsers/pf2e-parser.js"></script>
+  <script src="/parsers/dnd35e-parser.js"></script>
+  <script src="/parsers/osr-parser.js"></script>
+  <script src="/dnd-parser.js"></script>
+  <script src="/daggerheart-converter.js"></script>
 
   <script>
     // ==================== STATE ====================
@@ -4818,8 +4818,10 @@ Tags: ${c.tags.join(', ')}`;
       updateModalVotes();
       updateModalAuthor();
 
-      // Update URL for direct linking
-      history.pushState({ conversionId }, '', `/community/${conversionId}`);
+      // Update URL for direct linking (only if not already on this URL)
+      if (window.location.pathname !== `/community/${conversionId}`) {
+        window.history.pushState({ conversionId }, '', `/community/${conversionId}`);
+      }
 
       modal.classList.remove('hidden');
     }
@@ -4828,8 +4830,10 @@ Tags: ${c.tags.join(', ')}`;
       if (event && event.target !== event.currentTarget) return;
       document.getElementById('communityModal').classList.add('hidden');
       selectedConversion = null;
-      // Reset URL
-      history.pushState({}, '', '/');
+      // Reset URL if we're on a community detail page
+      if (window.location.pathname.startsWith('/community/')) {
+        window.history.pushState({}, '', '/');
+      }
     }
 
     function updateModalAuthor() {
