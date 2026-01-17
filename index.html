@@ -3710,7 +3710,7 @@
       transform: translateY(-1px);
     }
 
-    /* Dice tooltip */
+    /* Dice tooltip - smart positioning */
     .dice-roll[data-range]::after {
       content: attr(data-range);
       position: absolute;
@@ -3731,12 +3731,32 @@
       z-index: 100;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       border: 1px solid var(--accent);
+      pointer-events: none;
     }
 
     .dice-roll:hover[data-range]::after {
       opacity: 1;
       visibility: visible;
       transform: translateX(-50%) translateY(-8px);
+    }
+
+    /* Tooltip positioned to the right (for left-edge dice) */
+    .dice-roll.tooltip-right[data-range]::after {
+      left: 0;
+      transform: translateX(0) translateY(-4px);
+    }
+    .dice-roll.tooltip-right:hover[data-range]::after {
+      transform: translateX(0) translateY(-8px);
+    }
+
+    /* Tooltip positioned to the left (for right-edge dice) */
+    .dice-roll.tooltip-left[data-range]::after {
+      left: auto;
+      right: 0;
+      transform: translateX(0) translateY(-4px);
+    }
+    .dice-roll.tooltip-left:hover[data-range]::after {
+      transform: translateX(0) translateY(-8px);
     }
 
     :root.light-mode .dice-roll {
@@ -7715,6 +7735,33 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       });
     }
 
+    /**
+     * Position dice tooltips smartly to avoid edge overflow
+     * Call this after rendering content with dice rolls
+     */
+    function positionDiceTooltips(container) {
+      const diceRolls = (container || document).querySelectorAll('.dice-roll[data-range]');
+      const tooltipWidth = 180; // Approximate tooltip width
+
+      diceRolls.forEach(el => {
+        // Remove any existing positioning classes
+        el.classList.remove('tooltip-left', 'tooltip-right');
+
+        const rect = el.getBoundingClientRect();
+        const viewportWidth = window.innerWidth;
+
+        // Check if tooltip would overflow on the left
+        if (rect.left < tooltipWidth / 2) {
+          el.classList.add('tooltip-right'); // Align tooltip to right of element
+        }
+        // Check if tooltip would overflow on the right
+        else if (rect.right > viewportWidth - tooltipWidth / 2) {
+          el.classList.add('tooltip-left'); // Align tooltip to left of element
+        }
+        // Otherwise, keep centered (default)
+      });
+    }
+
     // Escape for use in JavaScript string literals inside HTML attributes
     // Must escape for JS first, then HTML-encode for the attribute context
     function escapeJsString(text) {
@@ -9105,6 +9152,9 @@ Tags: ${c.tags.join(', ')}`;
       }
 
       document.getElementById('myLibraryModal').classList.remove('hidden');
+
+      // Position dice tooltips after modal is visible
+      setTimeout(() => positionDiceTooltips(document.getElementById('myLibraryModal')), 50);
     }
 
     function closeMyLibraryModal(event) {
@@ -9749,6 +9799,9 @@ Tags: ${c.tags.join(', ')}`;
       }
 
       modal.classList.remove('hidden');
+
+      // Position dice tooltips after modal is visible
+      setTimeout(() => positionDiceTooltips(modal), 50);
     }
 
     function updateDeleteButton() {
