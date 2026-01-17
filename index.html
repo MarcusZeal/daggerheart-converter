@@ -2802,8 +2802,14 @@
       border-radius: 6px 6px 0 0;
     }
 
+    /* When scrolled, remove border-radius and add solid color corners */
     .dh-modal-card .dh-stat-block-header.compact {
       border-radius: 0;
+    }
+
+    /* Ensure modal card has matching dark background at top to prevent white flash */
+    .dh-modal-card {
+      background: linear-gradient(to bottom, #2d2d2d 0, #2d2d2d 80px, #f5f0e6 80px);
     }
 
     /* Modal wrapper for positioning close button outside */
