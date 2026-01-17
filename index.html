@@ -5594,6 +5594,141 @@
     .budget-bar-fill.warning { background: var(--warning); }
     .budget-bar-fill.danger { background: var(--error); }
 
+    /* Budget Adjustments */
+    .encounter-adjustments {
+      margin-top: 1rem;
+      padding: 0.75rem 1rem;
+      background: var(--bg-input);
+      border-radius: 6px;
+      border: 1px solid var(--border);
+    }
+
+    .encounter-adjustments summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .encounter-adjustments summary::-webkit-details-marker {
+      display: none;
+    }
+
+    .encounter-adjustments summary::before {
+      content: '▶';
+      font-size: 0.7rem;
+      transition: transform 0.2s;
+    }
+
+    .encounter-adjustments[open] summary::before {
+      transform: rotate(90deg);
+    }
+
+    #adjustment-summary {
+      font-weight: 400;
+      color: var(--text-secondary);
+    }
+
+    .adjustment-options {
+      margin-top: 0.75rem;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0.5rem;
+    }
+
+    .adjustment-option {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem;
+      background: var(--bg-card);
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .adjustment-option:hover {
+      background: rgba(201, 162, 39, 0.1);
+    }
+
+    .adjustment-option input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      accent-color: var(--accent);
+    }
+
+    .adjustment-label {
+      flex: 1;
+      font-size: 0.9rem;
+    }
+
+    .adjustment-value {
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--accent);
+    }
+
+    /* Tier scaling controls on roster cards */
+    .tier-scale-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+      margin-left: auto;
+    }
+
+    .tier-scale-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg-card);
+      font-size: 0.9rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--text-primary);
+    }
+
+    .tier-scale-btn:hover {
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-color: var(--accent);
+    }
+
+    .tier-scale-btn:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+
+    .tier-scale-btn:disabled:hover {
+      background: var(--bg-card);
+      color: var(--text-primary);
+      border-color: var(--border);
+    }
+
+    .tier-scale-display {
+      font-size: 0.8rem;
+      font-weight: 600;
+      min-width: 2.5rem;
+      text-align: center;
+      color: var(--accent);
+    }
+
+    .tier-scaled-badge {
+      position: absolute;
+      top: 2.5rem;
+      right: 0.5rem;
+      background: var(--accent-secondary);
+      color: #fff;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      font-size: 0.7rem;
+      font-weight: 600;
+    }
+
     .encounter-columns {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -6353,6 +6488,42 @@ The converter will auto-detect the source system."
             </div>
           </div>
         </div>
+        <!-- Budget Adjustments -->
+        <details class="encounter-adjustments">
+          <summary>Budget Adjustments <span id="adjustment-summary">(+0)</span></summary>
+          <div class="adjustment-options">
+            <label class="adjustment-option">
+              <input type="checkbox" id="adj-easier" onchange="updateBudgetAdjustments()">
+              <span class="adjustment-label">Easier/shorter fight</span>
+              <span class="adjustment-value">−1 BP</span>
+            </label>
+            <label class="adjustment-option">
+              <input type="checkbox" id="adj-multi-solo" onchange="updateBudgetAdjustments()">
+              <span class="adjustment-label">Using 2+ Solo adversaries</span>
+              <span class="adjustment-value">−2 BP</span>
+            </label>
+            <label class="adjustment-option">
+              <input type="checkbox" id="adj-damage-boost" onchange="updateBudgetAdjustments()">
+              <span class="adjustment-label">+2 damage to all adversaries</span>
+              <span class="adjustment-value">−2 BP</span>
+            </label>
+            <label class="adjustment-option">
+              <input type="checkbox" id="adj-lower-tier" onchange="updateBudgetAdjustments()">
+              <span class="adjustment-label">Using lower tier adversary</span>
+              <span class="adjustment-value">+1 BP</span>
+            </label>
+            <label class="adjustment-option">
+              <input type="checkbox" id="adj-no-heavy" onchange="updateBudgetAdjustments()">
+              <span class="adjustment-label">No Bruisers/Hordes/Leaders/Solos</span>
+              <span class="adjustment-value">+1 BP</span>
+            </label>
+            <label class="adjustment-option">
+              <input type="checkbox" id="adj-harder" onchange="updateBudgetAdjustments()">
+              <span class="adjustment-label">Harder/longer fight</span>
+              <span class="adjustment-value">+2 BP</span>
+            </label>
+          </div>
+        </details>
       </div>
 
       <!-- Two-column layout -->
@@ -9191,7 +9362,16 @@ Tags: ${c.tags.join(', ')}`;
     let encounterState = {
       partySize: 4,
       name: '',
-      roster: [] // [{adversaryId, adversary, count}]
+      budgetAdjustment: 0,
+      roster: [] // [{adversaryId, adversary, count, tierOverride}]
+    };
+
+    // Tier scaling statistics
+    const TIER_STATS = {
+      1: { atkMod: '+1', damage: '1d6+2 to 1d12+4', difficulty: 11, majorThresh: 7, severeThresh: 12 },
+      2: { atkMod: '+2', damage: '2d6+3 to 2d12+4', difficulty: 14, majorThresh: 10, severeThresh: 20 },
+      3: { atkMod: '+3', damage: '3d8+3 to 3d12+5', difficulty: 17, majorThresh: 20, severeThresh: 32 },
+      4: { atkMod: '+4', damage: '4d8+10 to 4d12+15', difficulty: 20, majorThresh: 25, severeThresh: 45 }
     };
 
     // Debounce for search
@@ -9214,7 +9394,81 @@ Tags: ${c.tags.join(', ')}`;
     }
 
     function calculateBudget(partySize) {
-      return (3 * partySize) + 2;
+      return (3 * partySize) + 2 + encounterState.budgetAdjustment;
+    }
+
+    function updateBudgetAdjustments() {
+      let adjustment = 0;
+      if (document.getElementById('adj-easier')?.checked) adjustment -= 1;
+      if (document.getElementById('adj-multi-solo')?.checked) adjustment -= 2;
+      if (document.getElementById('adj-damage-boost')?.checked) adjustment -= 2;
+      if (document.getElementById('adj-lower-tier')?.checked) adjustment += 1;
+      if (document.getElementById('adj-no-heavy')?.checked) adjustment += 1;
+      if (document.getElementById('adj-harder')?.checked) adjustment += 2;
+
+      encounterState.budgetAdjustment = adjustment;
+
+      // Update summary display
+      const summaryEl = document.getElementById('adjustment-summary');
+      if (summaryEl) {
+        const sign = adjustment >= 0 ? '+' : '';
+        summaryEl.textContent = `(${sign}${adjustment})`;
+      }
+
+      updateBudgetDisplay();
+    }
+
+    function scaleTier(adversaryId, delta) {
+      const item = encounterState.roster.find(r => r.adversaryId === adversaryId);
+      if (!item) return;
+
+      const baseTier = parseInt(item.adversary.tier) || 2;
+      const currentTier = item.tierOverride || baseTier;
+      const newTier = Math.max(1, Math.min(4, currentTier + delta));
+
+      item.tierOverride = newTier;
+      renderEncounterRoster();
+    }
+
+    function getScaledStats(adversary, tierOverride) {
+      const baseTier = parseInt(adversary.tier) || 2;
+      const targetTier = tierOverride || baseTier;
+
+      if (targetTier === baseTier) {
+        return {
+          tier: baseTier,
+          difficulty: adversary.difficulty,
+          majorThresh: adversary.majorThresh,
+          severeThresh: adversary.severeThresh,
+          atkMod: adversary.atkMod,
+          damage: adversary.damage,
+          hp: adversary.hp,
+          stress: adversary.stress,
+          scaled: false
+        };
+      }
+
+      const tierStats = TIER_STATS[targetTier];
+
+      // Calculate HP/Stress adjustment when scaling between tier groups
+      let hpAdjust = 0;
+      let stressAdjust = 0;
+      if ((baseTier <= 2 && targetTier >= 3) || (baseTier >= 3 && targetTier <= 2)) {
+        hpAdjust = targetTier > baseTier ? 2 : -2;
+        stressAdjust = targetTier > baseTier ? 1 : -1;
+      }
+
+      return {
+        tier: targetTier,
+        difficulty: tierStats.difficulty,
+        majorThresh: tierStats.majorThresh,
+        severeThresh: tierStats.severeThresh,
+        atkMod: tierStats.atkMod,
+        damage: tierStats.damage.split(' to ')[0], // Use lower end of range
+        hp: Math.max(1, (parseInt(adversary.hp) || 3) + hpAdjust),
+        stress: Math.max(1, (parseInt(adversary.stress) || 2) + stressAdjust),
+        scaled: true
+      };
     }
 
     function calculateUsedPoints() {
@@ -9438,20 +9692,28 @@ Tags: ${c.tags.join(', ')}`;
         const bp = getAdvTypeBattlePoints(adv.advType);
         const totalBp = bp * item.count;
         const cardTypeClass = (adv.advType || 'standard').toLowerCase().trim();
-        const difficulty = adv.difficulty || '?';
-        const hp = adv.hp || '?';
-        const stress = adv.stress || '?';
-        const majorThresh = adv.majorThresh || '?';
-        const severeThresh = adv.severeThresh || '?';
+
+        // Get scaled stats
+        const scaled = getScaledStats(adv, item.tierOverride);
+        const baseTier = parseInt(adv.tier) || 2;
+        const currentTier = item.tierOverride || baseTier;
+
+        const difficulty = scaled.difficulty || '?';
+        const hp = scaled.hp || '?';
+        const stress = scaled.stress || '?';
+        const majorThresh = scaled.majorThresh || '?';
+        const severeThresh = scaled.severeThresh || '?';
         const description = adv.description || '';
         const motives = adv.motives || adv.tactics || '';
 
-        // Build attack line
+        // Build attack line with scaled values
         let attackLine = '';
-        if (adv.atkMod && adv.atkMod !== '?') {
-          attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${adv.atkMod}</span>`;
+        const atkMod = scaled.atkMod || adv.atkMod;
+        const damage = scaled.scaled ? scaled.damage : adv.damage;
+        if (atkMod && atkMod !== '?') {
+          attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${atkMod}</span>`;
           if (adv.weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.weapon}: ${adv.range || ''}</span>`;
-          if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.damage}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
+          if (damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${damage}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
         }
 
         return `
@@ -9460,7 +9722,7 @@ Tags: ${c.tags.join(', ')}`;
                onclick="openMyLibraryAdversary('${escapeHtmlEncounter(item.adversaryId)}')">
             <div class="dh-card-header" data-type="${cardTypeClass}">
               <div class="dh-card-name">${escapeHtmlEncounter(adv.name || 'Unknown')}</div>
-              <div class="dh-card-tier-type">Tier ${adv.tier || '?'} ${adv.advType || 'Standard'}</div>
+              <div class="dh-card-tier-type">Tier ${currentTier} ${adv.advType || 'Standard'}</div>
             </div>
             <div class="dh-card-body">
               ${description ? `<div class="dh-card-description">${escapeHtmlEncounter(description)}</div>` : ''}
@@ -9514,11 +9776,17 @@ Tags: ${c.tags.join(', ')}`;
               </div>
             </div>
             <div class="encounter-roster-controls" onclick="event.stopPropagation()">
+              <div class="tier-scale-controls">
+                <button class="tier-scale-btn" onclick="scaleTier('${escapeHtmlEncounter(item.adversaryId)}', -1)" ${currentTier <= 1 ? 'disabled' : ''}>▼</button>
+                <span class="tier-scale-display">T${currentTier}</span>
+                <button class="tier-scale-btn" onclick="scaleTier('${escapeHtmlEncounter(item.adversaryId)}', 1)" ${currentTier >= 4 ? 'disabled' : ''}>▲</button>
+              </div>
               <button class="party-btn" onclick="removeFromEncounter('${escapeHtmlEncounter(item.adversaryId)}')">−</button>
               <span class="encounter-count">${item.count}</span>
               <button class="party-btn" onclick="addToEncounter('${escapeHtmlEncounter(item.adversaryId)}')">+</button>
             </div>
             <div class="encounter-bp-overlay">${totalBp} BP</div>
+            ${scaled.scaled ? `<div class="tier-scaled-badge">Scaled from T${baseTier}</div>` : ''}
           </div>
         `;
       }).join('');
