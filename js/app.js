@@ -2220,7 +2220,6 @@ let combatState = {
   encounterName: '',
   fear: 0,
   adversaries: [], // [{id, name, advType, maxHp, currentDamage, maxStress, stressTaken, conditions, notes, defeated}]
-  party: [], // [{name, hp, stress, armor}]
   log: [],
   undoStack: []
 };
@@ -2283,15 +2282,6 @@ function startCombat() {
     }
   });
 
-  // Load saved party or create default
-  const savedParty = JSON.parse(localStorage.getItem('dh-combat-party') || '[]');
-  combatState.party = savedParty.length > 0 ? savedParty : [
-    { name: 'Player 1', hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 },
-    { name: 'Player 2', hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 },
-    { name: 'Player 3', hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 },
-    { name: 'Player 4', hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 }
-  ];
-
   // Log combat start
   addCombatLog(`Combat started: ${combatState.encounterName}`, 'info');
 
@@ -2301,7 +2291,6 @@ function startCombat() {
   document.getElementById('combat-encounter-name').textContent = combatState.encounterName;
 
   renderCombatAdversaries();
-  renderPartyTracker();
   updateCombatPools();
   saveCombatState();
 }
@@ -2699,57 +2688,6 @@ function rollDice(notation) {
   return { rolls, modifier, total };
 }
 
-// Party tracker
-function renderPartyTracker() {
-  const container = document.getElementById('party-members');
-
-  container.innerHTML = combatState.party.map((member, idx) => `
-    <div class="party-member">
-      <div class="party-member-name">
-        <input type="text" value="${member.name}" onchange="updatePartyMember(${idx}, 'name', this.value)" placeholder="Name">
-      </div>
-      <div class="party-stat">
-        <span>HP:</span>
-        <input type="number" class="party-stat-input" value="${member.hp}" onchange="updatePartyMember(${idx}, 'hp', this.value)" min="0">
-        <span>/</span>
-        <input type="number" class="party-stat-input" value="${member.maxHp}" onchange="updatePartyMember(${idx}, 'maxHp', this.value)" min="1">
-      </div>
-      <div class="party-stat">
-        <span>Stress:</span>
-        <input type="number" class="party-stat-input" value="${member.stress}" onchange="updatePartyMember(${idx}, 'stress', this.value)" min="0">
-        <span>/</span>
-        <input type="number" class="party-stat-input" value="${member.maxStress}" onchange="updatePartyMember(${idx}, 'maxStress', this.value)" min="1">
-      </div>
-      <button class="btn btn-secondary btn-small" onclick="removePartyMember(${idx})" title="Remove">&times;</button>
-    </div>
-  `).join('');
-}
-
-function addPartyMember() {
-  combatState.party.push({ name: `Player ${combatState.party.length + 1}`, hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 });
-  renderPartyTracker();
-  savePartyState();
-}
-
-function removePartyMember(idx) {
-  combatState.party.splice(idx, 1);
-  renderPartyTracker();
-  savePartyState();
-}
-
-function updatePartyMember(idx, field, value) {
-  if (field === 'name') {
-    combatState.party[idx][field] = value;
-  } else {
-    combatState.party[idx][field] = parseInt(value) || 0;
-  }
-  savePartyState();
-}
-
-function savePartyState() {
-  localStorage.setItem('dh-combat-party', JSON.stringify(combatState.party));
-}
-
 // Combat log
 function addCombatLog(message, type = 'info') {
   const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
@@ -2832,7 +2770,6 @@ function checkForActiveCombat() {
     document.getElementById('combat-mode').classList.add('active');
     document.getElementById('combat-encounter-name').textContent = combatState.encounterName;
     renderCombatAdversaries();
-    renderPartyTracker();
     updateCombatPools();
     renderCombatLog();
     showToast('Resumed active combat', 'info');
