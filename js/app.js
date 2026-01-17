@@ -2225,7 +2225,7 @@ function handleAuthRedirect() {
 
 function renderAuthUI() {
   const authSection = document.getElementById('authSection');
-  if (!authSection) return;
+  const mobileAuthSection = document.getElementById('mobileAuthSection');
 
   // Show/hide My Submissions filter button
   const mySubmissionsBtn = document.getElementById('mySubmissionsBtn');
@@ -2248,7 +2248,7 @@ function renderAuthUI() {
 
   if (currentUser) {
     const initial = currentUser.username.charAt(0).toUpperCase();
-    authSection.innerHTML = `
+    const desktopHTML = `
       <div class="user-menu">
         <button class="user-menu-toggle" onclick="toggleUserMenu()" aria-haspopup="true" aria-expanded="false">
           <div class="user-avatar">
@@ -2264,12 +2264,51 @@ function renderAuthUI() {
         </div>
       </div>
     `;
+    const mobileHTML = `
+      <div class="mobile-user-info">
+        <div class="user-avatar">
+          ${currentUser.avatar_url
+            ? `<img src="${currentUser.avatar_url}" alt="${currentUser.username}">`
+            : initial}
+        </div>
+        <span class="user-name">${currentUser.username}</span>
+      </div>
+      <button class="mobile-menu-link" onclick="navigateTo('community'); setCommunityFilter('mine'); closeMobileMenu();">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/>
+          <circle cx="12" cy="7" r="4"/>
+        </svg>
+        My Submissions
+      </button>
+      <button class="mobile-menu-link" onclick="logout(); closeMobileMenu();">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+          <polyline points="16 17 21 12 16 7"/>
+          <line x1="21" y1="12" x2="9" y2="12"/>
+        </svg>
+        Logout
+      </button>
+    `;
+    if (authSection) authSection.innerHTML = desktopHTML;
+    if (mobileAuthSection) mobileAuthSection.innerHTML = mobileHTML;
   } else {
-    authSection.innerHTML = `
+    const desktopHTML = `
       <button class="btn-login" onclick="openLoginModal()">
         Sign In
       </button>
     `;
+    const mobileHTML = `
+      <button class="btn-login" onclick="openLoginModal(); closeMobileMenu();">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="18" height="18">
+          <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/>
+          <polyline points="10 17 15 12 10 7"/>
+          <line x1="15" y1="12" x2="3" y2="12"/>
+        </svg>
+        Sign In
+      </button>
+    `;
+    if (authSection) authSection.innerHTML = desktopHTML;
+    if (mobileAuthSection) mobileAuthSection.innerHTML = mobileHTML;
   }
 }
 

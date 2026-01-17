@@ -52,6 +52,13 @@
         <span>Forgeheart</span>
       </a>
 
+      <!-- Mobile hamburger menu button - positioned right after brand for mobile layout -->
+      <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Open menu" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
       <div class="navbar-nav">
         <a href="#" class="nav-link active" data-page="converter" onclick="navigateTo('converter'); return false;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -97,13 +104,6 @@
           <span>Admin</span>
         </a>
       </div>
-
-      <!-- Mobile hamburger menu button -->
-      <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Open menu" aria-expanded="false">
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-        <span class="hamburger-line"></span>
-      </button>
 
       <div class="navbar-right">
         <button class="faq-link" onclick="openFAQModal()" title="How It Works">
@@ -184,6 +184,25 @@
       </a>
     </nav>
     <div class="mobile-menu-footer">
+      <!-- Auth section for mobile -->
+      <div id="mobileAuthSection" class="mobile-auth-section">
+        <!-- Populated by JavaScript -->
+      </div>
+
+      <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="5"/>
+          <line x1="12" y1="1" x2="12" y2="3"/>
+          <line x1="12" y1="21" x2="12" y2="23"/>
+          <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+          <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+          <line x1="1" y1="12" x2="3" y2="12"/>
+          <line x1="21" y1="12" x2="23" y2="12"/>
+          <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+          <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+        </svg>
+        Toggle Theme
+      </button>
       <button class="mobile-menu-link" onclick="openFAQModal(); closeMobileMenu();">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
           <circle cx="12" cy="12" r="10"/>
