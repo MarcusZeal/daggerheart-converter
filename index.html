@@ -2318,8 +2318,26 @@
 
     .dh-stat-block-header {
       background: #2d2d2d;
+      background: linear-gradient(135deg, #2d2d2d 0%, var(--type-color, #2d2d2d) 100%);
       color: #fff;
       padding: 1rem 1.25rem;
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      transition: padding 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dh-stat-block-header.compact {
+      padding: 0.5rem 1.25rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+    }
+
+    .dh-stat-block-header.compact .dh-stat-block-name {
+      font-size: 1.1rem;
+    }
+
+    .dh-stat-block-header.compact .dh-stat-block-tier {
+      font-size: 0.75rem;
     }
 
     .dh-stat-block-name {
@@ -2328,6 +2346,7 @@
       text-transform: uppercase;
       letter-spacing: 0.5px;
       margin-bottom: 0;
+      transition: font-size 0.2s ease;
     }
 
     .dh-stat-block-tier {
@@ -2337,7 +2356,20 @@
       font-family: 'Roboto Slab', var(--font-slab);
       letter-spacing: 0.03em;
       font-weight: 400;
+      transition: font-size 0.2s ease;
     }
+
+    /* Adversary type colors */
+    .dh-stat-block-header[data-type="bruiser"] { --type-color: #8B2635; }
+    .dh-stat-block-header[data-type="horde"] { --type-color: #B5651D; }
+    .dh-stat-block-header[data-type="leader"] { --type-color: #6B3FA0; }
+    .dh-stat-block-header[data-type="minion"] { --type-color: #4a4a4a; }
+    .dh-stat-block-header[data-type="ranged"] { --type-color: #2E5984; }
+    .dh-stat-block-header[data-type="skulk"] { --type-color: #2D5A3D; }
+    .dh-stat-block-header[data-type="social"] { --type-color: #1D6B6B; }
+    .dh-stat-block-header[data-type="solo"] { --type-color: #8B7500; }
+    .dh-stat-block-header[data-type="standard"] { --type-color: #3d3d3d; }
+    .dh-stat-block-header[data-type="support"] { --type-color: #7B3F7B; }
 
     .dh-stat-block-body {
       padding: 1rem 1.25rem;
@@ -2735,6 +2767,30 @@
       overflow-y: auto;
       border-radius: 6px;
       box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      scrollbar-width: thin;
+      scrollbar-color: var(--accent) transparent;
+    }
+
+    /* Custom scrollbar for Webkit browsers */
+    .dh-modal-card::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    .dh-modal-card::-webkit-scrollbar-track {
+      background: transparent;
+      border-radius: 4px;
+    }
+
+    .dh-modal-card::-webkit-scrollbar-thumb {
+      background: linear-gradient(180deg, var(--accent) 0%, #8B4513 100%);
+      border-radius: 4px;
+      border: 2px solid transparent;
+      background-clip: padding-box;
+    }
+
+    .dh-modal-card::-webkit-scrollbar-thumb:hover {
+      background: linear-gradient(180deg, #d4a84b 0%, #a65d1a 100%);
+      background-clip: padding-box;
     }
 
     .dh-modal-card .dh-stat-block {
@@ -6419,6 +6475,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       handleUrlRouting();
       loadFromURL();
       initDiceTooltips();
+      initStickyHeaders();
     });
 
     // ==================== THEME TOGGLE ====================
@@ -7378,9 +7435,11 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
         ? `<img src="${escapeHtml(c.imageUrl)}" alt="${escapeHtml(c.name)}" class="dh-stat-block-image">`
         : '';
 
+      const advTypeClass = (c.advType || 'standard').toLowerCase().trim();
+
       return `
         <div class="dh-stat-block">
-          <div class="dh-stat-block-header">
+          <div class="dh-stat-block-header" data-type="${advTypeClass}">
             <div class="dh-stat-block-name">${escapeHtml(c.name || 'Unknown')}</div>
             <div class="dh-stat-block-tier">Tier ${c.tier || '?'} ${c.advType || 'Standard'}</div>
           </div>
@@ -7778,6 +7837,26 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
     function positionDiceTooltips(container) {
       // Tooltips now use fixed positioning with event delegation
       // This function is kept for backward compatibility
+    }
+
+    /**
+     * Initialize sticky header scroll behavior for modals
+     * Headers shrink when user scrolls down
+     */
+    function initStickyHeaders() {
+      // Use event delegation for scroll events on modal cards
+      document.querySelectorAll('.dh-modal-card').forEach(modal => {
+        modal.addEventListener('scroll', () => {
+          const header = modal.querySelector('.dh-stat-block-header');
+          if (header) {
+            if (modal.scrollTop > 30) {
+              header.classList.add('compact');
+            } else {
+              header.classList.remove('compact');
+            }
+          }
+        });
+      });
     }
 
     // Escape for use in JavaScript string literals inside HTML attributes
