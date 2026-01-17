@@ -3204,6 +3204,21 @@
       text-decoration: underline;
     }
 
+    .footer-divider {
+      color: var(--text-secondary);
+      opacity: 0.4;
+    }
+
+    .coffee-footer-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .coffee-footer-link:hover svg {
+      color: #ffdd00;
+    }
+
     /* Privacy Modal */
     .privacy-modal {
       display: none;
@@ -3224,7 +3239,7 @@
     }
 
     .privacy-modal-content {
-      background: var(--card-bg);
+      background: var(--bg-dark);
       border-radius: 12px;
       max-width: 600px;
       width: 100%;
@@ -3995,6 +4010,17 @@ The converter will auto-detect the source system."
     <p>This tool is not affiliated with, endorsed, or sponsored by Wizards of the Coast, Paizo Inc., or Darrington Press. All product names and trademarks are property of their respective owners.</p>
     <div class="footer-links">
       <a href="#" onclick="openPrivacyModal(); return false;">Privacy Policy</a>
+      <span class="footer-divider">|</span>
+      <a href="https://buymeacoffee.com/marcusu" target="_blank" rel="noopener" class="coffee-footer-link">
+        Help keep the lights on
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
+          <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
+          <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+          <line x1="6" y1="2" x2="6" y2="4"/>
+          <line x1="10" y1="2" x2="10" y2="4"/>
+          <line x1="14" y1="2" x2="14" y2="4"/>
+        </svg>
+      </a>
     </div>
     <div class="zs-credits" itemscope="" itemtype="https://schema.org/Organization">
       <a href="https://zealoussites.com" target="_blank" rel="noopener noreferrer nofollow" title="Website by Marcus Zeal @ Zealous Sites" aria-label="Website by Zealous Sites" itemprop="url">
