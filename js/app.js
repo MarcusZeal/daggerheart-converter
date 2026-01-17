@@ -2254,6 +2254,7 @@ function startCombat() {
       combatState.adversaries.push({
         id: `combat-${instanceId++}`,
         name: item.count > 1 ? `${adv.name} #${i + 1}` : adv.name,
+        baseName: adv.name,
         advType: adv.advType || 'Standard',
         tier: item.tierOverride || parseInt(adv.tier) || 2,
         maxHp: hp,
@@ -2262,7 +2263,18 @@ function startCombat() {
         severeThresh,
         maxStress: stress,
         stressTaken: 0,
+        // Full adversary data for display
+        description: adv.description || '',
+        motives: adv.motives || '',
+        difficulty: scaled.difficulty || adv.difficulty || 14,
+        atkMod: scaled.atkMod || adv.atkMod || '+2',
+        weapon: adv.weapon || '',
+        range: adv.range || 'Melee',
         damage: scaled.damage || adv.damage || '2d6+3',
+        dmgType: adv.dmgType || 'phy',
+        experience: adv.experience || '',
+        features: adv.features || [],
+        // Combat tracking
         conditions: [],
         notes: '',
         defeated: false
@@ -2305,44 +2317,41 @@ function endCombat() {
   localStorage.removeItem('dh-active-combat');
 }
 
-// Render combat adversary cards
+// Render combat adversary cards (full card design matching site style)
 function renderCombatAdversaries() {
   const container = document.getElementById('combat-adversaries');
 
   container.innerHTML = combatState.adversaries.map(adv => {
-    const hpPercent = (adv.currentDamage / adv.maxHp) * 100;
     const isDefeated = adv.currentDamage >= adv.maxHp;
     const isMajor = adv.currentDamage >= adv.majorThresh && !isDefeated;
     const isSevere = adv.currentDamage >= adv.severeThresh && !isDefeated;
+    const cardTypeClass = (adv.advType || 'standard').toLowerCase().trim();
 
-    // Build HP boxes
+    // Build HP boxes with threshold markers
     let hpBoxesHtml = '<div class="combat-hp-boxes">';
     for (let i = 1; i <= adv.maxHp; i++) {
       const isFilled = i <= adv.currentDamage;
-      const isMajorBox = i === adv.majorThresh;
-      const isSevereBox = i === adv.severeThresh;
       let boxClass = 'hp-box';
       if (isFilled) boxClass += ' filled';
-      if (i > adv.majorThresh && i <= adv.severeThresh) boxClass += ' major-threshold';
-      if (i > adv.severeThresh) boxClass += ' severe-threshold';
+      if (i > adv.majorThresh && i <= adv.severeThresh) boxClass += ' major-zone';
+      if (i > adv.severeThresh) boxClass += ' severe-zone';
 
-      // Add threshold markers
-      if (i === adv.majorThresh) {
-        hpBoxesHtml += `<div class="hp-threshold-marker major" data-label="Major"></div>`;
+      if (i === adv.majorThresh + 1) {
+        hpBoxesHtml += `<div class="hp-threshold-marker" data-label="Major"></div>`;
       }
-      if (i === adv.severeThresh) {
+      if (i === adv.severeThresh + 1) {
         hpBoxesHtml += `<div class="hp-threshold-marker severe" data-label="Severe"></div>`;
       }
 
-      hpBoxesHtml += `<div class="${boxClass}" onclick="toggleHpBox('${adv.id}', ${i})" title="HP ${i}/${adv.maxHp}"></div>`;
+      hpBoxesHtml += `<div class="${boxClass}" onclick="toggleHpBox('${adv.id}', ${i})" title="Click to ${isFilled ? 'heal' : 'damage'}"></div>`;
     }
     hpBoxesHtml += '</div>';
 
-    // Build stress boxes (fill up like HP)
+    // Build stress boxes
     let stressHtml = '<div class="combat-stress-boxes">';
     for (let i = 0; i < adv.maxStress; i++) {
       const isFilled = i < adv.stressTaken;
-      stressHtml += `<div class="stress-box ${isFilled ? 'filled' : ''}" onclick="toggleStressBox('${adv.id}', ${i})" title="Click to ${isFilled ? 'remove' : 'mark'} stress"></div>`;
+      stressHtml += `<div class="stress-box ${isFilled ? 'filled' : ''}" onclick="toggleStressBox('${adv.id}', ${i})" title="Click to ${isFilled ? 'clear' : 'mark'} stress"></div>`;
     }
     stressHtml += '</div>';
 
@@ -2360,45 +2369,101 @@ function renderCombatAdversaries() {
       </div>
     </div></div>`;
 
-    const cardClass = `combat-card ${isDefeated ? 'defeated' : ''} ${isSevere ? 'threshold-severe' : isMajor ? 'threshold-major' : ''}`;
+    // Build features HTML
+    let featuresHtml = '';
+    if (adv.features && adv.features.length > 0) {
+      featuresHtml = '<div class="combat-features"><div class="combat-features-title">FEATURES</div>';
+      adv.features.forEach(f => {
+        const typeClass = (f.type || 'passive').toLowerCase();
+        const descWithDice = highlightDiceRolls(f.desc || f.description || '');
+        featuresHtml += `
+          <div class="combat-feature">
+            <span class="combat-feature-name">${escapeHtml(f.name)}</span> -
+            <span class="combat-feature-type ${typeClass}">${f.type || 'Passive'}</span>:
+            ${descWithDice}
+          </div>`;
+      });
+      featuresHtml += '</div>';
+    }
+
+    // Build attack line
+    let attackHtml = '';
+    if (adv.atkMod) {
+      attackHtml = `<div class="combat-attack-line">
+        <span class="atk-label">ATK:</span> ${adv.atkMod}`;
+      if (adv.weapon) attackHtml += ` | <span class="weapon-name">${adv.weapon}:</span> ${adv.range}`;
+      if (adv.damage) attackHtml += ` | <span class="dice-roll" onclick="rollDamage('${adv.damage}')" title="Click to roll">${adv.damage}</span> ${adv.dmgType}`;
+      attackHtml += '</div>';
+    }
+
+    const cardClass = `combat-card dh-card ${isDefeated ? 'defeated' : ''} ${isSevere ? 'threshold-severe' : isMajor ? 'threshold-major' : ''}`;
 
     return `
       <div class="${cardClass}" id="combat-card-${adv.id}">
-        <div class="combat-card-header">
-          <div>
-            <span class="combat-card-name">${isDefeated ? '<s>' + adv.name + '</s>' : adv.name}</span>
-            <span class="combat-card-meta">T${adv.tier} ${adv.advType}</span>
-          </div>
-          <span class="combat-card-meta">${adv.currentDamage}/${adv.maxHp} damage${isDefeated ? ' - DEFEATED' : ''}</span>
+        <div class="dh-card-header" data-type="${cardTypeClass}">
+          <div class="dh-card-name">${isDefeated ? '<s>' + adv.name + '</s>' : adv.name}${isDefeated ? ' <span class="defeated-badge">DEFEATED</span>' : ''}</div>
+          <div class="dh-card-tier-type">Tier ${adv.tier} ${adv.advType}</div>
         </div>
-        <div class="combat-card-body">
-          <div class="combat-hp-section">
-            <div class="combat-hp-label">
-              <span>Damage (click to mark)</span>
-              <span>${isSevere ? '⚠️ SEVERE' : isMajor ? '⚠️ Major' : ''}</span>
+
+        <div class="dh-card-body combat-card-body">
+          ${adv.description ? `<div class="dh-card-description">${escapeHtml(adv.description)}</div>` : ''}
+          ${adv.motives ? `<div class="dh-card-motives"><strong>Motives & Tactics:</strong> ${escapeHtml(adv.motives)}</div>` : ''}
+
+          <div class="combat-stats-row">
+            <div class="combat-stat-box">
+              <span class="combat-stat-value">${adv.difficulty}</span>
+              <span class="combat-stat-label">Difficulty</span>
             </div>
-            ${hpBoxesHtml}
+            <div class="combat-stat-box">
+              <span class="combat-stat-value">${adv.currentDamage}/${adv.maxHp}</span>
+              <span class="combat-stat-label">Damage</span>
+            </div>
+            <div class="combat-stat-box">
+              <span class="combat-stat-value">${adv.stressTaken}/${adv.maxStress}</span>
+              <span class="combat-stat-label">Stress</span>
+            </div>
           </div>
 
-          <div class="combat-stress-section">
-            <span class="combat-stress-label">Stress:</span>
-            ${stressHtml}
+          <div class="combat-threshold-display">
+            <span class="threshold-item">Minor: 1-${adv.majorThresh}</span>
+            <span class="threshold-item major">Major: ${adv.majorThresh + 1}-${adv.severeThresh}</span>
+            <span class="threshold-item severe">Severe: ${adv.severeThresh + 1}+</span>
+            ${isSevere ? '<span class="threshold-warning severe">⚠️ SEVERE</span>' : isMajor ? '<span class="threshold-warning major">⚠️ Major</span>' : ''}
           </div>
 
-          <div class="combat-damage-controls">
-            <button class="damage-btn" onclick="dealDamage('${adv.id}', 1)">+1</button>
-            <button class="damage-btn" onclick="dealDamage('${adv.id}', 5)">+5</button>
-            <button class="damage-btn" onclick="dealDamage('${adv.id}', 10)">+10</button>
-            <input type="number" class="damage-input" id="custom-dmg-${adv.id}" placeholder="#" min="1">
-            <button class="damage-btn custom" onclick="dealCustomDamage('${adv.id}')">Deal</button>
-            <button class="damage-btn heal" onclick="healDamage('${adv.id}', 1)">−1</button>
-            ${adv.damage ? `<button class="combat-damage-dice" onclick="rollDamage('${adv.damage}')" title="Click to roll ${adv.damage}"><i class="fas fa-dice-d20"></i> ${adv.damage}</button>` : ''}
-          </div>
+          ${attackHtml}
+          ${adv.experience ? `<div class="combat-experience"><strong>Experience:</strong> ${escapeHtml(adv.experience)}</div>` : ''}
 
-          ${conditionsHtml}
+          ${featuresHtml}
 
-          <div class="combat-notes">
-            <textarea class="combat-notes-input" placeholder="Notes..." rows="1" onchange="updateCombatNotes('${adv.id}', this.value)">${adv.notes}</textarea>
+          <div class="combat-tracking-section">
+            <div class="combat-hp-section">
+              <div class="combat-tracking-label">HP Damage <span class="tracking-hint">(click boxes to mark/heal)</span></div>
+              ${hpBoxesHtml}
+              <div class="combat-damage-controls">
+                <button class="damage-btn" onclick="dealDamage('${adv.id}', 1)">+1</button>
+                <button class="damage-btn" onclick="dealDamage('${adv.id}', 5)">+5</button>
+                <input type="number" class="damage-input" id="custom-dmg-${adv.id}" placeholder="#" min="1" style="width: 50px;">
+                <button class="damage-btn" onclick="dealCustomDamage('${adv.id}')">Deal</button>
+                <button class="damage-btn heal" onclick="healDamage('${adv.id}', 1)">Heal 1</button>
+                ${adv.damage ? `<button class="damage-btn dice" onclick="rollDamage('${adv.damage}')" title="Roll ${adv.damage}"><i class="fas fa-dice-d20"></i></button>` : ''}
+              </div>
+            </div>
+
+            <div class="combat-stress-section">
+              <div class="combat-tracking-label">Stress <span class="tracking-hint">(click to mark/clear)</span></div>
+              ${stressHtml}
+            </div>
+
+            <div class="combat-conditions-section">
+              <div class="combat-tracking-label">Conditions</div>
+              ${conditionsHtml}
+            </div>
+
+            <div class="combat-notes-section">
+              <div class="combat-tracking-label">Notes</div>
+              <textarea class="combat-notes-input" placeholder="Combat notes..." rows="2" onchange="updateCombatNotes('${adv.id}', this.value)">${adv.notes}</textarea>
+            </div>
           </div>
         </div>
       </div>

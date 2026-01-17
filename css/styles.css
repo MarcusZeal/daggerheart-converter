@@ -6122,51 +6122,213 @@ textarea::placeholder {
 .combat-adversaries {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 1.5rem;
 }
 
 .combat-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
   border-radius: 8px;
   overflow: hidden;
   transition: all 0.2s;
 }
 
 .combat-card.defeated {
-  opacity: 0.5;
+  opacity: 0.6;
   filter: grayscale(0.5);
 }
 
 .combat-card.threshold-major {
   border-color: #eab308;
+  box-shadow: 0 0 10px rgba(234, 179, 8, 0.3);
 }
 
 .combat-card.threshold-severe {
   border-color: #ef4444;
+  box-shadow: 0 0 10px rgba(239, 68, 68, 0.3);
 }
 
-.combat-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.2);
-  border-bottom: 1px solid var(--border);
+.combat-card .dh-card-header {
+  position: relative;
 }
 
-.combat-card-name {
+.combat-card.defeated .dh-card-name {
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.defeated-badge {
+  background: #ef4444;
+  color: white;
+  padding: 0.15rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.7rem;
   font-weight: 700;
-  font-size: 1.1rem;
-}
-
-.combat-card-meta {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
+  margin-left: 0.5rem;
+  vertical-align: middle;
 }
 
 .combat-card-body {
   padding: 1rem;
+}
+
+/* Combat stat boxes */
+.combat-stats-row {
+  display: flex;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+.combat-stat-box {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  text-align: center;
+  min-width: 80px;
+}
+
+.combat-stat-value {
+  display: block;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.combat-stat-label {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Threshold display */
+.combat-threshold-display {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  font-size: 0.85rem;
+}
+
+.threshold-item {
+  padding: 0.25rem 0.5rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+}
+
+.threshold-item.major {
+  color: #eab308;
+  border: 1px solid #eab308;
+}
+
+.threshold-item.severe {
+  color: #ef4444;
+  border: 1px solid #ef4444;
+}
+
+.threshold-warning {
+  font-weight: 700;
+  animation: pulse 1s infinite;
+}
+
+.threshold-warning.major { color: #eab308; }
+.threshold-warning.severe { color: #ef4444; }
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
+}
+
+/* Attack line */
+.combat-attack-line {
+  padding: 0.5rem 0.75rem;
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  margin-bottom: 1rem;
+  font-size: 0.9rem;
+}
+
+.combat-attack-line .atk-label {
+  font-weight: 600;
+  color: var(--accent);
+}
+
+.combat-attack-line .weapon-name {
+  font-weight: 600;
+}
+
+.combat-experience {
+  font-size: 0.85rem;
+  margin-bottom: 1rem;
+  color: var(--text-secondary);
+}
+
+/* Combat features */
+.combat-features {
+  margin-bottom: 1rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 6px;
+}
+
+.combat-features-title {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 0.25rem;
+}
+
+.combat-feature {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+.combat-feature:last-child {
+  margin-bottom: 0;
+}
+
+.combat-feature-name {
+  font-weight: 700;
+}
+
+.combat-feature-type {
+  font-style: italic;
+  color: var(--text-secondary);
+}
+
+.combat-feature-type.passive { color: #6b7280; }
+.combat-feature-type.action { color: #3b82f6; }
+.combat-feature-type.reaction { color: #f59e0b; }
+
+/* Combat tracking section */
+.combat-tracking-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 2px solid var(--border-color);
+}
+
+.combat-tracking-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.5rem;
+  color: var(--text-secondary);
+}
+
+.tracking-hint {
+  font-weight: 400;
+  font-size: 0.7rem;
+  text-transform: none;
+  letter-spacing: normal;
+  opacity: 0.7;
 }
 
 /* HP Bar */
@@ -6234,15 +6396,15 @@ textarea::placeholder {
 
 /* Stress tracker */
 .combat-stress-section {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
   margin-bottom: 1rem;
 }
 
-.combat-stress-label {
-  font-size: 0.85rem;
-  font-weight: 600;
+.combat-conditions-section {
+  margin-bottom: 1rem;
+}
+
+.combat-notes-section {
+  margin-bottom: 0;
 }
 
 .combat-stress-boxes {
@@ -6398,13 +6560,9 @@ textarea::placeholder {
 }
 
 /* Notes */
-.combat-notes {
-  margin-top: 0.5rem;
-}
-
 .combat-notes-input {
   width: 100%;
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   border-radius: 4px;
   border: 1px solid var(--border);
   background: var(--bg-input);
