@@ -6013,3 +6013,747 @@ textarea::placeholder {
     padding: 1rem;
   }
 }
+
+/* ==================== COMBAT MODE ==================== */
+
+/* Combat mode container */
+.combat-mode {
+  display: none;
+}
+
+.combat-mode.active {
+  display: block;
+}
+
+.encounter-builder-container.combat-active .encounter-columns,
+.encounter-builder-container.combat-active .saved-encounters-section {
+  display: none;
+}
+
+/* Combat header with Fear/Hope */
+.combat-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1rem 1.5rem;
+  background: var(--bg-card);
+  border-radius: 8px;
+  margin-bottom: 1.5rem;
+  border: 2px solid var(--accent);
+}
+
+.combat-title {
+  font-family: var(--font-display);
+  font-size: 1.5rem;
+  color: var(--accent);
+  margin: 0;
+}
+
+.combat-pools {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.pool-tracker {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pool-label {
+  font-weight: 600;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.pool-label.fear { color: #ef4444; }
+.pool-label.hope { color: #22c55e; }
+
+.pool-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pool-btn {
+  width: 28px;
+  height: 28px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 1.1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pool-btn:hover {
+  background: var(--accent);
+  color: var(--bg-dark);
+}
+
+.pool-value {
+  font-size: 1.5rem;
+  font-weight: 700;
+  min-width: 2rem;
+  text-align: center;
+}
+
+.pool-value.fear { color: #ef4444; }
+.pool-value.hope { color: #22c55e; }
+
+.combat-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+/* Combat grid layout */
+.combat-grid {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 1.5rem;
+}
+
+/* Adversary combat cards */
+.combat-adversaries {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.combat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  transition: all 0.2s;
+}
+
+.combat-card.defeated {
+  opacity: 0.5;
+  filter: grayscale(0.5);
+}
+
+.combat-card.threshold-major {
+  border-color: #eab308;
+}
+
+.combat-card.threshold-severe {
+  border-color: #ef4444;
+}
+
+.combat-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-bottom: 1px solid var(--border);
+}
+
+.combat-card-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+}
+
+.combat-card-meta {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+}
+
+.combat-card-body {
+  padding: 1rem;
+}
+
+/* HP Bar */
+.combat-hp-section {
+  margin-bottom: 1rem;
+}
+
+.combat-hp-label {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.combat-hp-bar {
+  height: 24px;
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+  overflow: hidden;
+  position: relative;
+}
+
+.combat-hp-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #22c55e, #4ade80);
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.combat-hp-fill.major {
+  background: linear-gradient(90deg, #eab308, #facc15);
+}
+
+.combat-hp-fill.severe {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.combat-hp-thresholds {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+}
+
+.threshold-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: rgba(255, 255, 255, 0.5);
+}
+
+.threshold-marker::after {
+  content: attr(data-label);
+  position: absolute;
+  top: -18px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.65rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+/* Stress tracker */
+.combat-stress-section {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.combat-stress-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.combat-stress-pips {
+  display: flex;
+  gap: 0.25rem;
+}
+
+.stress-pip {
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.stress-pip.filled {
+  background: var(--accent);
+}
+
+.stress-pip.spent {
+  background: var(--text-secondary);
+  border-color: var(--text-secondary);
+}
+
+/* Damage controls */
+.combat-damage-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.damage-btn {
+  padding: 0.4rem 0.75rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.damage-btn:hover {
+  background: #ef4444;
+  border-color: #ef4444;
+  color: white;
+}
+
+.damage-btn.heal:hover {
+  background: #22c55e;
+  border-color: #22c55e;
+}
+
+.damage-btn.custom {
+  background: var(--accent);
+  color: var(--bg-dark);
+  border-color: var(--accent);
+}
+
+.damage-input {
+  width: 60px;
+  padding: 0.4rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  text-align: center;
+}
+
+/* Conditions */
+.combat-conditions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.condition-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.25rem 0.5rem;
+  background: rgba(99, 102, 241, 0.2);
+  border: 1px solid #6366f1;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  color: #a5b4fc;
+}
+
+.condition-tag .remove-condition {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.condition-tag .remove-condition:hover {
+  opacity: 1;
+}
+
+.add-condition-btn {
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  border: 1px dashed var(--border);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+
+.add-condition-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Condition dropdown */
+.condition-dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.condition-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.5rem;
+  z-index: 100;
+  min-width: 150px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  display: none;
+}
+
+.condition-menu.open {
+  display: block;
+}
+
+.condition-option {
+  padding: 0.4rem 0.75rem;
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 0.85rem;
+}
+
+.condition-option:hover {
+  background: var(--accent);
+  color: var(--bg-dark);
+}
+
+/* Notes */
+.combat-notes {
+  margin-top: 0.5rem;
+}
+
+.combat-notes-input {
+  width: 100%;
+  padding: 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+  font-size: 0.85rem;
+  resize: none;
+}
+
+.combat-notes-input::placeholder {
+  color: var(--text-secondary);
+}
+
+/* Combat sidebar */
+.combat-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Combat log */
+.combat-log {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.combat-log-title {
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.combat-log-entries {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+}
+
+.log-entry {
+  padding: 0.4rem 0.5rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  border-left: 3px solid var(--border);
+}
+
+.log-entry.damage {
+  border-left-color: #ef4444;
+}
+
+.log-entry.heal {
+  border-left-color: #22c55e;
+}
+
+.log-entry.defeated {
+  border-left-color: #6366f1;
+}
+
+.log-entry.fear {
+  border-left-color: #ef4444;
+}
+
+.log-entry.hope {
+  border-left-color: #22c55e;
+}
+
+.log-entry-time {
+  font-size: 0.7rem;
+  color: var(--text-secondary);
+}
+
+/* Party tracker */
+.party-tracker {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 1rem;
+}
+
+.party-tracker-title {
+  font-weight: 700;
+  margin-bottom: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.party-member {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.party-member:last-child {
+  border-bottom: none;
+}
+
+.party-member-name {
+  flex: 1;
+  font-weight: 600;
+}
+
+.party-member-name input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-weight: 600;
+  width: 100%;
+}
+
+.party-stat {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.party-stat-input {
+  width: 40px;
+  padding: 0.25rem;
+  text-align: center;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.add-party-member {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border: 1px dashed var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text-secondary);
+  cursor: pointer;
+}
+
+.add-party-member:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* Dice roller */
+.dice-roller-result {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: var(--bg-dark);
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 2rem 3rem;
+  z-index: 10000;
+  text-align: center;
+  animation: diceRollIn 0.3s ease;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
+@keyframes diceRollIn {
+  from {
+    transform: translate(-50%, -50%) scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+  }
+}
+
+.dice-roll-value {
+  font-size: 4rem;
+  font-weight: 700;
+  color: var(--accent);
+  font-family: var(--font-display);
+}
+
+.dice-roll-notation {
+  font-size: 1.2rem;
+  color: var(--text-secondary);
+  margin-top: 0.5rem;
+}
+
+.dice-roll-breakdown {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin-top: 0.25rem;
+}
+
+/* Combat summary modal */
+.combat-summary {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.combat-summary-section {
+  margin-bottom: 1.5rem;
+}
+
+.combat-summary-section h4 {
+  margin-bottom: 0.5rem;
+  color: var(--accent);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .combat-grid {
+    grid-template-columns: 1fr;
+  }
+  
+  .combat-sidebar {
+    order: -1;
+  }
+  
+  .combat-header {
+    flex-direction: column;
+    text-align: center;
+  }
+  
+  .combat-pools {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+}
+
+/* Daggerheart-style HP boxes (fill UP as damage taken) */
+.combat-hp-boxes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 0.5rem;
+}
+
+.hp-box {
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--text-secondary);
+  border-radius: 4px;
+  background: transparent;
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+}
+
+.hp-box:hover {
+  border-color: var(--accent);
+}
+
+.hp-box.filled {
+  background: #ef4444;
+  border-color: #ef4444;
+}
+
+.hp-box.major-threshold {
+  border-color: #eab308;
+}
+
+.hp-box.major-threshold.filled {
+  background: #eab308;
+  border-color: #eab308;
+}
+
+.hp-box.severe-threshold {
+  border-color: #ef4444;
+}
+
+/* Threshold markers between boxes */
+.hp-threshold-marker {
+  width: 2px;
+  height: 28px;
+  background: var(--text-secondary);
+  margin: 0 2px;
+  position: relative;
+}
+
+.hp-threshold-marker::after {
+  content: attr(data-label);
+  position: absolute;
+  top: -16px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 0.6rem;
+  color: var(--text-secondary);
+  white-space: nowrap;
+}
+
+.hp-threshold-marker.major {
+  background: #eab308;
+}
+
+.hp-threshold-marker.major::after {
+  color: #eab308;
+}
+
+.hp-threshold-marker.severe {
+  background: #ef4444;
+}
+
+.hp-threshold-marker.severe::after {
+  color: #ef4444;
+}
+
+/* Clickable damage dice */
+.combat-damage-dice {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.4rem 0.75rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.combat-damage-dice:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg-dark);
+}
+
+.combat-damage-dice i {
+  font-size: 1rem;
+}
+
+/* Light mode adjustments for combat */
+:root.light-mode .hp-box {
+  border-color: #9ca3af;
+}
+
+:root.light-mode .hp-box:hover {
+  border-color: var(--accent);
+}
+
+:root.light-mode .combat-card {
+  background: var(--bg-card);
+}
+
+:root.light-mode .combat-card-header {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+:root.light-mode .log-entry {
+  background: rgba(0, 0, 0, 0.05);
+}

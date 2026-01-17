@@ -547,6 +547,9 @@ The converter will auto-detect the source system."
           <div class="encounter-actions">
             <button class="btn btn-secondary" onclick="clearEncounter()">Clear</button>
             <button class="btn btn-primary" onclick="saveEncounter()">Save Encounter</button>
+            <button class="btn btn-primary" onclick="startCombat()" id="start-combat-btn" style="background: #22c55e; border-color: #22c55e;">
+              <i class="fas fa-play"></i> Start Combat
+            </button>
           </div>
         </div>
       </div>
@@ -555,6 +558,68 @@ The converter will auto-detect the source system."
       <div class="saved-encounters-section">
         <h3>Saved Encounters</h3>
         <div id="saved-encounters-list"></div>
+      </div>
+
+      <!-- Combat Mode -->
+      <div class="combat-mode" id="combat-mode">
+        <div class="combat-header">
+          <h2 class="combat-title" id="combat-encounter-name">Combat</h2>
+          <div class="combat-pools">
+            <div class="pool-tracker">
+              <span class="pool-label fear">Fear</span>
+              <div class="pool-controls">
+                <button class="pool-btn" onclick="adjustFear(-1)">−</button>
+                <span class="pool-value fear" id="fear-value">0</span>
+                <button class="pool-btn" onclick="adjustFear(1)">+</button>
+              </div>
+            </div>
+            <div class="pool-tracker">
+              <span class="pool-label hope">Hope</span>
+              <div class="pool-controls">
+                <button class="pool-btn" onclick="adjustHope(-1)">−</button>
+                <span class="pool-value hope" id="hope-value">0</span>
+                <button class="pool-btn" onclick="adjustHope(1)">+</button>
+              </div>
+            </div>
+          </div>
+          <div class="combat-actions">
+            <button class="btn btn-secondary" onclick="undoCombatAction()"><i class="fas fa-undo"></i> Undo</button>
+            <button class="btn btn-secondary" onclick="exportCombatSummary()"><i class="fas fa-file-export"></i> Export</button>
+            <button class="btn btn-primary" onclick="endCombat()" style="background: #ef4444; border-color: #ef4444;">
+              <i class="fas fa-stop"></i> End Combat
+            </button>
+          </div>
+        </div>
+
+        <div class="combat-grid">
+          <div class="combat-adversaries" id="combat-adversaries">
+            <!-- Combat cards rendered here -->
+          </div>
+
+          <div class="combat-sidebar">
+            <!-- Party Tracker -->
+            <div class="party-tracker">
+              <div class="party-tracker-title">
+                <span>Party</span>
+                <button class="btn btn-secondary btn-small" onclick="addPartyMember()">+ Add</button>
+              </div>
+              <div id="party-members">
+                <!-- Party members rendered here -->
+              </div>
+            </div>
+
+            <!-- Combat Log -->
+            <div class="combat-log">
+              <div class="combat-log-title">
+                <span>Combat Log</span>
+                <button class="btn btn-secondary btn-small" onclick="clearCombatLog()">Clear</button>
+              </div>
+              <div class="combat-log-entries" id="combat-log-entries">
+                <!-- Log entries rendered here -->
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

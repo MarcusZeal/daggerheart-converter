@@ -2209,6 +2209,588 @@ const TIER_STATS = {
   4: { atkMod: '+4', damage: '4d8+10 to 4d12+15', difficulty: 20, majorThresh: 25, severeThresh: 45 }
 };
 
+// ==================== COMBAT MODE ====================
+
+// Daggerheart conditions
+const DH_CONDITIONS = ['Restrained', 'Vulnerable', 'Hidden', 'Frightened', 'Slowed', 'Weakened', 'Empowered', 'Marked'];
+
+// Combat state
+let combatState = {
+  active: false,
+  encounterName: '',
+  fear: 0,
+  hope: 0,
+  adversaries: [], // [{id, name, advType, maxHp, currentDamage, maxStress, currentStress, conditions, notes, defeated}]
+  party: [], // [{name, hp, stress, armor}]
+  log: [],
+  undoStack: []
+};
+
+// Start combat from current encounter roster
+function startCombat() {
+  if (encounterState.roster.length === 0) {
+    showToast('Add adversaries to start combat', 'error');
+    return;
+  }
+
+  // Initialize combat state
+  combatState.active = true;
+  combatState.encounterName = encounterState.name || 'Unnamed Encounter';
+  combatState.fear = 0;
+  combatState.hope = 0;
+  combatState.adversaries = [];
+  combatState.log = [];
+  combatState.undoStack = [];
+
+  // Create combat instances for each adversary
+  let instanceId = 0;
+  encounterState.roster.forEach(item => {
+    const adv = item.adversary;
+    const scaled = getScaledStats(adv, item.tierOverride);
+    const hp = parseInt(scaled.hp) || parseInt(adv.hp) || 5;
+    const stress = parseInt(adv.stress) || 3;
+    const majorThresh = parseInt(scaled.majorThresh) || parseInt(adv.majorThresh) || Math.floor(hp * 0.5);
+    const severeThresh = parseInt(scaled.severeThresh) || parseInt(adv.severeThresh) || Math.floor(hp * 0.8);
+
+    for (let i = 0; i < item.count; i++) {
+      combatState.adversaries.push({
+        id: `combat-${instanceId++}`,
+        name: item.count > 1 ? `${adv.name} #${i + 1}` : adv.name,
+        advType: adv.advType || 'Standard',
+        tier: item.tierOverride || parseInt(adv.tier) || 2,
+        maxHp: hp,
+        currentDamage: 0,
+        majorThresh,
+        severeThresh,
+        maxStress: stress,
+        currentStress: stress,
+        damage: scaled.damage || adv.damage || '2d6+3',
+        conditions: [],
+        notes: '',
+        defeated: false
+      });
+    }
+  });
+
+  // Load saved party or create default
+  const savedParty = JSON.parse(localStorage.getItem('dh-combat-party') || '[]');
+  combatState.party = savedParty.length > 0 ? savedParty : [
+    { name: 'Player 1', hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 },
+    { name: 'Player 2', hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 },
+    { name: 'Player 3', hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 },
+    { name: 'Player 4', hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 }
+  ];
+
+  // Log combat start
+  addCombatLog(`Combat started: ${combatState.encounterName}`, 'info');
+
+  // Show combat mode
+  document.querySelector('.encounter-builder-container').classList.add('combat-active');
+  document.getElementById('combat-mode').classList.add('active');
+  document.getElementById('combat-encounter-name').textContent = combatState.encounterName;
+
+  renderCombatAdversaries();
+  renderPartyTracker();
+  updateCombatPools();
+  saveCombatState();
+}
+
+// End combat
+function endCombat() {
+  if (!confirm('End combat and return to encounter builder?')) return;
+
+  combatState.active = false;
+  document.querySelector('.encounter-builder-container').classList.remove('combat-active');
+  document.getElementById('combat-mode').classList.remove('active');
+
+  addCombatLog('Combat ended', 'info');
+  localStorage.removeItem('dh-active-combat');
+}
+
+// Render combat adversary cards
+function renderCombatAdversaries() {
+  const container = document.getElementById('combat-adversaries');
+
+  container.innerHTML = combatState.adversaries.map(adv => {
+    const hpPercent = (adv.currentDamage / adv.maxHp) * 100;
+    const isDefeated = adv.currentDamage >= adv.maxHp;
+    const isMajor = adv.currentDamage >= adv.majorThresh && !isDefeated;
+    const isSevere = adv.currentDamage >= adv.severeThresh && !isDefeated;
+
+    // Build HP boxes
+    let hpBoxesHtml = '<div class="combat-hp-boxes">';
+    for (let i = 1; i <= adv.maxHp; i++) {
+      const isFilled = i <= adv.currentDamage;
+      const isMajorBox = i === adv.majorThresh;
+      const isSevereBox = i === adv.severeThresh;
+      let boxClass = 'hp-box';
+      if (isFilled) boxClass += ' filled';
+      if (i > adv.majorThresh && i <= adv.severeThresh) boxClass += ' major-threshold';
+      if (i > adv.severeThresh) boxClass += ' severe-threshold';
+
+      // Add threshold markers
+      if (i === adv.majorThresh) {
+        hpBoxesHtml += `<div class="hp-threshold-marker major" data-label="Major"></div>`;
+      }
+      if (i === adv.severeThresh) {
+        hpBoxesHtml += `<div class="hp-threshold-marker severe" data-label="Severe"></div>`;
+      }
+
+      hpBoxesHtml += `<div class="${boxClass}" onclick="toggleHpBox('${adv.id}', ${i})" title="HP ${i}/${adv.maxHp}"></div>`;
+    }
+    hpBoxesHtml += '</div>';
+
+    // Build stress pips
+    let stressHtml = '<div class="combat-stress-pips">';
+    for (let i = 0; i < adv.maxStress; i++) {
+      const isAvailable = i < adv.currentStress;
+      stressHtml += `<div class="stress-pip ${isAvailable ? 'filled' : 'spent'}" onclick="toggleStressPip('${adv.id}', ${i})" title="${isAvailable ? 'Spend stress' : 'Restore stress'}"></div>`;
+    }
+    stressHtml += '</div>';
+
+    // Build conditions
+    let conditionsHtml = '<div class="combat-conditions">';
+    adv.conditions.forEach(cond => {
+      conditionsHtml += `<span class="condition-tag">${cond} <span class="remove-condition" onclick="removeCondition('${adv.id}', '${cond}')">&times;</span></span>`;
+    });
+    conditionsHtml += `<div class="condition-dropdown">
+      <button class="add-condition-btn" onclick="toggleConditionMenu('${adv.id}')">+ Condition</button>
+      <div class="condition-menu" id="condition-menu-${adv.id}">
+        ${DH_CONDITIONS.filter(c => !adv.conditions.includes(c)).map(c =>
+          `<div class="condition-option" onclick="addCondition('${adv.id}', '${c}')">${c}</div>`
+        ).join('')}
+      </div>
+    </div></div>`;
+
+    const cardClass = `combat-card ${isDefeated ? 'defeated' : ''} ${isSevere ? 'threshold-severe' : isMajor ? 'threshold-major' : ''}`;
+
+    return `
+      <div class="${cardClass}" id="combat-card-${adv.id}">
+        <div class="combat-card-header">
+          <div>
+            <span class="combat-card-name">${isDefeated ? '<s>' + adv.name + '</s>' : adv.name}</span>
+            <span class="combat-card-meta">T${adv.tier} ${adv.advType}</span>
+          </div>
+          <span class="combat-card-meta">${adv.currentDamage}/${adv.maxHp} damage${isDefeated ? ' - DEFEATED' : ''}</span>
+        </div>
+        <div class="combat-card-body">
+          <div class="combat-hp-section">
+            <div class="combat-hp-label">
+              <span>Damage (click to mark)</span>
+              <span>${isSevere ? '⚠️ SEVERE' : isMajor ? '⚠️ Major' : ''}</span>
+            </div>
+            ${hpBoxesHtml}
+          </div>
+
+          <div class="combat-stress-section">
+            <span class="combat-stress-label">Stress:</span>
+            ${stressHtml}
+          </div>
+
+          <div class="combat-damage-controls">
+            <button class="damage-btn" onclick="dealDamage('${adv.id}', 1)">+1</button>
+            <button class="damage-btn" onclick="dealDamage('${adv.id}', 5)">+5</button>
+            <button class="damage-btn" onclick="dealDamage('${adv.id}', 10)">+10</button>
+            <input type="number" class="damage-input" id="custom-dmg-${adv.id}" placeholder="#" min="1">
+            <button class="damage-btn custom" onclick="dealCustomDamage('${adv.id}')">Deal</button>
+            <button class="damage-btn heal" onclick="healDamage('${adv.id}', 1)">−1</button>
+            ${adv.damage ? `<button class="combat-damage-dice" onclick="rollDamage('${adv.damage}')" title="Click to roll ${adv.damage}"><i class="fas fa-dice-d20"></i> ${adv.damage}</button>` : ''}
+          </div>
+
+          ${conditionsHtml}
+
+          <div class="combat-notes">
+            <textarea class="combat-notes-input" placeholder="Notes..." rows="1" onchange="updateCombatNotes('${adv.id}', this.value)">${adv.notes}</textarea>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+}
+
+// Toggle HP box (click to fill/unfill)
+function toggleHpBox(advId, boxNum) {
+  const adv = combatState.adversaries.find(a => a.id === advId);
+  if (!adv) return;
+
+  saveUndoState();
+
+  // If clicking on a filled box, unfill from there to the end
+  // If clicking on an empty box, fill up to and including that box
+  if (boxNum <= adv.currentDamage) {
+    // Clicking on filled box - heal to this point
+    const healed = adv.currentDamage - (boxNum - 1);
+    adv.currentDamage = boxNum - 1;
+    addCombatLog(`${adv.name} healed ${healed} damage (${adv.currentDamage}/${adv.maxHp})`, 'heal');
+  } else {
+    // Clicking on empty box - deal damage to this point
+    const dealt = boxNum - adv.currentDamage;
+    adv.currentDamage = boxNum;
+
+    if (adv.currentDamage >= adv.maxHp) {
+      adv.defeated = true;
+      addCombatLog(`${adv.name} DEFEATED!`, 'defeated');
+    } else if (adv.currentDamage >= adv.severeThresh) {
+      addCombatLog(`${adv.name} took ${dealt} damage - SEVERE THRESHOLD! (${adv.currentDamage}/${adv.maxHp})`, 'damage');
+    } else if (adv.currentDamage >= adv.majorThresh) {
+      addCombatLog(`${adv.name} took ${dealt} damage - Major threshold (${adv.currentDamage}/${adv.maxHp})`, 'damage');
+    } else {
+      addCombatLog(`${adv.name} took ${dealt} damage (${adv.currentDamage}/${adv.maxHp})`, 'damage');
+    }
+  }
+
+  renderCombatAdversaries();
+  saveCombatState();
+}
+
+// Deal damage
+function dealDamage(advId, amount) {
+  const adv = combatState.adversaries.find(a => a.id === advId);
+  if (!adv || adv.defeated) return;
+
+  saveUndoState();
+  adv.currentDamage = Math.min(adv.maxHp, adv.currentDamage + amount);
+
+  if (adv.currentDamage >= adv.maxHp) {
+    adv.defeated = true;
+    addCombatLog(`${adv.name} took ${amount} damage - DEFEATED!`, 'defeated');
+  } else if (adv.currentDamage >= adv.severeThresh && adv.currentDamage - amount < adv.severeThresh) {
+    addCombatLog(`${adv.name} took ${amount} damage - SEVERE THRESHOLD! (${adv.currentDamage}/${adv.maxHp})`, 'damage');
+  } else if (adv.currentDamage >= adv.majorThresh && adv.currentDamage - amount < adv.majorThresh) {
+    addCombatLog(`${adv.name} took ${amount} damage - Major threshold (${adv.currentDamage}/${adv.maxHp})`, 'damage');
+  } else {
+    addCombatLog(`${adv.name} took ${amount} damage (${adv.currentDamage}/${adv.maxHp})`, 'damage');
+  }
+
+  renderCombatAdversaries();
+  saveCombatState();
+}
+
+// Deal custom damage
+function dealCustomDamage(advId) {
+  const input = document.getElementById(`custom-dmg-${advId}`);
+  const amount = parseInt(input.value);
+  if (!amount || amount < 1) return;
+  dealDamage(advId, amount);
+  input.value = '';
+}
+
+// Heal damage
+function healDamage(advId, amount) {
+  const adv = combatState.adversaries.find(a => a.id === advId);
+  if (!adv) return;
+
+  saveUndoState();
+  const oldDamage = adv.currentDamage;
+  adv.currentDamage = Math.max(0, adv.currentDamage - amount);
+  adv.defeated = adv.currentDamage >= adv.maxHp;
+
+  if (oldDamage !== adv.currentDamage) {
+    addCombatLog(`${adv.name} healed ${oldDamage - adv.currentDamage} damage (${adv.currentDamage}/${adv.maxHp})`, 'heal');
+  }
+
+  renderCombatAdversaries();
+  saveCombatState();
+}
+
+// Toggle stress pip
+function toggleStressPip(advId, pipIndex) {
+  const adv = combatState.adversaries.find(a => a.id === advId);
+  if (!adv) return;
+
+  saveUndoState();
+
+  if (pipIndex < adv.currentStress) {
+    // Spend stress
+    adv.currentStress = pipIndex;
+    addCombatLog(`${adv.name} spent stress (${adv.currentStress}/${adv.maxStress} remaining)`, 'info');
+  } else {
+    // Restore stress
+    adv.currentStress = pipIndex + 1;
+    addCombatLog(`${adv.name} restored stress (${adv.currentStress}/${adv.maxStress})`, 'info');
+  }
+
+  renderCombatAdversaries();
+  saveCombatState();
+}
+
+// Condition management
+function toggleConditionMenu(advId) {
+  const menu = document.getElementById(`condition-menu-${advId}`);
+  document.querySelectorAll('.condition-menu').forEach(m => {
+    if (m !== menu) m.classList.remove('open');
+  });
+  menu.classList.toggle('open');
+}
+
+function addCondition(advId, condition) {
+  const adv = combatState.adversaries.find(a => a.id === advId);
+  if (!adv || adv.conditions.includes(condition)) return;
+
+  saveUndoState();
+  adv.conditions.push(condition);
+  addCombatLog(`${adv.name} gained condition: ${condition}`, 'info');
+
+  document.getElementById(`condition-menu-${advId}`).classList.remove('open');
+  renderCombatAdversaries();
+  saveCombatState();
+}
+
+function removeCondition(advId, condition) {
+  const adv = combatState.adversaries.find(a => a.id === advId);
+  if (!adv) return;
+
+  saveUndoState();
+  adv.conditions = adv.conditions.filter(c => c !== condition);
+  addCombatLog(`${adv.name} lost condition: ${condition}`, 'info');
+
+  renderCombatAdversaries();
+  saveCombatState();
+}
+
+// Update notes
+function updateCombatNotes(advId, notes) {
+  const adv = combatState.adversaries.find(a => a.id === advId);
+  if (!adv) return;
+  adv.notes = notes;
+  saveCombatState();
+}
+
+// Fear/Hope pools
+function adjustFear(amount) {
+  saveUndoState();
+  combatState.fear = Math.max(0, combatState.fear + amount);
+  updateCombatPools();
+  addCombatLog(`Fear ${amount > 0 ? 'gained' : 'spent'}: now ${combatState.fear}`, 'fear');
+  saveCombatState();
+}
+
+function adjustHope(amount) {
+  saveUndoState();
+  combatState.hope = Math.max(0, combatState.hope + amount);
+  updateCombatPools();
+  addCombatLog(`Hope ${amount > 0 ? 'gained' : 'spent'}: now ${combatState.hope}`, 'hope');
+  saveCombatState();
+}
+
+function updateCombatPools() {
+  document.getElementById('fear-value').textContent = combatState.fear;
+  document.getElementById('hope-value').textContent = combatState.hope;
+}
+
+// Dice roller
+function rollDamage(diceNotation) {
+  const result = rollDice(diceNotation);
+  if (!result) return;
+
+  // Show roll result popup
+  const popup = document.createElement('div');
+  popup.className = 'dice-roller-result';
+  popup.innerHTML = `
+    <div class="dice-roll-value">${result.total}</div>
+    <div class="dice-roll-notation">${diceNotation}</div>
+    <div class="dice-roll-breakdown">[${result.rolls.join(', ')}]${result.modifier ? ` ${result.modifier >= 0 ? '+' : ''}${result.modifier}` : ''}</div>
+  `;
+  document.body.appendChild(popup);
+
+  addCombatLog(`Rolled ${diceNotation}: ${result.total} [${result.rolls.join(', ')}]${result.modifier ? ` ${result.modifier >= 0 ? '+' : ''}${result.modifier}` : ''}`, 'info');
+
+  setTimeout(() => popup.remove(), 2000);
+}
+
+function rollDice(notation) {
+  const match = notation.match(/(\d+)d(\d+)([+-]\d+)?/i);
+  if (!match) return null;
+
+  const numDice = parseInt(match[1]);
+  const dieSize = parseInt(match[2]);
+  const modifier = match[3] ? parseInt(match[3]) : 0;
+
+  const rolls = [];
+  for (let i = 0; i < numDice; i++) {
+    rolls.push(Math.floor(Math.random() * dieSize) + 1);
+  }
+
+  const total = rolls.reduce((a, b) => a + b, 0) + modifier;
+  return { rolls, modifier, total };
+}
+
+// Party tracker
+function renderPartyTracker() {
+  const container = document.getElementById('party-members');
+
+  container.innerHTML = combatState.party.map((member, idx) => `
+    <div class="party-member">
+      <div class="party-member-name">
+        <input type="text" value="${member.name}" onchange="updatePartyMember(${idx}, 'name', this.value)" placeholder="Name">
+      </div>
+      <div class="party-stat">
+        <span>HP:</span>
+        <input type="number" class="party-stat-input" value="${member.hp}" onchange="updatePartyMember(${idx}, 'hp', this.value)" min="0">
+        <span>/</span>
+        <input type="number" class="party-stat-input" value="${member.maxHp}" onchange="updatePartyMember(${idx}, 'maxHp', this.value)" min="1">
+      </div>
+      <div class="party-stat">
+        <span>Stress:</span>
+        <input type="number" class="party-stat-input" value="${member.stress}" onchange="updatePartyMember(${idx}, 'stress', this.value)" min="0">
+        <span>/</span>
+        <input type="number" class="party-stat-input" value="${member.maxStress}" onchange="updatePartyMember(${idx}, 'maxStress', this.value)" min="1">
+      </div>
+      <button class="btn btn-secondary btn-small" onclick="removePartyMember(${idx})" title="Remove">&times;</button>
+    </div>
+  `).join('');
+}
+
+function addPartyMember() {
+  combatState.party.push({ name: `Player ${combatState.party.length + 1}`, hp: 0, maxHp: 6, stress: 0, maxStress: 6, armor: 0 });
+  renderPartyTracker();
+  savePartyState();
+}
+
+function removePartyMember(idx) {
+  combatState.party.splice(idx, 1);
+  renderPartyTracker();
+  savePartyState();
+}
+
+function updatePartyMember(idx, field, value) {
+  if (field === 'name') {
+    combatState.party[idx][field] = value;
+  } else {
+    combatState.party[idx][field] = parseInt(value) || 0;
+  }
+  savePartyState();
+}
+
+function savePartyState() {
+  localStorage.setItem('dh-combat-party', JSON.stringify(combatState.party));
+}
+
+// Combat log
+function addCombatLog(message, type = 'info') {
+  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  combatState.log.unshift({ message, type, time });
+
+  // Keep log size manageable
+  if (combatState.log.length > 100) combatState.log.pop();
+
+  renderCombatLog();
+}
+
+function renderCombatLog() {
+  const container = document.getElementById('combat-log-entries');
+  if (!container) return;
+
+  container.innerHTML = combatState.log.slice(0, 50).map(entry => `
+    <div class="log-entry ${entry.type}">
+      <span class="log-entry-time">${entry.time}</span> ${entry.message}
+    </div>
+  `).join('');
+}
+
+function clearCombatLog() {
+  combatState.log = [];
+  renderCombatLog();
+}
+
+// Undo system
+function saveUndoState() {
+  const state = JSON.stringify({
+    fear: combatState.fear,
+    hope: combatState.hope,
+    adversaries: combatState.adversaries.map(a => ({...a, conditions: [...a.conditions]}))
+  });
+  combatState.undoStack.push(state);
+  if (combatState.undoStack.length > 50) combatState.undoStack.shift();
+}
+
+function undoCombatAction() {
+  if (combatState.undoStack.length === 0) {
+    showToast('Nothing to undo', 'info');
+    return;
+  }
+
+  const state = JSON.parse(combatState.undoStack.pop());
+  combatState.fear = state.fear;
+  combatState.hope = state.hope;
+  combatState.adversaries = state.adversaries;
+
+  addCombatLog('Action undone', 'info');
+  renderCombatAdversaries();
+  updateCombatPools();
+  saveCombatState();
+}
+
+// Save/Load combat state
+function saveCombatState() {
+  if (!combatState.active) return;
+  localStorage.setItem('dh-active-combat', JSON.stringify(combatState));
+}
+
+function loadCombatState() {
+  const saved = localStorage.getItem('dh-active-combat');
+  if (!saved) return false;
+
+  try {
+    const loaded = JSON.parse(saved);
+    if (loaded.active) {
+      combatState = loaded;
+      return true;
+    }
+  } catch (e) {
+    console.error('Failed to load combat state:', e);
+  }
+  return false;
+}
+
+// Resume combat if there was an active combat
+function checkForActiveCombat() {
+  if (loadCombatState() && combatState.active) {
+    document.querySelector('.encounter-builder-container').classList.add('combat-active');
+    document.getElementById('combat-mode').classList.add('active');
+    document.getElementById('combat-encounter-name').textContent = combatState.encounterName;
+    renderCombatAdversaries();
+    renderPartyTracker();
+    updateCombatPools();
+    renderCombatLog();
+    showToast('Resumed active combat', 'info');
+  }
+}
+
+// Export combat summary
+function exportCombatSummary() {
+  const defeated = combatState.adversaries.filter(a => a.defeated).length;
+  const remaining = combatState.adversaries.filter(a => !a.defeated).length;
+
+  let summary = `# Combat Summary: ${combatState.encounterName}\n\n`;
+  summary += `## Results\n`;
+  summary += `- Adversaries Defeated: ${defeated}\n`;
+  summary += `- Adversaries Remaining: ${remaining}\n`;
+  summary += `- Final Fear: ${combatState.fear}\n`;
+  summary += `- Final Hope: ${combatState.hope}\n\n`;
+
+  summary += `## Adversary Status\n`;
+  combatState.adversaries.forEach(adv => {
+    summary += `- **${adv.name}** (${adv.advType}): ${adv.defeated ? 'DEFEATED' : `${adv.currentDamage}/${adv.maxHp} damage`}`;
+    if (adv.conditions.length > 0) summary += ` [${adv.conditions.join(', ')}]`;
+    if (adv.notes) summary += ` - ${adv.notes}`;
+    summary += '\n';
+  });
+
+  summary += `\n## Combat Log\n`;
+  combatState.log.slice().reverse().forEach(entry => {
+    summary += `[${entry.time}] ${entry.message}\n`;
+  });
+
+  // Copy to clipboard
+  navigator.clipboard.writeText(summary).then(() => {
+    showToast('Combat summary copied to clipboard!', 'success');
+  }).catch(() => {
+    // Fallback: show in modal or alert
+    alert(summary);
+  });
+}
+
 // Debounce for search
 let encounterSearchTimeout = null;
 function debouncedFilterEncounterLibrary() {
@@ -2740,6 +3322,7 @@ function initEncounterBuilder() {
   renderEncounterRoster();
   renderSavedEncounters();
   updateBudgetDisplay();
+  checkForActiveCombat();
 }
 
 // ==================== ADMIN PANEL ====================
