@@ -523,13 +523,15 @@ app.get('/api/community/conversions', apiLimiter, authenticateToken, (req, res) 
       data: JSON.parse(c.data),
       createdAt: c.created_at,
       author: {
+        id: c.user_id,
         username: c.username,
         avatarUrl: c.avatar_url
       },
       upvotes: c.upvotes,
       downvotes: c.downvotes,
       score: c.score,
-      userVote: userVotes[c.id] || 0
+      userVote: userVotes[c.id] || 0,
+      isOwner: req.user?.id === c.user_id
     })),
     pagination: {
       page: parseInt(page),
@@ -576,6 +578,7 @@ app.get('/api/community/conversions/:id', apiLimiter, authenticateToken, (req, r
     data: JSON.parse(conversion.data),
     createdAt: conversion.created_at,
     author: {
+      id: conversion.user_id,
       username: conversion.username,
       avatarUrl: conversion.avatar_url
     },

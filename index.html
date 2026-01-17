@@ -8715,10 +8715,7 @@ Tags: ${c.tags.join(', ')}`;
       if (!deleteBtn) return;
 
       // Show delete button only if user owns this conversion
-      const isOwner = currentUser && selectedConversion &&
-                      selectedConversion.author &&
-                      selectedConversion.author.id === currentUser.id;
-      deleteBtn.classList.toggle('hidden', !isOwner);
+      deleteBtn.classList.toggle('hidden', !selectedConversion?.isOwner);
     }
 
     async function deleteMyConversion() {
@@ -9092,6 +9089,23 @@ Tags: ${c.tags.join(', ')}`;
         }
 
         showToast('Shared to community library!', 'success');
+
+        // Also add to user's local library automatically
+        try {
+          const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+          const exportObj = getExportObject();
+          exportObj._userCreated = true;
+
+          const existingIdx = existingLibrary.findIndex(item => item.id === exportObj.id);
+          if (existingIdx >= 0) {
+            existingLibrary[existingIdx] = exportObj;
+          } else {
+            existingLibrary.push(exportObj);
+          }
+          localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+        } catch (e) {
+          console.error('Auto-save to library failed:', e);
+        }
 
         // Reload if on community tab
         if (communityLoaded) {
