@@ -53,6 +53,10 @@
       letter-spacing: 0.5px;
     }
 
+    :root.light-mode h1 {
+      font-weight: 900;
+    }
+
     :root.light-mode h4,
     :root.light-mode h5,
     :root.light-mode h6 {
@@ -3438,6 +3442,23 @@
       border-radius: 3px;
       background: rgba(0,0,0,0.08);
       color: #555;
+    }
+
+    .dh-card-footer-right {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dh-card-footer .share-link-btn {
+      position: static;
+      padding: 0.2rem 0.4rem;
+      font-size: 0.8rem;
+      opacity: 0.6;
+    }
+
+    .dh-card-footer .share-link-btn:hover {
+      opacity: 1;
     }
 
     /* Voting buttons */
@@ -7634,7 +7655,10 @@ Tags: ${c.tags.join(', ')}`;
             </div>
             <div class="dh-card-footer">
               <div class="dh-card-author">${authorAvatar}@${escapeHtml(conv.author?.username || 'Unknown')}</div>
-              ${sourceSystem ? `<span class="dh-card-source">${escapeHtml(sourceSystem)}</span>` : ''}
+              <div class="dh-card-footer-right">
+                ${sourceSystem ? `<span class="dh-card-source">${escapeHtml(sourceSystem)}</span>` : ''}
+                <button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>
+              </div>
             </div>
             <div class="community-item-votes">
               <button class="vote-btn upvote ${conv.userVote === 1 ? 'active' : ''}"
@@ -7643,7 +7667,6 @@ Tags: ${c.tags.join(', ')}`;
               <button class="vote-btn downvote ${conv.userVote === -1 ? 'active' : ''}"
                       onclick="event.stopPropagation(); quickVote('${conv.id}', -1)">&#9660;</button>
             </div>
-            <button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>
           </div>
         `;
       }).join('');
