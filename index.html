@@ -172,9 +172,13 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: bottom left;
-      opacity: 0.15;
+      opacity: 0.04;
       pointer-events: none;
       z-index: 0;
+    }
+
+    :root.light-mode #converterPage.active::after {
+      opacity: 0.10;
     }
 
     /* Navigation Bar */
@@ -492,9 +496,13 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: bottom left;
-      opacity: 0.12;
+      opacity: 0.04;
       pointer-events: none;
       z-index: 0;
+    }
+
+    :root.light-mode #communityPage.active::after {
+      opacity: 0.10;
     }
 
     .community-header {
@@ -921,9 +929,13 @@
       background-size: contain;
       background-repeat: no-repeat;
       background-position: bottom right;
-      opacity: 0.12;
+      opacity: 0.04;
       pointer-events: none;
       z-index: 0;
+    }
+
+    :root.light-mode #myLibraryPage.active .my-library-page::after {
+      opacity: 0.10;
     }
 
     .my-library-header {
