@@ -5651,8 +5651,51 @@
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    .encounter-library-card {
+    .encounter-library-card,
+    .encounter-roster-card {
       position: relative;
+    }
+
+    /* Grid layout for roster cards */
+    #encounter-roster {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1rem;
+    }
+
+    #encounter-roster .community-item {
+      margin: 0;
+    }
+
+    /* Roster card controls overlay */
+    .encounter-roster-controls {
+      position: absolute;
+      bottom: 0.5rem;
+      left: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(0, 0, 0, 0.85);
+      padding: 0.35rem 0.5rem;
+      border-radius: 6px;
+      z-index: 10;
+    }
+
+    .encounter-roster-controls .party-btn {
+      background: var(--accent);
+      color: var(--bg-dark);
+      border: none;
+    }
+
+    .encounter-roster-controls .party-btn:hover {
+      background: var(--accent-hover);
+    }
+
+    .encounter-roster-controls .encounter-count {
+      color: #fff;
+      font-weight: 700;
+      min-width: 1.5rem;
+      text-align: center;
     }
 
     /* Drop zone styling */
@@ -9330,25 +9373,96 @@ Tags: ${c.tags.join(', ')}`;
       if (!container) return;
 
       if (encounterState.roster.length === 0) {
-        container.innerHTML = '<div class="empty-state">Click adversaries from your library to add them</div>';
+        container.innerHTML = '<div class="empty-state">Click or drag adversaries from your library to add them</div>';
         return;
       }
 
       container.innerHTML = encounterState.roster.map(item => {
-        const bp = getAdvTypeBattlePoints(item.adversary.advType);
+        const adv = item.adversary;
+        const bp = getAdvTypeBattlePoints(adv.advType);
         const totalBp = bp * item.count;
+        const cardTypeClass = (adv.advType || 'standard').toLowerCase().trim();
+        const difficulty = adv.difficulty || '?';
+        const hp = adv.hp || '?';
+        const stress = adv.stress || '?';
+        const majorThresh = adv.majorThresh || '?';
+        const severeThresh = adv.severeThresh || '?';
+        const description = adv.description || '';
+        const motives = adv.motives || adv.tactics || '';
+
+        // Build attack line
+        let attackLine = '';
+        if (adv.atkMod && adv.atkMod !== '?') {
+          attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${adv.atkMod}</span>`;
+          if (adv.weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.weapon}: ${adv.range || ''}</span>`;
+          if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.damage}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
+        }
+
         return `
-          <div class="encounter-item">
-            <div class="encounter-item-info">
-              <span class="encounter-item-name">${escapeHtmlEncounter(item.adversary.name)}</span>
-              <span class="encounter-item-meta">${item.count > 1 ? `×${item.count}` : ''} ${escapeHtmlEncounter(item.adversary.advType || 'Standard')}</span>
+          <div class="community-item encounter-roster-card"
+               data-adversary-id="${escapeHtmlEncounter(item.adversaryId)}"
+               onclick="openMyLibraryAdversary('${escapeHtmlEncounter(item.adversaryId)}')">
+            <div class="dh-card-header" data-type="${cardTypeClass}">
+              <div class="dh-card-name">${escapeHtmlEncounter(adv.name || 'Unknown')}</div>
+              <div class="dh-card-tier-type">Tier ${adv.tier || '?'} ${adv.advType || 'Standard'}</div>
             </div>
-            <div class="encounter-item-controls">
+            <div class="dh-card-body">
+              ${description ? `<div class="dh-card-description">${escapeHtmlEncounter(description)}</div>` : ''}
+              ${motives ? `<div class="dh-card-motives"><strong>Motives & Tactics:</strong> ${escapeHtmlEncounter(motives)}</div>` : ''}
+              <div class="mini-stats-container">
+                <div class="mini-vitals-row">
+                  <div class="mini-vital-box difficulty">
+                    <span class="mini-vital-value">${difficulty}</span>
+                    <span class="mini-vital-label">Diff</span>
+                  </div>
+                  <div class="mini-vital-box hp">
+                    <span class="mini-vital-value">${hp}</span>
+                    <span class="mini-vital-label">HP</span>
+                  </div>
+                  <div class="mini-vital-box stress">
+                    <span class="mini-vital-value">${stress}</span>
+                    <span class="mini-vital-label">Stress</span>
+                  </div>
+                </div>
+                <div class="mini-damage-tracker">
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -874.223 1942.978 L -874.223 1442.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Minor</span>
+                  </div>
+                  <div class="mini-connector"><span class="mini-connector-number">${majorThresh}</span></div>
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                        <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Major</span>
+                  </div>
+                  <div class="mini-connector"><span class="mini-connector-number">${severeThresh}</span></div>
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                        <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Severe</span>
+                  </div>
+                </div>
+                ${attackLine ? `<div class="dh-card-stats-row">${attackLine}</div>` : ''}
+              </div>
+            </div>
+            <div class="encounter-roster-controls" onclick="event.stopPropagation()">
               <button class="party-btn" onclick="removeFromEncounter('${escapeHtmlEncounter(item.adversaryId)}')">−</button>
               <span class="encounter-count">${item.count}</span>
               <button class="party-btn" onclick="addToEncounter('${escapeHtmlEncounter(item.adversaryId)}')">+</button>
-              <span class="encounter-bp-badge">${totalBp} BP</span>
             </div>
+            <div class="encounter-bp-overlay">${totalBp} BP</div>
           </div>
         `;
       }).join('');
