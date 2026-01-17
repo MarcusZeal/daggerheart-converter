@@ -88,6 +88,9 @@ console.log('Database initialized at:', DATABASE_PATH);
 
 const app = express();
 
+// Trust Fly.io proxy for correct client IP detection
+app.set('trust proxy', 1);
+
 app.use(express.json());
 app.use(cookieParser());
 
