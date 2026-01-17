@@ -934,7 +934,7 @@
       color: var(--accent);
       font-size: 1.1rem;
       margin: 0;
-      font-weight: 600;
+      font-weight: 900;
     }
 
     .library-item-count {
@@ -3483,6 +3483,26 @@
       box-shadow: 0 1px 3px rgba(0,0,0,0.15);
     }
 
+    .quick-save-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 1rem;
+      padding: 0.15rem;
+      color: #888;
+      transition: all 0.2s;
+      line-height: 1;
+    }
+
+    .quick-save-btn:hover {
+      color: #e1b74a;
+      transform: scale(1.1);
+    }
+
+    .quick-save-btn.saved {
+      color: #e1b74a;
+    }
+
     .share-link-btn {
       position: absolute;
       bottom: 0.5rem;
@@ -3569,9 +3589,15 @@
     }
 
     .filter-options {
-      display: flex;
-      flex-direction: column;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
       gap: 0.5rem;
+    }
+
+    @media (max-width: 700px) {
+      .filter-options {
+        grid-template-columns: repeat(2, 1fr);
+      }
     }
 
     .filter-option {
@@ -3707,6 +3733,7 @@
       margin: 0;
       font-size: 1.25rem;
       color: var(--accent);
+      font-weight: 900;
     }
 
     .modal-close {
@@ -7673,6 +7700,11 @@ Tags: ${c.tags.join(', ')}`;
               <span class="vote-score ${conv.score > 0 ? 'positive' : conv.score < 0 ? 'negative' : ''}">${conv.score}</span>
               <button class="vote-btn downvote ${conv.userVote === -1 ? 'active' : ''}"
                       onclick="event.stopPropagation(); quickVote('${conv.id}', -1)">&#9660;</button>
+              <button class="quick-save-btn ${isInLibrary(conv.data?.id) ? 'saved' : ''}"
+                      onclick="event.stopPropagation(); quickSaveToLibrary('${conv.id}')"
+                      title="${isInLibrary(conv.data?.id) ? 'Remove from library' : 'Save to library'}">
+                ${isInLibrary(conv.data?.id) ? '★' : '☆'}
+              </button>
             </div>
           </div>
         `;
@@ -7910,6 +7942,43 @@ Tags: ${c.tags.join(', ')}`;
         localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
       } catch (err) {
         showToast('Could not add to library: ' + err.message, 'error');
+      }
+    }
+
+    function quickSaveToLibrary(conversionId) {
+      const conv = communityConversions.find(c => c.id === conversionId);
+      if (!conv) return;
+
+      try {
+        const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+        const data = { ...conv.data, _userCreated: true };
+
+        const existingIdx = existingLibrary.findIndex(item => item.id === data.id);
+        if (existingIdx >= 0) {
+          // Already in library - remove it (toggle off)
+          existingLibrary.splice(existingIdx, 1);
+          localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+          showToast('Removed from library', 'info');
+        } else {
+          // Add to library
+          existingLibrary.push(data);
+          localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+          showToast('Saved to library!', 'success');
+        }
+
+        // Re-render to update star state
+        renderCommunityList();
+      } catch (err) {
+        showToast('Could not save: ' + err.message, 'error');
+      }
+    }
+
+    function isInLibrary(dataId) {
+      try {
+        const library = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+        return library.some(item => item.id === dataId);
+      } catch {
+        return false;
       }
     }
 
