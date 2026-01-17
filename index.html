@@ -3,7 +3,36 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Daggerheart Adversary Converter</title>
+  <title>Forgeheart — Daggerheart Adversary Tools</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="Forgeheart is a free tool for creating and converting adversaries for Daggerheart. Build encounters, manage your collection, and share with the community.">
+  <meta name="keywords" content="Daggerheart, adversary, converter, encounter builder, TTRPG, tabletop RPG, GM tools, Darrington Press">
+  <meta name="author" content="Forgeheart">
+
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://forgeheart.us/">
+  <meta property="og:title" content="Forgeheart — Daggerheart Adversary Tools">
+  <meta property="og:description" content="Create, convert, and share Daggerheart adversaries. Free tools for GMs including an encounter builder and community library.">
+  <meta property="og:image" content="https://forgeheart.us/og-image.png">
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:url" content="https://forgeheart.us/">
+  <meta name="twitter:title" content="Forgeheart — Daggerheart Adversary Tools">
+  <meta name="twitter:description" content="Create, convert, and share Daggerheart adversaries. Free tools for GMs including an encounter builder and community library.">
+  <meta name="twitter:image" content="https://forgeheart.us/og-image.png">
+
+  <!-- Canonical URL -->
+  <link rel="canonical" href="https://forgeheart.us/">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+
   <!-- Google Fonts - Daggerheart-inspired typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -19,8 +48,8 @@
   <nav class="navbar">
     <div class="navbar-inner">
       <a href="#" class="navbar-brand" onclick="navigateTo('converter'); return false;">
-        <span class="navbar-brand-icon">⚔️</span>
-        <span>Daggerheart Tools</span>
+        <img src="/assets/forgeheart-icon.webp" alt="Forgeheart" class="navbar-logo">
+        <span>Forgeheart</span>
       </a>
 
       <div class="navbar-nav">
@@ -28,7 +57,7 @@
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
           </svg>
-          <span>Converter</span>
+          <span>Forge</span>
         </a>
         <a href="#" class="nav-link" data-page="myLibrary" onclick="navigateTo('myLibrary'); return false;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -69,6 +98,13 @@
         </a>
       </div>
 
+      <!-- Mobile hamburger menu button -->
+      <button class="hamburger-btn" onclick="toggleMobileMenu()" aria-label="Open menu" aria-expanded="false">
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+        <span class="hamburger-line"></span>
+      </button>
+
       <div class="navbar-right">
         <button class="faq-link" onclick="openFAQModal()" title="How It Works">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
@@ -96,6 +132,78 @@
       </div>
     </div>
   </nav>
+
+  <!-- Mobile Slide-out Menu -->
+  <div class="mobile-menu-overlay" onclick="closeMobileMenu()"></div>
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <img src="/assets/forgeheart-icon.webp" alt="Forgeheart" class="mobile-menu-logo">
+      <span>Forgeheart</span>
+      <button class="mobile-menu-close" onclick="closeMobileMenu()" aria-label="Close menu">&times;</button>
+    </div>
+    <nav class="mobile-menu-nav">
+      <a href="#" class="mobile-menu-link active" data-page="converter" onclick="navigateTo('converter'); closeMobileMenu(); return false;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/>
+        </svg>
+        Forge
+      </a>
+      <a href="#" class="mobile-menu-link" data-page="myLibrary" onclick="navigateTo('myLibrary'); closeMobileMenu(); return false;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/>
+        </svg>
+        Collection
+      </a>
+      <a href="#" class="mobile-menu-link" data-page="community" onclick="navigateTo('community'); closeMobileMenu(); return false;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+          <circle cx="9" cy="7" r="4"/>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+        </svg>
+        Community
+      </a>
+      <a href="#" class="mobile-menu-link" data-page="encounter-builder" onclick="navigateTo('encounter-builder'); closeMobileMenu(); return false;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="7"/>
+          <rect x="14" y="3" width="7" height="7"/>
+          <rect x="14" y="14" width="7" height="7"/>
+          <rect x="3" y="14" width="7" height="7"/>
+        </svg>
+        Encounter Builder
+      </a>
+      <a href="#" class="mobile-menu-link admin-only hidden" id="adminMobileLink" data-page="admin" onclick="navigateTo('admin'); closeMobileMenu(); return false;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 15v2"/>
+          <path d="M12 11v.01"/>
+          <path d="M3 4h18v16H3z"/>
+          <path d="M3 8h18"/>
+        </svg>
+        Admin
+      </a>
+    </nav>
+    <div class="mobile-menu-footer">
+      <button class="mobile-menu-link" onclick="openFAQModal(); closeMobileMenu();">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="10"/>
+          <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+          <circle cx="12" cy="17" r="0.5" fill="currentColor"/>
+        </svg>
+        How It Works
+      </button>
+      <a href="https://buymeacoffee.com/marcusu" target="_blank" rel="noopener" class="mobile-menu-link">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
+          <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
+          <line x1="6" y1="2" x2="6" y2="4"/>
+          <line x1="10" y1="2" x2="10" y2="4"/>
+          <line x1="14" y1="2" x2="14" y2="4"/>
+        </svg>
+        Buy Me a Coffee
+      </a>
+    </div>
+  </div>
 
   <!-- Login Modal -->
   <div id="loginModal" class="login-modal hidden" onclick="closeLoginModal(event)">
@@ -170,21 +278,73 @@
   <!-- Converter Page -->
   <div id="converterPage" class="page-view active">
     <div class="container">
-      <header class="page-header">
-        <h1>Adversary Converter</h1>
-        <p class="subtitle">Transform any creature from other popular TTRPGs into a Daggerheart stat block. Just paste and convert.</p>
-        <div class="keyboard-hints" role="note" aria-label="Keyboard shortcuts">
-          <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> Convert</span>
-          <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> Copy JSON</span>
-          <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Z</kbd> Undo</span>
-          <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Y</kbd> Redo</span>
-          <span class="keyboard-hint"><kbd>Esc</kbd> Clear</span>
+      <!-- Landing State: Choice between Convert or Create -->
+      <div id="converterLanding" class="converter-landing">
+        <header class="page-header">
+          <img src="/assets/forgeheart-icon.webp" alt="" class="hero-icon" aria-hidden="true">
+          <h1>The Forge</h1>
+          <p class="subtitle">Craft adversaries for your Daggerheart campaign</p>
+          <button class="btn btn-secondary btn-how-it-works" onclick="openFAQModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
+              <line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            How It Works
+          </button>
+        </header>
+
+        <div class="converter-choice-grid">
+          <button class="converter-choice-card" onclick="enterConverterMode('convert')">
+            <div class="choice-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M17 3a2.85 2.83 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5Z"/>
+                <path d="m15 5 4 4"/>
+              </svg>
+            </div>
+            <h2>Convert</h2>
+            <p>Transform creatures from other TTRPGs into Daggerheart stat blocks</p>
+          </button>
+
+          <button class="converter-choice-card" onclick="enterConverterMode('scratch')">
+            <div class="choice-icon">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="3" width="18" height="18" rx="2"/>
+                <line x1="12" y1="8" x2="12" y2="16"/>
+                <line x1="8" y1="12" x2="16" y2="12"/>
+              </svg>
+            </div>
+            <h2>Create</h2>
+            <p>Build a new Daggerheart adversary from scratch</p>
+          </button>
         </div>
-      </header>
+      </div>
+
+      <!-- Workspace State: Converter or Scratch Editor -->
+      <div id="converterWorkspace" class="converter-workspace" style="display: none;">
+        <header class="page-header">
+          <div class="page-header-row">
+            <button class="btn btn-secondary btn-back" onclick="exitConverterMode()" title="Back to selection">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 12H5M12 19l-7-7 7-7"/>
+              </svg>
+              Back
+            </button>
+            <h1 id="workspaceTitle">Convert</h1>
+          </div>
+          <p class="subtitle" id="workspaceSubtitle">Transform creatures from other TTRPGs into Daggerheart stat blocks</p>
+          <div class="keyboard-hints" role="note" aria-label="Keyboard shortcuts" id="converterKeyboardHints">
+            <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Enter</kbd> Convert</span>
+            <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Shift</kbd>+<kbd>C</kbd> Copy JSON</span>
+            <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Z</kbd> Undo</span>
+            <span class="keyboard-hint"><kbd>Ctrl</kbd>+<kbd>Y</kbd> Redo</span>
+            <span class="keyboard-hint"><kbd>Esc</kbd> Clear</span>
+          </div>
+        </header>
 
       <main id="main-content" class="main-grid">
-      <!-- Input Panel -->
-      <div class="panel" role="region" aria-label="Input panel">
+      <!-- Input Panel (hidden in scratch mode) -->
+      <div id="converterInputPanel" class="panel" role="region" aria-label="Input panel">
         <div class="panel-header">
           <span class="panel-title">
             TTRPG Stat Block
@@ -204,17 +364,17 @@
         </div>
 
         <!-- System Selector -->
-        <div class="system-selector" style="margin-bottom: 1rem;">
+        <div class="system-selector">
           <label class="form-label" for="systemSelect">Source System</label>
-          <div style="display: flex; gap: 0.5rem; align-items: center;">
-            <select id="systemSelect" class="form-select" style="flex: 1;" onchange="handleSystemChange()">
+          <div class="system-selector-row">
+            <select id="systemSelect" class="form-select" onchange="handleSystemChange()">
               <option value="auto">Auto-Detect</option>
-              <option value="dnd5e">D&D 5th Edition</option>
-              <option value="pf2e">Pathfinder 2e</option>
-              <option value="dnd35e">D&D 3.5e / Pathfinder 1e</option>
-              <option value="osr">OSR / B/X / Old-School</option>
+              <option value="dnd5e">Modern d20 (5th Edition)</option>
+              <option value="pf2e">3-Action Economy (2e)</option>
+              <option value="dnd35e">Classic d20 (3.5 / 1e)</option>
+              <option value="osr">OSR / Old-School</option>
             </select>
-            <span id="detectedSystem" class="detected-system" style="font-size: 0.8rem; color: var(--text-secondary);"></span>
+            <span id="detectedSystem" class="detected-system"></span>
           </div>
         </div>
 
@@ -222,11 +382,10 @@
         <div class="sample-buttons" style="margin-bottom: 1rem;">
           <span style="font-size: 0.8rem; color: var(--text-secondary); margin-right: 0.5rem;">Samples:</span>
           <div class="btn-group" id="sampleButtons">
-            <button class="btn btn-secondary sample-btn" onclick="loadSample('dnd5e', 'ogre')">5e Ogre</button>
-            <button class="btn btn-secondary sample-btn" onclick="loadSample('dnd5e', 'wight')">5e Wight</button>
-            <button class="btn btn-secondary sample-btn" onclick="loadSample('pf2e', 'ironscale')">PF2e Warrior</button>
-            <button class="btn btn-secondary sample-btn" onclick="loadSample('dnd35e', 'ogre')">3.5e Ogre</button>
-            <button class="btn btn-secondary sample-btn" onclick="loadSample('osr', 'goblin')">OSR Goblin</button>
+            <button class="btn btn-secondary sample-btn" onclick="loadSample('dnd5e', 'ogre')">Ogre</button>
+            <button class="btn btn-secondary sample-btn" onclick="loadSample('dnd5e', 'wight')">Wight</button>
+            <button class="btn btn-secondary sample-btn" onclick="loadSample('pf2e', 'ironscale')">Warrior</button>
+            <button class="btn btn-secondary sample-btn" onclick="loadSample('osr', 'goblin')">Goblin</button>
           </div>
         </div>
 
@@ -316,9 +475,17 @@ The converter will auto-detect the source system."
           <span class="panel-title">Daggerheart Output</span>
           <div class="undo-toolbar">
             <button class="btn btn-icon btn-small" onclick="undo()" id="undoBtn" disabled
-                    aria-label="Undo" title="Undo (Ctrl+Z)">↶</button>
+                    aria-label="Undo" title="Undo (Ctrl+Z)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 7v6h6"/><path d="M3 13a9 9 0 1 0 3-7.7L3 7"/>
+              </svg>
+            </button>
             <button class="btn btn-icon btn-small" onclick="redo()" id="redoBtn" disabled
-                    aria-label="Redo" title="Redo (Ctrl+Y)">↷</button>
+                    aria-label="Redo" title="Redo (Ctrl+Y)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 7v6h-6"/><path d="M21 13a9 9 0 1 1-3-7.7L21 7"/>
+              </svg>
+            </button>
           </div>
           <div class="btn-group output-actions">
             <!-- Copy Dropdown -->
@@ -403,15 +570,16 @@ The converter will auto-detect the source system."
         </div>
       </div>
     </main>
-    </div>
-  </div>
+      </div><!-- /converterWorkspace -->
+    </div><!-- /container -->
+  </div><!-- /converterPage -->
 
   <!-- Community Library Page -->
   <div id="communityPage" class="page-view">
     <div class="community-page">
       <div class="community-header">
         <h1>Community</h1>
-        <p>Browse and share Daggerheart conversions created by the community</p>
+        <p>Browse and share adversaries created by the Forgeheart community</p>
       </div>
 
       <div class="community-container">
@@ -943,6 +1111,22 @@ The converter will auto-detect the source system."
     </div>
   </div>
 
+  <!-- Mobile Folder Picker Modal -->
+  <div id="mobileFolderPicker" class="modal-overlay hidden" onclick="closeMobileFolderPicker(event)">
+    <div class="modal-content modal-small" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Move to Folder</h2>
+        <button class="modal-close" onclick="closeMobileFolderPicker()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="mobile-picker-name" id="mobileFolderPickerName"></p>
+        <div class="mobile-folder-list" id="mobileFolderList">
+          <!-- Folders populated by JavaScript -->
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- Adversary Detail Modal for My Library -->
   <div id="myLibraryModal" class="modal-overlay hidden" onclick="closeMyLibraryModal(event)">
     <div class="dh-modal-wrapper">
@@ -1057,14 +1241,14 @@ The converter will auto-detect the source system."
 
   <!-- Footer -->
   <footer class="site-footer">
-    <p>This tool is not affiliated with, endorsed, or sponsored by Wizards of the Coast, Paizo Inc., or Darrington Press. All product names and trademarks are property of their respective owners.</p>
+    <p>Forgeheart is a fan-made tool and is not affiliated with, endorsed, or sponsored by Darrington Press, Wizards of the Coast, or Paizo Inc. All product names and trademarks are property of their respective owners.</p>
     <div class="footer-links">
-      <a href="#" onclick="openFAQModal(); return false;">How's This Work?</a>
+      <a href="#" onclick="openFAQModal(); return false;">How It Works</a>
       <span class="footer-divider">|</span>
-      <a href="#" onclick="openPrivacyModal(); return false;">Privacy Policy</a>
+      <a href="#" onclick="openPrivacyModal(); return false;">Privacy</a>
       <span class="footer-divider">|</span>
       <a href="https://buymeacoffee.com/marcusu" target="_blank" rel="noopener" class="coffee-footer-link">
-        Help keep the lights on
+        Support Forgeheart
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16">
           <path d="M17 8h1a4 4 0 1 1 0 8h-1"/>
           <path d="M3 8h14v9a4 4 0 0 1-4 4H7a4 4 0 0 1-4-4Z"/>
@@ -1099,22 +1283,22 @@ The converter will auto-detect the source system."
   <div id="faqModal" class="modal-overlay hidden" onclick="closeFAQModal(event)">
     <div class="modal-content faq-modal" onclick="event.stopPropagation()">
       <div class="modal-header">
-        <h2>How the Converter Works</h2>
+        <h2>How Forgeheart Works</h2>
         <button class="modal-close" onclick="closeFAQModal()" aria-label="Close">&times;</button>
       </div>
       <div class="modal-body faq-body">
 
         <section class="faq-section">
           <h3>Overview</h3>
-          <p>This tool converts stat blocks from D&D 5e (and other systems) into Daggerheart format. It analyzes the original creature's statistics and translates them into Daggerheart's streamlined adversary system.</p>
+          <p>This tool converts stat blocks from other popular TTRPGs into Daggerheart format. It analyzes the original creature's statistics and translates them into Daggerheart's streamlined adversary system.</p>
         </section>
 
         <section class="faq-section">
           <h3>How are Tiers determined?</h3>
-          <p>Daggerheart uses a 4-tier system instead of D&D's 30-level Challenge Rating scale. The conversion maps CR to tier as follows:</p>
+          <p>Daggerheart uses a 4-tier system instead of Challenge Rating scales. The conversion maps CR to tier as follows:</p>
           <table class="faq-table">
             <thead>
-              <tr><th>D&D Challenge Rating</th><th>Daggerheart Tier</th></tr>
+              <tr><th>Challenge Rating</th><th>Daggerheart Tier</th></tr>
             </thead>
             <tbody>
               <tr><td>CR 0-1</td><td>Tier 1</td></tr>
@@ -1127,7 +1311,7 @@ The converter will auto-detect the source system."
 
         <section class="faq-section">
           <h3>How are Hit Points scaled?</h3>
-          <p>Daggerheart uses much smaller HP pools than D&D 5e. Instead of directly converting HP, the tool assigns HP based on the creature's tier and type:</p>
+          <p>Daggerheart uses much smaller HP pools than other d20 systems. Instead of directly converting HP, the tool assigns HP based on the creature's tier and type:</p>
           <table class="faq-table">
             <thead>
               <tr><th>Tier</th><th>Base HP</th></tr>
@@ -1214,7 +1398,7 @@ The converter will auto-detect the source system."
 
         <section class="faq-section">
           <h3>Damage Type Conversion</h3>
-          <p>D&D has many damage types. Daggerheart simplifies these into two categories:</p>
+          <p>Many TTRPGs have numerous damage types. Daggerheart simplifies these into two categories:</p>
           <ul class="faq-list">
             <li><strong>Physical (phy):</strong> Slashing, Piercing, Bludgeoning</li>
             <li><strong>Magic (mag):</strong> Fire, Cold, Lightning, Acid, Poison, Necrotic, Radiant, Force, Psychic, Thunder</li>
@@ -1223,10 +1407,10 @@ The converter will auto-detect the source system."
 
         <section class="faq-section">
           <h3>Range Conversion</h3>
-          <p>D&D ranges in feet are converted to Daggerheart's abstract range bands:</p>
+          <p>Ranges in feet are converted to Daggerheart's abstract range bands:</p>
           <table class="faq-table">
             <thead>
-              <tr><th>D&D Range</th><th>Daggerheart Range</th></tr>
+              <tr><th>Source Range</th><th>Daggerheart Range</th></tr>
             </thead>
             <tbody>
               <tr><td>5 ft</td><td>Melee</td></tr>

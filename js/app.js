@@ -194,6 +194,51 @@ function loadThemePreference() {
   });
 }
 
+// ==================== MOBILE MENU ====================
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const overlay = document.querySelector('.mobile-menu-overlay');
+  const hamburger = document.querySelector('.hamburger-btn');
+
+  const isOpen = menu.classList.toggle('active');
+  overlay.classList.toggle('active', isOpen);
+  hamburger.classList.toggle('active', isOpen);
+  hamburger.setAttribute('aria-expanded', isOpen);
+
+  // Prevent body scroll when menu is open
+  document.body.style.overflow = isOpen ? 'hidden' : '';
+}
+
+function closeMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const overlay = document.querySelector('.mobile-menu-overlay');
+  const hamburger = document.querySelector('.hamburger-btn');
+
+  menu.classList.remove('active');
+  overlay.classList.remove('active');
+  hamburger.classList.remove('active');
+  hamburger.setAttribute('aria-expanded', 'false');
+  document.body.style.overflow = '';
+}
+
+// Update mobile menu active state when navigating
+function updateMobileMenuActive(page) {
+  const links = document.querySelectorAll('.mobile-menu-link[data-page]');
+  links.forEach(link => {
+    link.classList.toggle('active', link.dataset.page === page);
+  });
+}
+
+// Close mobile menu on escape key
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    const menu = document.getElementById('mobileMenu');
+    if (menu && menu.classList.contains('active')) {
+      closeMobileMenu();
+    }
+  }
+});
+
 // ==================== DRAG AND DROP ====================
 function setupDragAndDrop() {
   const dropZone = document.getElementById('dropZone');
@@ -1081,7 +1126,7 @@ function renderStatBlockReadOnly(c) {
     const descWithDice = highlightDiceRolls(escapeHtml(f.desc || ''));
     // Fear cost skulls
     const fearCost = f.fearCost || 0;
-    const fearSkulls = fearCost > 0 ? `<span class="fear-cost-display">${'💀'.repeat(fearCost)}</span>` : '';
+    const fearSkulls = fearCost > 0 ? `<span class="fear-cost-display" title="Fear Cost: ${fearCost}">${'💀'.repeat(fearCost)}</span>` : '';
     return `
       <div class="dh-stat-block-feature">
         <span class="dh-stat-block-feature-name">${escapeHtml(f.name)}</span> -
@@ -1383,7 +1428,7 @@ function toggleFearCost(index, skulls) {
     // Toggle: if clicking same level, turn off; otherwise set to that level
     currentConverted.features[index].fearCost = (current === skulls) ? 0 : skulls;
     pushHistory();
-    renderStatBlock();
+    renderPreview();
     renderJSON();
     renderMarkdown();
     renderText();
@@ -1835,9 +1880,54 @@ function loadFromURL() {
   }
 }
 
-// Create a new adversary from scratch
-function createNewAdversary() {
-  // Create a blank adversary template
+// Current converter mode: 'landing', 'convert', or 'scratch'
+let converterMode = 'landing';
+
+// Enter converter workspace mode (convert or scratch)
+function enterConverterMode(mode) {
+  converterMode = mode;
+  const landing = document.getElementById('converterLanding');
+  const workspace = document.getElementById('converterWorkspace');
+  const title = document.getElementById('workspaceTitle');
+  const subtitle = document.getElementById('workspaceSubtitle');
+  const keyboardHints = document.getElementById('converterKeyboardHints');
+
+  // Hide landing, show workspace
+  landing.style.display = 'none';
+  workspace.style.display = 'block';
+
+  if (mode === 'scratch') {
+    // Scratch mode: hide input panel, update title
+    workspace.classList.add('scratch-mode');
+    title.textContent = 'Create';
+    subtitle.textContent = 'Build a Daggerheart adversary from scratch';
+    keyboardHints.style.display = 'none';
+
+    // Load a blank adversary template
+    loadBlankAdversary();
+  } else {
+    // Convert mode: show input panel
+    workspace.classList.remove('scratch-mode');
+    title.textContent = 'Convert';
+    subtitle.textContent = 'Transform creatures from other TTRPGs into Daggerheart stat blocks';
+    keyboardHints.style.display = 'flex';
+  }
+}
+
+// Exit workspace back to landing page
+function exitConverterMode() {
+  converterMode = 'landing';
+  const landing = document.getElementById('converterLanding');
+  const workspace = document.getElementById('converterWorkspace');
+
+  // Show landing, hide workspace
+  landing.style.display = 'flex';
+  workspace.style.display = 'none';
+  workspace.classList.remove('scratch-mode');
+}
+
+// Load a blank adversary template for scratch mode
+function loadBlankAdversary() {
   const blankAdversary = {
     id: 'adv-' + Date.now(),
     category: 'adversary',
@@ -1865,18 +1955,21 @@ function createNewAdversary() {
     tags: []
   };
 
-  // Set as current converted and navigate to converter
   currentConverted = blankAdversary;
-  currentParsed = null; // No source parsed data
+  currentParsed = null;
+  renderAll();
+  showToast('Fill in your adversary details, then click "Add to Library" to save', 'info');
+}
 
-  // Navigate to converter
+// Create a new adversary from scratch (used from Collection page)
+function createNewAdversary() {
+  // Navigate to converter page
   navigateTo('converter');
 
-  // Render the blank adversary for editing
+  // Enter scratch mode after navigation
   setTimeout(() => {
-    renderAll();
-    showToast('Edit your new adversary, then click "Add to Library" to save', 'info');
-  }, 100);
+    enterConverterMode('scratch');
+  }, 50);
 }
 
 function addToLibrary() {
@@ -2148,6 +2241,10 @@ function renderAuthUI() {
   if (adminNavLink) {
     adminNavLink.classList.toggle('hidden', !currentUser?.is_admin);
   }
+  const adminMobileLink = document.getElementById('adminMobileLink');
+  if (adminMobileLink) {
+    adminMobileLink.classList.toggle('hidden', !currentUser?.is_admin);
+  }
 
   if (currentUser) {
     const initial = currentUser.username.charAt(0).toUpperCase();
@@ -2217,6 +2314,9 @@ function navigateTo(page, updateUrl = true) {
     link.classList.toggle('active', link.dataset.page === page);
   });
 
+  // Update mobile menu active state
+  updateMobileMenuActive(page);
+
   // Update page views
   document.querySelectorAll('.page-view').forEach(view => {
     view.classList.toggle('active', view.id === page + 'Page');
@@ -2240,6 +2340,18 @@ function navigateTo(page, updateUrl = true) {
   // Initialize encounter builder when navigating to it
   if (page === 'encounter-builder') {
     initEncounterBuilder();
+  }
+
+  // Reset to landing page when navigating to converter
+  if (page === 'converter') {
+    // Show landing by default, unless explicitly entering a mode
+    const landing = document.getElementById('converterLanding');
+    const workspace = document.getElementById('converterWorkspace');
+    if (landing && workspace && converterMode === 'landing') {
+      landing.style.display = 'flex';
+      workspace.style.display = 'none';
+      workspace.classList.remove('scratch-mode');
+    }
   }
 }
 
@@ -4166,6 +4278,14 @@ function renderLibraryItems(adversaries) {
             <circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/>
           </svg>
         </div>
+        <button class="library-mobile-move-btn" onclick="event.stopPropagation(); openMobileFolderPicker('${adv.id}')" title="Move to folder">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/>
+            <line x1="12" y1="11" x2="12" y2="17"/>
+            <polyline points="9 14 12 11 15 14"/>
+          </svg>
+          Move
+        </button>
       </div>
     `;
   }).join('');
@@ -4540,6 +4660,74 @@ function addAdversaryToGroup(adversary) {
 function selectGroup(id) { selectFolder(id); }
 function renderGroupsList() { renderFoldersList(); }
 function renderUngroupedCount() { updateFolderCounts(); }
+
+// ==================== MOBILE FOLDER PICKER ====================
+let mobilePickerAdversaryId = null;
+
+function openMobileFolderPicker(adversaryId) {
+  mobilePickerAdversaryId = adversaryId;
+  const adv = getAllLibraryAdversaries().find(a => a.id === adversaryId);
+  if (!adv) return;
+
+  document.getElementById('mobileFolderPickerName').textContent = adv.name;
+
+  // Build folder list
+  const container = document.getElementById('mobileFolderList');
+  const folders = [
+    { id: 'ungrouped', name: 'Ungrouped', icon: 'inbox' },
+    ...myLibraryGroups.map(f => ({ id: f.id, name: f.name, icon: 'folder' }))
+  ];
+
+  container.innerHTML = folders.map(folder => `
+    <button class="mobile-folder-option" onclick="moveMobileToFolder('${folder.id}')">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+        ${folder.icon === 'inbox'
+          ? '<rect x="3" y="3" width="18" height="18" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M9 9h6M9 15h6" fill="none" stroke="currentColor" stroke-width="2"/>'
+          : '<path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/>'
+        }
+      </svg>
+      <span>${escapeHtml(folder.name)}</span>
+    </button>
+  `).join('');
+
+  document.getElementById('mobileFolderPicker').classList.remove('hidden');
+}
+
+function closeMobileFolderPicker(event) {
+  if (event && event.target !== event.currentTarget) return;
+  document.getElementById('mobileFolderPicker').classList.add('hidden');
+  mobilePickerAdversaryId = null;
+}
+
+function moveMobileToFolder(targetFolderId) {
+  if (!mobilePickerAdversaryId) return;
+
+  const adv = getAllLibraryAdversaries().find(a => a.id === mobilePickerAdversaryId);
+  if (!adv) return;
+
+  // Remove from all groups first
+  myLibraryGroups.forEach(group => {
+    group.adversaryIds = group.adversaryIds.filter(id => id !== mobilePickerAdversaryId);
+  });
+
+  // Add to target folder (if not ungrouped)
+  if (targetFolderId !== 'ungrouped') {
+    const targetFolder = myLibraryGroups.find(g => g.id === targetFolderId);
+    if (targetFolder && !targetFolder.adversaryIds.includes(mobilePickerAdversaryId)) {
+      targetFolder.adversaryIds.push(mobilePickerAdversaryId);
+    }
+  }
+
+  saveGroupsToStorage();
+  renderFoldersList();
+  updateFolderCounts();
+  selectFolder(selectedFolderId);
+
+  const folderName = targetFolderId === 'ungrouped' ? 'Ungrouped' : myLibraryGroups.find(g => g.id === targetFolderId)?.name || 'folder';
+  showToast(`Moved "${adv.name}" to ${folderName}`, 'success');
+
+  closeMobileFolderPicker();
+}
 
 // ==================== LOGIN MODAL ====================
 function openLoginModal() {
