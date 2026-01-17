@@ -158,6 +158,23 @@
       color: var(--text-primary);
       min-height: 100vh;
       line-height: 1.6;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 400px;
+      height: 400px;
+      background-image: url('assets/monster-faceoff.webp');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: bottom left;
+      opacity: 0.15;
+      pointer-events: none;
+      z-index: 0;
     }
 
     /* Navigation Bar */
@@ -3906,6 +3923,7 @@
     .community-item-votes .vote-score {
       font-size: 0.75rem;
       min-width: 1.25rem;
+      text-align: center;
     }
 
     .quick-save-btn {
