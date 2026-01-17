@@ -2379,6 +2379,173 @@
       font-weight: 300;
     }
 
+    /* Threshold Track - Daggerheart Character Sheet Style */
+    .dh-threshold-track {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0.75rem 0;
+      padding: 0.5rem;
+      background: linear-gradient(135deg, rgba(0,0,0,0.02) 0%, rgba(0,0,0,0.05) 100%);
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.08);
+    }
+
+    .dh-threshold-segment {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 0.25rem 0.5rem;
+      min-width: 50px;
+    }
+
+    .dh-threshold-label {
+      font-family: var(--font-slab);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: var(--text-secondary);
+      line-height: 1.2;
+    }
+
+    .dh-threshold-hp {
+      font-family: var(--font-body);
+      font-size: 0.65rem;
+      color: var(--text-muted);
+      margin-top: 0.1rem;
+    }
+
+    .dh-threshold-value {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      background: var(--accent);
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 700;
+      border-radius: 50%;
+      margin: 0 0.25rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .dh-threshold-connector {
+      flex: 1;
+      height: 2px;
+      background: linear-gradient(90deg, var(--accent) 0%, rgba(201,162,39,0.3) 100%);
+      margin: 0 0.25rem;
+      max-width: 30px;
+    }
+
+    /* HP and Stress boxes */
+    .dh-vitals-row {
+      display: flex;
+      justify-content: center;
+      gap: 1.5rem;
+      margin: 0.75rem 0;
+    }
+
+    .dh-vital-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.5rem 1rem;
+      background: rgba(0,0,0,0.03);
+      border-radius: 6px;
+      border: 1px solid rgba(0,0,0,0.08);
+      min-width: 70px;
+    }
+
+    .dh-vital-value {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      color: var(--accent);
+      line-height: 1;
+    }
+
+    .dh-vital-label {
+      font-family: var(--font-slab);
+      font-size: 0.7rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      color: var(--text-secondary);
+      margin-top: 0.25rem;
+    }
+
+    .dh-vital-box.hp .dh-vital-value {
+      color: #dc2626;
+    }
+
+    .dh-vital-box.stress .dh-vital-value {
+      color: #7c3aed;
+    }
+
+    .dh-vital-box.difficulty .dh-vital-value {
+      color: var(--accent);
+    }
+
+    /* Light mode adjustments */
+    :root.light-mode .dh-threshold-track,
+    :root.light-mode .dh-vital-box {
+      background: rgba(139, 115, 85, 0.08);
+      border-color: rgba(139, 115, 85, 0.15);
+    }
+
+    :root.light-mode .dh-threshold-value {
+      background: var(--accent);
+    }
+
+    /* Dark mode adjustments */
+    :root:not(.light-mode) .dh-threshold-track,
+    :root:not(.light-mode) .dh-vital-box {
+      background: rgba(201, 162, 39, 0.08);
+      border-color: rgba(201, 162, 39, 0.2);
+    }
+
+    :root:not(.light-mode) .dh-threshold-label,
+    :root:not(.light-mode) .dh-vital-label {
+      color: var(--text-secondary);
+    }
+
+    :root:not(.light-mode) .dh-threshold-hp {
+      color: var(--text-muted);
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 480px) {
+      .dh-threshold-track {
+        flex-wrap: wrap;
+        gap: 0.25rem;
+      }
+
+      .dh-threshold-connector {
+        display: none;
+      }
+
+      .dh-threshold-value {
+        width: 32px;
+        height: 32px;
+        font-size: 0.95rem;
+      }
+
+      .dh-vitals-row {
+        gap: 0.75rem;
+      }
+
+      .dh-vital-box {
+        padding: 0.4rem 0.75rem;
+        min-width: 60px;
+      }
+
+      .dh-vital-value {
+        font-size: 1.25rem;
+      }
+    }
+
     .dh-stat-block-experience {
       font-size: 0.9rem;
       margin-bottom: 0.75rem;
@@ -7185,8 +7352,39 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
             ${imageHTML}
             ${c.description ? `<div class="dh-stat-block-desc">${escapeHtml(c.description)}</div>` : ''}
             ${motivesLine}
-            <div class="dh-stat-block-stats-line">
-              <span class="label">Difficulty:</span> ${c.difficulty || '?'}<span class="separator">|</span><span class="label">Thresholds:</span> ${c.majorThresh || '?'}/${c.severeThresh || '?'}<span class="separator">|</span><span class="label">HP:</span> ${c.hp || '?'}<span class="separator">|</span><span class="label">Stress:</span> ${c.stress || '?'}
+            <div class="dh-vitals-row">
+              <div class="dh-vital-box difficulty">
+                <span class="dh-vital-value">${c.difficulty || '?'}</span>
+                <span class="dh-vital-label">Difficulty</span>
+              </div>
+              <div class="dh-vital-box hp">
+                <span class="dh-vital-value">${c.hp || '?'}</span>
+                <span class="dh-vital-label">HP</span>
+              </div>
+              <div class="dh-vital-box stress">
+                <span class="dh-vital-value">${c.stress || '?'}</span>
+                <span class="dh-vital-label">Stress</span>
+              </div>
+            </div>
+            <div class="dh-threshold-track">
+              <div class="dh-threshold-segment">
+                <span class="dh-threshold-label">Minor</span>
+                <span class="dh-threshold-hp">1 HP</span>
+              </div>
+              <div class="dh-threshold-connector"></div>
+              <div class="dh-threshold-value">${c.majorThresh || '?'}</div>
+              <div class="dh-threshold-connector"></div>
+              <div class="dh-threshold-segment">
+                <span class="dh-threshold-label">Major</span>
+                <span class="dh-threshold-hp">2 HP</span>
+              </div>
+              <div class="dh-threshold-connector"></div>
+              <div class="dh-threshold-value">${c.severeThresh || '?'}</div>
+              <div class="dh-threshold-connector"></div>
+              <div class="dh-threshold-segment">
+                <span class="dh-threshold-label">Severe</span>
+                <span class="dh-threshold-hp">3 HP</span>
+              </div>
             </div>
             ${attackLine}
             ${expLine}
