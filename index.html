@@ -41,25 +41,32 @@
       --card-shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
     }
 
-    /* Light mode typography - All caps for H1-H3, Title case for H4-H5 */
-    :root.light-mode h1,
-    :root.light-mode h2,
-    :root.light-mode h3,
-    :root.light-mode .page-header h1,
-    :root.light-mode .community-header h1,
-    :root.light-mode .my-library-header h1,
-    :root.light-mode .admin-header h1 {
+    /* Typography - Daggerheart Rulebook Style (both modes) */
+    /* All caps for H1-H3 */
+    h1, h2, h3,
+    .page-header h1,
+    .community-header h1,
+    .my-library-header h1,
+    .admin-header h1 {
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
-    :root.light-mode h1 {
+    /* H1 specific styling */
+    h1 {
+      font-size: 2rem;
+      color: var(--accent);
+      margin-bottom: 0.5rem;
       font-weight: 900;
+      letter-spacing: 0.06em;
     }
 
-    :root.light-mode h4,
-    :root.light-mode h5,
-    :root.light-mode h6 {
+    /* H2 and H3 letter-spacing */
+    h2, h3 {
+      letter-spacing: 0.04em;
+    }
+
+    /* Title case for H4-H6 */
+    h4, h5, h6 {
       text-transform: capitalize;
     }
 
