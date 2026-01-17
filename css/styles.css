@@ -177,7 +177,7 @@ body {
   left: 0;
   width: 90vw;
   height: 90vw;
-  background-image: url('assets/monster-faceoff.webp');
+  background-image: url('/assets/monster-faceoff.webp');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom left;
@@ -197,7 +197,7 @@ body {
   left: 0;
   width: 90vw;
   height: 90vw;
-  background-image: url('assets/monster-faceoff.webp');
+  background-image: url('/assets/monster-faceoff.webp');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom left;
@@ -542,7 +542,7 @@ body {
   left: 0;
   width: 90vw;
   height: 90vw;
-  background-image: url('assets/friends.webp');
+  background-image: url('/assets/friends.webp');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom left;
@@ -977,7 +977,7 @@ body {
   right: 0;
   width: 90vw;
   height: 90vw;
-  background-image: url('assets/goblin-wizard-studying-up.webp');
+  background-image: url('/assets/goblin-wizard-studying-up.webp');
   background-size: contain;
   background-repeat: no-repeat;
   background-position: bottom right;

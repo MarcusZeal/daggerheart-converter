@@ -2106,8 +2106,38 @@ function renderAuthUI() {
 // ==================== PAGE NAVIGATION ====================
 let currentPage = 'converter';
 
-function navigateTo(page) {
+// Map URL paths to page names
+const URL_TO_PAGE = {
+  '/': 'converter',
+  '/converter': 'converter',
+  '/community': 'community',
+  '/collection': 'myLibrary',
+  '/encounters': 'encounter-builder',
+  '/admin': 'admin'
+};
+
+// Map page names to URL paths
+const PAGE_TO_URL = {
+  'converter': '/',
+  'community': '/community',
+  'myLibrary': '/collection',
+  'encounter-builder': '/encounters',
+  'admin': '/admin'
+};
+
+function navigateTo(page, updateUrl = true) {
+  // Block non-admins from admin page
+  if (page === 'admin' && !currentUser?.is_admin) {
+    page = 'converter';
+  }
+
   currentPage = page;
+
+  // Update URL without page reload
+  if (updateUrl) {
+    const url = PAGE_TO_URL[page] || '/';
+    history.pushState({ page }, '', url);
+  }
 
   // Update nav links
   document.querySelectorAll('.nav-link').forEach(link => {
@@ -2138,6 +2168,20 @@ function navigateTo(page) {
   if (page === 'encounter-builder') {
     initEncounterBuilder();
   }
+}
+
+// Handle browser back/forward buttons
+window.addEventListener('popstate', (event) => {
+  const page = event.state?.page || URL_TO_PAGE[window.location.pathname] || 'converter';
+  navigateTo(page, false);
+});
+
+// Initialize page from URL on load
+function initRouting() {
+  const page = URL_TO_PAGE[window.location.pathname] || 'converter';
+  // Replace current history entry with proper state
+  history.replaceState({ page }, '', window.location.pathname);
+  navigateTo(page, false);
 }
 
 // ==================== ENCOUNTER BUILDER ====================
@@ -4609,25 +4653,24 @@ async function loadMySubmissions() {
 function handleUrlRouting() {
   const path = window.location.pathname;
 
-  // Handle /community/:id routes
+  // Handle /community/:id routes (specific conversion)
   const communityMatch = path.match(/^\/community\/(.+)$/);
   if (communityMatch) {
     const conversionId = communityMatch[1];
-    navigateTo('community');
+    navigateTo('community', false);
     // Wait for community page to load, then open modal
     setTimeout(() => openCommunityModal(conversionId), 100);
     return;
   }
-}
 
-// Handle browser back/forward
-window.addEventListener('popstate', (e) => {
-  if (e.state?.conversionId) {
-    openCommunityModal(e.state.conversionId);
-  } else {
-    closeCommunityModal();
+  // Handle base page routes
+  const page = URL_TO_PAGE[path];
+  if (page) {
+    // Replace history state with page info
+    history.replaceState({ page }, '', path);
+    navigateTo(page, false);
   }
-});
+}
 
 // ==================== SAVE AND PUBLISH ====================
 async function saveAndPublish() {
