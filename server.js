@@ -76,12 +76,27 @@ db.exec(`
     score INTEGER DEFAULT 0
   );
 
+  -- Reports
+  CREATE TABLE IF NOT EXISTS reports (
+    id TEXT PRIMARY KEY,
+    conversion_id TEXT NOT NULL REFERENCES conversions(id),
+    reporter_id TEXT NOT NULL REFERENCES users(id),
+    reason TEXT NOT NULL,
+    status TEXT DEFAULT 'pending',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    reviewed_at DATETIME,
+    reviewed_by TEXT REFERENCES users(id),
+    admin_notes TEXT
+  );
+
   -- Create indexes
   CREATE INDEX IF NOT EXISTS idx_conversions_user ON conversions(user_id);
   CREATE INDEX IF NOT EXISTS idx_conversions_tier ON conversions(tier);
   CREATE INDEX IF NOT EXISTS idx_conversions_type ON conversions(adv_type);
   CREATE INDEX IF NOT EXISTS idx_conversions_name ON conversions(name);
   CREATE INDEX IF NOT EXISTS idx_stats_score ON conversion_stats(score DESC);
+  CREATE INDEX IF NOT EXISTS idx_reports_status ON reports(status);
+  CREATE INDEX IF NOT EXISTS idx_reports_conversion ON reports(conversion_id);
 `);
 
 // Migration: Add is_admin column if it doesn't exist
@@ -670,6 +685,43 @@ app.get('/api/community/my-submissions', apiLimiter, authenticateToken, requireA
   });
 });
 
+// Report a conversion
+app.post('/api/community/conversions/:id/report', apiLimiter, authenticateToken, requireAuth, (req, res) => {
+  const { reason } = req.body;
+
+  if (!reason || reason.trim().length < 10) {
+    return res.status(400).json({ error: 'Please provide a reason (at least 10 characters)' });
+  }
+
+  const conversion = db.prepare('SELECT * FROM conversions WHERE id = ?').get(req.params.id);
+  if (!conversion) {
+    return res.status(404).json({ error: 'Conversion not found' });
+  }
+
+  // Can't report own conversion
+  if (conversion.user_id === req.user.id) {
+    return res.status(400).json({ error: 'Cannot report your own conversion' });
+  }
+
+  // Check if user already reported this conversion
+  const existingReport = db.prepare(
+    'SELECT * FROM reports WHERE conversion_id = ? AND reporter_id = ? AND status = ?'
+  ).get(req.params.id, req.user.id, 'pending');
+
+  if (existingReport) {
+    return res.status(400).json({ error: 'You have already reported this conversion' });
+  }
+
+  const reportId = crypto.randomUUID();
+  db.prepare(`
+    INSERT INTO reports (id, conversion_id, reporter_id, reason)
+    VALUES (?, ?, ?, ?)
+  `).run(reportId, req.params.id, req.user.id, reason.trim());
+
+  console.log(`Report submitted: ${reportId} for conversion ${req.params.id} by user ${req.user.username}`);
+  res.json({ message: 'Report submitted successfully' });
+});
+
 // ============================================================================
 // ADMIN API ROUTES
 // ============================================================================
@@ -682,6 +734,8 @@ app.get('/api/admin/stats', apiLimiter, authenticateToken, requireAdmin, (req, r
     publishedConversions: db.prepare('SELECT COUNT(*) as count FROM conversions WHERE is_published = 1').get().count,
     totalVotes: db.prepare('SELECT COUNT(*) as count FROM votes').get().count,
     bannedUsers: db.prepare('SELECT COUNT(*) as count FROM users WHERE is_banned = 1').get().count,
+    pendingReports: db.prepare('SELECT COUNT(*) as count FROM reports WHERE status = ?').get('pending').count,
+    totalReports: db.prepare('SELECT COUNT(*) as count FROM reports').get().count,
 
     // Conversions by tier
     conversionsByTier: db.prepare(`
@@ -886,6 +940,149 @@ app.patch('/api/admin/users/:id/ban', apiLimiter, authenticateToken, requireAdmi
 
   console.log(`Admin ${req.user.username} ${isBanned ? 'banned' : 'unbanned'} user ${user.username}`);
   res.json({ message: `User ${isBanned ? 'banned' : 'unbanned'}` });
+});
+
+// Get all reports (admin view)
+app.get('/api/admin/reports', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const { status = 'all', page = 1, limit = 50 } = req.query;
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const safeLimit = Math.min(parseInt(limit), 100);
+
+  let whereClause = '1=1';
+  const params = [];
+
+  if (status !== 'all') {
+    whereClause += ' AND r.status = ?';
+    params.push(status);
+  }
+
+  const countQuery = db.prepare(`
+    SELECT COUNT(*) as total FROM reports r WHERE ${whereClause}
+  `);
+  const total = countQuery.get(...params).total;
+
+  const query = db.prepare(`
+    SELECT
+      r.*,
+      c.name as conversion_name,
+      c.tier as conversion_tier,
+      c.adv_type as conversion_type,
+      c.is_published as conversion_published,
+      reporter.username as reporter_username,
+      reporter.avatar_url as reporter_avatar,
+      author.username as author_username,
+      author.avatar_url as author_avatar,
+      reviewer.username as reviewer_username
+    FROM reports r
+    JOIN conversions c ON r.conversion_id = c.id
+    JOIN users reporter ON r.reporter_id = reporter.id
+    JOIN users author ON c.user_id = author.id
+    LEFT JOIN users reviewer ON r.reviewed_by = reviewer.id
+    WHERE ${whereClause}
+    ORDER BY
+      CASE r.status WHEN 'pending' THEN 0 ELSE 1 END,
+      r.created_at DESC
+    LIMIT ? OFFSET ?
+  `);
+
+  const reports = query.all(...params, safeLimit, offset);
+
+  res.json({
+    reports: reports.map(r => ({
+      id: r.id,
+      reason: r.reason,
+      status: r.status,
+      createdAt: r.created_at,
+      reviewedAt: r.reviewed_at,
+      adminNotes: r.admin_notes,
+      conversion: {
+        id: r.conversion_id,
+        name: r.conversion_name,
+        tier: r.conversion_tier,
+        type: r.conversion_type,
+        isPublished: !!r.conversion_published
+      },
+      reporter: {
+        username: r.reporter_username,
+        avatarUrl: r.reporter_avatar
+      },
+      author: {
+        username: r.author_username,
+        avatarUrl: r.author_avatar
+      },
+      reviewer: r.reviewer_username ? { username: r.reviewer_username } : null
+    })),
+    pagination: {
+      page: parseInt(page),
+      limit: safeLimit,
+      total,
+      totalPages: Math.ceil(total / safeLimit)
+    }
+  });
+});
+
+// Update report status (admin)
+app.patch('/api/admin/reports/:id', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const { status, adminNotes } = req.body;
+
+  if (!['pending', 'reviewed', 'dismissed', 'actioned'].includes(status)) {
+    return res.status(400).json({ error: 'Invalid status' });
+  }
+
+  const report = db.prepare('SELECT * FROM reports WHERE id = ?').get(req.params.id);
+  if (!report) {
+    return res.status(404).json({ error: 'Report not found' });
+  }
+
+  db.prepare(`
+    UPDATE reports
+    SET status = ?, admin_notes = ?, reviewed_at = CURRENT_TIMESTAMP, reviewed_by = ?
+    WHERE id = ?
+  `).run(status, adminNotes || null, req.user.id, req.params.id);
+
+  console.log(`Admin ${req.user.username} updated report ${req.params.id} to status: ${status}`);
+  res.json({ message: 'Report updated' });
+});
+
+// Bulk action on report - hide conversion and dismiss report
+app.post('/api/admin/reports/:id/action', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const { action, adminNotes } = req.body;
+
+  const report = db.prepare(`
+    SELECT r.*, c.id as conv_id, c.name as conv_name
+    FROM reports r
+    JOIN conversions c ON r.conversion_id = c.id
+    WHERE r.id = ?
+  `).get(req.params.id);
+
+  if (!report) {
+    return res.status(404).json({ error: 'Report not found' });
+  }
+
+  const transaction = db.transaction(() => {
+    if (action === 'hide') {
+      // Hide the conversion
+      db.prepare('UPDATE conversions SET is_published = 0 WHERE id = ?').run(report.conv_id);
+      console.log(`Admin ${req.user.username} hid conversion ${report.conv_name} due to report`);
+    } else if (action === 'delete') {
+      // Delete the conversion
+      db.prepare('DELETE FROM votes WHERE conversion_id = ?').run(report.conv_id);
+      db.prepare('DELETE FROM conversion_stats WHERE conversion_id = ?').run(report.conv_id);
+      db.prepare('DELETE FROM reports WHERE conversion_id = ?').run(report.conv_id);
+      db.prepare('DELETE FROM conversions WHERE id = ?').run(report.conv_id);
+      console.log(`Admin ${req.user.username} deleted conversion ${report.conv_name} due to report`);
+    }
+
+    // Mark report as actioned
+    db.prepare(`
+      UPDATE reports
+      SET status = 'actioned', admin_notes = ?, reviewed_at = CURRENT_TIMESTAMP, reviewed_by = ?
+      WHERE id = ?
+    `).run(adminNotes || `Action taken: ${action}`, req.user.id, req.params.id);
+  });
+
+  transaction();
+  res.json({ message: `Report actioned: ${action}` });
 });
 
 // ============================================================================

@@ -588,6 +588,32 @@
       color: #4caf50;
     }
 
+    .admin-badge-count {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      background: var(--error);
+      color: white;
+      border-radius: 9px;
+      margin-left: 0.4rem;
+    }
+
+    .admin-badge-count:empty {
+      display: none;
+    }
+
+    .admin-report-reason {
+      max-width: 250px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     .admin-actions {
       display: flex;
       gap: 0.5rem;
@@ -3664,6 +3690,26 @@
       opacity: 1;
     }
 
+    /* Report Modal */
+    .report-modal {
+      max-width: 450px;
+    }
+
+    .report-conversion-name {
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+      background: var(--bg-input);
+      border-radius: 4px;
+    }
+
+    .report-hint {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 0.75rem;
+    }
+
     /* Share button */
     .btn-share {
       background: var(--accent-secondary);
@@ -4352,6 +4398,9 @@ The converter will auto-detect the source system."
       <div class="admin-tabs">
         <button class="admin-tab active" onclick="switchAdminTab('conversions')">Conversions</button>
         <button class="admin-tab" onclick="switchAdminTab('users')">Users</button>
+        <button class="admin-tab" onclick="switchAdminTab('reports')" id="adminReportsTab">
+          Reports <span class="admin-badge-count" id="pendingReportsBadge"></span>
+        </button>
       </div>
 
       <!-- Conversions Tab -->
@@ -4405,6 +4454,37 @@ The converter will auto-detect the source system."
           </table>
         </div>
         <div class="admin-pagination" id="adminUsersPagination"></div>
+      </div>
+
+      <!-- Reports Tab -->
+      <div id="adminReportsTab" class="admin-tab-content hidden">
+        <div class="admin-toolbar">
+          <select class="form-select" id="adminReportStatusFilter" onchange="loadAdminReports(1)">
+            <option value="all">All Reports</option>
+            <option value="pending" selected>Pending</option>
+            <option value="reviewed">Reviewed</option>
+            <option value="dismissed">Dismissed</option>
+            <option value="actioned">Actioned</option>
+          </select>
+        </div>
+        <div class="admin-table-container">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th>Conversion</th>
+                <th>Reported By</th>
+                <th>Reason</th>
+                <th>Status</th>
+                <th>Date</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="adminReportsBody">
+              <tr><td colspan="6" class="loading">Loading...</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="admin-pagination" id="adminReportsPagination"></div>
       </div>
     </div>
   </div>
@@ -4577,7 +4657,27 @@ The converter will auto-detect the source system."
       </div>
       <div class="modal-actions-secondary">
         <span class="modal-author" id="modalAuthor"></span>
-        <button class="report-btn" onclick="reportConversion()" title="Report this conversion">Report</button>
+        <button class="report-btn" onclick="openReportModal()" title="Report this conversion">Report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Report Modal -->
+  <div id="reportModal" class="modal-overlay hidden" onclick="closeReportModal(event)">
+    <div class="modal-content report-modal" onclick="event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Report Conversion</h2>
+        <button class="modal-close" onclick="closeReportModal()" aria-label="Close">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p class="report-conversion-name" id="reportConversionName"></p>
+        <label class="form-label" for="reportReason">Why are you reporting this?</label>
+        <textarea id="reportReason" class="form-textarea" rows="4" placeholder="Please describe the issue (e.g., inappropriate content, copyright violation, spam, incorrect data...)"></textarea>
+        <p class="report-hint">Reports are reviewed by moderators. Please provide enough detail for us to understand the issue.</p>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeReportModal()">Cancel</button>
+        <button class="btn btn-primary" onclick="submitReport()">Submit Report</button>
       </div>
     </div>
   </div>
@@ -6415,6 +6515,12 @@ Tags: ${c.tags.join(', ')}`;
         document.getElementById('statConversions').textContent = stats.totalConversions;
         document.getElementById('statVotes').textContent = stats.totalVotes;
         document.getElementById('statRecentConversions').textContent = stats.recentConversions;
+
+        // Update pending reports badge
+        const badge = document.getElementById('pendingReportsBadge');
+        if (badge) {
+          badge.textContent = stats.pendingReports > 0 ? stats.pendingReports : '';
+        }
       } catch (err) {
         console.error('Failed to load admin stats:', err);
       }
@@ -6535,6 +6641,8 @@ Tags: ${c.tags.join(', ')}`;
 
       if (tab === 'users') {
         loadAdminUsers();
+      } else if (tab === 'reports') {
+        loadAdminReports();
       } else {
         loadAdminConversions();
       }
@@ -6595,6 +6703,105 @@ Tags: ${c.tags.join(', ')}`;
         loadAdminStats();
       } catch (err) {
         showToast('Failed to update user', 'error');
+      }
+    }
+
+    // ==================== ADMIN REPORTS ====================
+    let adminReportsPage = 1;
+
+    async function loadAdminReports(page = 1) {
+      adminReportsPage = page;
+      const status = document.getElementById('adminReportStatusFilter')?.value || 'pending';
+      const tbody = document.getElementById('adminReportsBody');
+      tbody.innerHTML = '<tr><td colspan="6" class="loading">Loading...</td></tr>';
+
+      try {
+        const response = await fetch(`/api/admin/reports?page=${page}&status=${status}`);
+        const data = await response.json();
+
+        if (data.reports.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="loading">No reports found</td></tr>';
+          renderAdminPagination('adminReportsPagination', data.pagination, loadAdminReports);
+          return;
+        }
+
+        tbody.innerHTML = data.reports.map(r => `
+          <tr>
+            <td>
+              <div><strong>${escapeHtml(r.conversion.name)}</strong></div>
+              <div style="font-size: 0.75rem; color: var(--text-secondary);">
+                T${r.conversion.tier} ${r.conversion.type} · by @${escapeHtml(r.author.username)}
+              </div>
+            </td>
+            <td>
+              <div class="admin-author">
+                ${r.reporter.avatarUrl ? `<img src="${r.reporter.avatarUrl}" alt="">` : ''}
+                <span>@${escapeHtml(r.reporter.username)}</span>
+              </div>
+            </td>
+            <td><div class="admin-report-reason" title="${escapeHtml(r.reason)}">${escapeHtml(r.reason)}</div></td>
+            <td><span class="admin-badge ${r.status}">${r.status}</span></td>
+            <td>${new Date(r.createdAt).toLocaleDateString()}</td>
+            <td>
+              <div class="admin-actions">
+                <button class="admin-btn" onclick="viewReportedConversion('${r.conversion.id}')" title="View">View</button>
+                ${r.status === 'pending' ? `
+                  <button class="admin-btn" onclick="dismissReport('${r.id}')" title="Dismiss">Dismiss</button>
+                  <button class="admin-btn danger" onclick="actionReport('${r.id}', 'hide')" title="Hide conversion">Hide</button>
+                  <button class="admin-btn danger" onclick="actionReport('${r.id}', 'delete')" title="Delete conversion">Delete</button>
+                ` : ''}
+              </div>
+            </td>
+          </tr>
+        `).join('');
+
+        renderAdminPagination('adminReportsPagination', data.pagination, loadAdminReports);
+      } catch (err) {
+        console.error('Failed to load reports:', err);
+        tbody.innerHTML = '<tr><td colspan="6" class="loading">Failed to load reports</td></tr>';
+      }
+    }
+
+    async function viewReportedConversion(conversionId) {
+      // Switch to community and open the modal
+      navigateTo('community');
+      setTimeout(() => openCommunityModal(conversionId), 300);
+    }
+
+    async function dismissReport(reportId) {
+      if (!confirm('Dismiss this report? The conversion will remain visible.')) return;
+
+      try {
+        const response = await fetch(`/api/admin/reports/${reportId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ status: 'dismissed', adminNotes: 'Dismissed by admin' })
+        });
+        if (!response.ok) throw new Error('Failed to dismiss');
+        showToast('Report dismissed', 'success');
+        loadAdminReports(adminReportsPage);
+        loadAdminStats();
+      } catch (err) {
+        showToast('Failed to dismiss report', 'error');
+      }
+    }
+
+    async function actionReport(reportId, action) {
+      const actionLabel = action === 'hide' ? 'hide' : 'delete';
+      if (!confirm(`${action === 'hide' ? 'Hide' : 'Delete'} this conversion? ${action === 'delete' ? 'This cannot be undone.' : ''}`)) return;
+
+      try {
+        const response = await fetch(`/api/admin/reports/${reportId}/action`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action })
+        });
+        if (!response.ok) throw new Error('Failed to action');
+        showToast(`Conversion ${actionLabel}d and report resolved`, 'success');
+        loadAdminReports(adminReportsPage);
+        loadAdminStats();
+      } catch (err) {
+        showToast('Failed to action report', 'error');
       }
     }
 
@@ -7651,14 +7858,49 @@ Tags: ${c.tags.join(', ')}`;
         .catch(() => showToast('Failed to copy link', 'error'));
     }
 
-    function reportConversion() {
+    function openReportModal() {
       if (!selectedConversion) return;
       if (!currentUser) {
         showToast('Please log in to report content', 'info');
         return;
       }
-      // For now, just show a message. In a full implementation, this would send to an API
-      showToast('Report submitted. Thank you for helping keep the community safe.', 'success');
+      document.getElementById('reportConversionName').textContent = `Reporting: ${selectedConversion.name}`;
+      document.getElementById('reportReason').value = '';
+      document.getElementById('reportModal').classList.remove('hidden');
+    }
+
+    function closeReportModal(event) {
+      if (event && event.target !== event.currentTarget) return;
+      document.getElementById('reportModal').classList.add('hidden');
+    }
+
+    async function submitReport() {
+      if (!selectedConversion) return;
+
+      const reason = document.getElementById('reportReason').value.trim();
+      if (reason.length < 10) {
+        showToast('Please provide more detail (at least 10 characters)', 'error');
+        return;
+      }
+
+      try {
+        const response = await fetch(`/api/community/conversions/${selectedConversion.id}/report`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ reason })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || 'Failed to submit report');
+        }
+
+        closeReportModal();
+        showToast('Report submitted. Thank you for helping keep the community safe.', 'success');
+      } catch (err) {
+        showToast(err.message, 'error');
+      }
     }
 
     // ==================== COMMUNITY FILTERS ====================
