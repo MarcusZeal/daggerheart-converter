@@ -3710,13 +3710,9 @@
       transform: translateY(-1px);
     }
 
-    /* Dice tooltip - smart positioning */
-    .dice-roll[data-range]::after {
-      content: attr(data-range);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%) translateY(-4px);
+    /* Dice tooltip - fixed positioning to escape modal overflow */
+    #dice-tooltip {
+      position: fixed;
       background: var(--bg-dark);
       color: var(--text-primary);
       padding: 0.35rem 0.6rem;
@@ -3725,38 +3721,23 @@
       font-family: var(--font-body);
       font-weight: 400;
       white-space: nowrap;
-      opacity: 0;
-      visibility: hidden;
-      transition: all 0.2s;
-      z-index: 100;
+      z-index: 10000;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       border: 1px solid var(--accent);
       pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.15s, visibility 0.15s;
     }
 
-    .dice-roll:hover[data-range]::after {
+    #dice-tooltip.visible {
       opacity: 1;
       visibility: visible;
-      transform: translateX(-50%) translateY(-8px);
     }
 
-    /* Tooltip positioned to the right (for left-edge dice) */
-    .dice-roll.tooltip-right[data-range]::after {
-      left: 0;
-      transform: translateX(0) translateY(-4px);
-    }
-    .dice-roll.tooltip-right:hover[data-range]::after {
-      transform: translateX(0) translateY(-8px);
-    }
-
-    /* Tooltip positioned to the left (for right-edge dice) */
-    .dice-roll.tooltip-left[data-range]::after {
-      left: auto;
-      right: 0;
-      transform: translateX(0) translateY(-4px);
-    }
-    .dice-roll.tooltip-left:hover[data-range]::after {
-      transform: translateX(0) translateY(-8px);
+    :root.light-mode #dice-tooltip {
+      background: #2d2d2d;
+      color: #f5f0e6;
     }
 
     :root.light-mode .dice-roll {
@@ -5263,10 +5244,10 @@
 
       <div class="navbar-right">
         <button class="faq-link" onclick="openFAQModal()" title="How It Works">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="20" height="20">
             <circle cx="12" cy="12" r="10"/>
             <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/>
-            <line x1="12" y1="17" x2="12.01" y2="17"/>
+            <circle cx="12" cy="17" r="0.5" fill="currentColor"/>
           </svg>
         </button>
         <a href="https://buymeacoffee.com/marcusu" target="_blank" rel="noopener" class="coffee-link" title="Buy me a coffee">
@@ -6434,6 +6415,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       handleAuthRedirect();
       handleUrlRouting();
       loadFromURL();
+      initDiceTooltips();
     });
 
     // ==================== THEME TOGGLE ====================
@@ -7736,30 +7718,63 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
     }
 
     /**
-     * Position dice tooltips smartly to avoid edge overflow
-     * Call this after rendering content with dice rolls
+     * Initialize dice roll tooltip system
+     * Uses a fixed-position element to escape modal overflow clipping
      */
+    function initDiceTooltips() {
+      const tooltip = document.getElementById('dice-tooltip');
+      if (!tooltip) return;
+
+      // Use event delegation on document to catch all dice rolls
+      document.addEventListener('mouseenter', (e) => {
+        const diceRoll = e.target.closest('.dice-roll[data-range]');
+        if (!diceRoll) return;
+
+        const range = diceRoll.getAttribute('data-range');
+        if (!range) return;
+
+        tooltip.textContent = range;
+
+        // Position the tooltip
+        const rect = diceRoll.getBoundingClientRect();
+        const tooltipRect = tooltip.getBoundingClientRect();
+
+        // Calculate center position above the element
+        let left = rect.left + (rect.width / 2) - (tooltip.offsetWidth / 2);
+        let top = rect.top - tooltip.offsetHeight - 8;
+
+        // Ensure tooltip stays within viewport bounds
+        const padding = 10;
+
+        // Check left edge
+        if (left < padding) {
+          left = padding;
+        }
+        // Check right edge
+        if (left + tooltip.offsetWidth > window.innerWidth - padding) {
+          left = window.innerWidth - tooltip.offsetWidth - padding;
+        }
+        // If too close to top, show below instead
+        if (top < padding) {
+          top = rect.bottom + 8;
+        }
+
+        tooltip.style.left = left + 'px';
+        tooltip.style.top = top + 'px';
+        tooltip.classList.add('visible');
+      }, true);
+
+      document.addEventListener('mouseleave', (e) => {
+        const diceRoll = e.target.closest('.dice-roll[data-range]');
+        if (!diceRoll) return;
+        tooltip.classList.remove('visible');
+      }, true);
+    }
+
+    // Legacy function - now a no-op since tooltips use event delegation
     function positionDiceTooltips(container) {
-      const diceRolls = (container || document).querySelectorAll('.dice-roll[data-range]');
-      const tooltipWidth = 180; // Approximate tooltip width
-
-      diceRolls.forEach(el => {
-        // Remove any existing positioning classes
-        el.classList.remove('tooltip-left', 'tooltip-right');
-
-        const rect = el.getBoundingClientRect();
-        const viewportWidth = window.innerWidth;
-
-        // Check if tooltip would overflow on the left
-        if (rect.left < tooltipWidth / 2) {
-          el.classList.add('tooltip-right'); // Align tooltip to right of element
-        }
-        // Check if tooltip would overflow on the right
-        else if (rect.right > viewportWidth - tooltipWidth / 2) {
-          el.classList.add('tooltip-left'); // Align tooltip to left of element
-        }
-        // Otherwise, keep centered (default)
-      });
+      // Tooltips now use fixed positioning with event delegation
+      // This function is kept for backward compatibility
     }
 
     // Escape for use in JavaScript string literals inside HTML attributes
@@ -10245,5 +10260,8 @@ Tags: ${c.tags.join(', ')}`;
       }
     });
   </script>
+
+  <!-- Fixed tooltip for dice rolls (escapes modal overflow) -->
+  <div id="dice-tooltip"></div>
 </body>
 </html>
