@@ -2646,20 +2646,21 @@
     }
 
     .share-link-btn {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
+      background: transparent;
+      border: none;
       border-radius: 4px;
       cursor: pointer;
       color: var(--text-secondary);
-      padding: 0.35rem 0.5rem;
-      font-size: 0.85rem;
-      opacity: 0.7;
+      padding: 0.2rem 0.35rem;
+      font-size: 0.75rem;
+      opacity: 0.5;
       transition: all 0.2s;
+      margin-left: auto;
+      flex-shrink: 0;
     }
 
     .share-link-btn:hover {
       color: var(--accent);
-      border-color: var(--accent);
       opacity: 1;
     }
 
@@ -5844,6 +5845,7 @@ Tags: ${c.tags.join(', ')}`;
               <div class="community-item-header">
                 <div class="community-item-name">${escapeHtml(conv.name)}</div>
                 ${sourceSystem ? `<span class="community-item-source">${escapeHtml(sourceSystem)}</span>` : ''}
+                <button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>
               </div>
               <div class="community-item-stats">
                 <span class="community-item-stat"><strong>Diff:</strong> ${difficulty}</span>
@@ -5863,7 +5865,6 @@ Tags: ${c.tags.join(', ')}`;
                 <button class="vote-btn downvote ${conv.userVote === -1 ? 'active' : ''}"
                         onclick="event.stopPropagation(); quickVote('${conv.id}', -1)">&#9660;</button>
               </div>
-              <button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>
             </div>
           </div>
         `;
