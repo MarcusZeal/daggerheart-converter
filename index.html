@@ -2325,10 +2325,13 @@
       top: 0;
       z-index: 5;
       border-bottom: 3px solid #e1b74a;
+      transition: box-shadow 0.15s ease-out;
+      /* Fixed height to prevent layout shift on compact */
+      min-height: 72px;
+      box-sizing: border-box;
     }
 
     .dh-stat-block-header.compact {
-      padding: 0.5rem 1.25rem;
       box-shadow: 0 2px 8px rgba(0,0,0,0.3);
       display: flex;
       align-items: center;
@@ -2342,6 +2345,12 @@
 
     .dh-stat-block-header.compact .dh-stat-block-tier {
       font-size: 0.75rem;
+    }
+
+    .dh-stat-block-header.compact .dh-header-main {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
     }
 
     /* Compact stats bar in header on scroll */
@@ -2457,6 +2466,11 @@
       font-weight: 300;
     }
 
+    .dh-stat-block-stats-line .stat-item {
+      display: inline-block;
+      white-space: nowrap;
+    }
+
     /* Damage Tracker - Daggerheart Character Sheet Style */
     .damage-tracker-container {
       container-type: inline-size;
@@ -2548,7 +2562,7 @@
     .damage-connector {
       width: 100px;
       height: 50px;
-      background: var(--bg-card);
+      background: unset;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -2563,11 +2577,6 @@
       font-family: var(--font-display);
       font-size: 36px;
       font-weight: 400;
-    }
-
-    /* Light mode connector */
-    :root.light-mode .damage-connector {
-      background: #fff;
     }
 
     :root.light-mode .damage-card-footer-text {
@@ -2841,7 +2850,7 @@
     }
 
     .dh-modal-card .dh-stat-block-header {
-      border-radius: 6px 6px 0 0;
+      border-radius: 0;
     }
 
     /* When scrolled, remove border-radius and add solid color corners */
@@ -4562,6 +4571,7 @@
       font-size: 0.85rem;
       line-height: 1.4;
       border-bottom: 1px solid #d4cfc3;
+      flex: 1;
     }
 
     .dh-card-description {
@@ -4604,6 +4614,134 @@
     .dh-stat-separator {
       color: #888;
       margin: 0 0.35rem;
+    }
+
+    .dh-stat-item {
+      display: inline-block;
+      white-space: nowrap;
+    }
+
+    /* Mini Stats for Community Cards */
+    .mini-stats-container {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      margin: 0.5rem 0;
+    }
+
+    .mini-vitals-row {
+      display: flex;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .mini-vital-box {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0.25rem 0.5rem;
+      background: rgba(0,0,0,0.04);
+      border: 1px solid rgba(0,0,0,0.1);
+      border-radius: 4px;
+      min-width: 45px;
+    }
+
+    .mini-vital-value {
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .mini-vital-label {
+      font-size: 0.55rem;
+      text-transform: uppercase;
+      color: #666;
+      margin-top: 2px;
+      letter-spacing: 0.3px;
+    }
+
+    .mini-vital-box.difficulty .mini-vital-value { color: #b8860b; }
+    .mini-vital-box.hp .mini-vital-value { color: #dc2626; }
+    .mini-vital-box.stress .mini-vital-value { color: #7c3aed; }
+
+    /* Mini Damage Tracker for Cards */
+    .mini-damage-tracker {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+
+    .mini-damage-card {
+      position: relative;
+      width: 44px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .mini-damage-card svg {
+      width: 100%;
+      height: 100%;
+    }
+
+    .mini-damage-card .mini-card-label {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      color: white;
+      font-size: 6px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.2px;
+      white-space: nowrap;
+    }
+
+    .mini-connector {
+      width: 28px;
+      height: 16px;
+      background: #fff;
+      border: 2px solid #5f6975;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 -5px;
+      z-index: 1;
+      position: relative;
+    }
+
+    .mini-connector-number {
+      color: #5f6975;
+      font-size: 10px;
+      font-weight: 800;
+    }
+
+    /* Library draggable cards */
+    .community-item.library-draggable {
+      cursor: grab;
+    }
+
+    .community-item.library-draggable:active {
+      cursor: grabbing;
+    }
+
+    .community-item.library-draggable.dragging {
+      opacity: 0.5;
+      transform: scale(0.98);
+    }
+
+    .library-drag-hint {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      color: #999;
+      opacity: 0;
+      transition: opacity 0.2s;
+      z-index: 5;
+    }
+
+    .community-item.library-draggable:hover .library-drag-hint {
+      opacity: 0.5;
     }
 
     /* Card footer - author info */
@@ -5336,6 +5474,286 @@
         display: none;
       }
     }
+
+    /* Encounter Builder */
+    .encounter-builder-container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 1.5rem;
+    }
+
+    .encounter-header {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem 1.5rem;
+      background: var(--bg-card);
+      border-radius: 8px;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+
+    .encounter-header h2 {
+      margin: 0;
+      font-size: 1.5rem;
+      color: var(--accent);
+    }
+
+    .encounter-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .party-size-control {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .party-size-control label {
+      font-weight: 500;
+    }
+
+    .party-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+    }
+
+    .party-btn:hover {
+      border-color: var(--accent);
+      background: var(--bg-card);
+    }
+
+    #party-size-value {
+      font-size: 1.5rem;
+      font-weight: 700;
+      min-width: 2rem;
+      text-align: center;
+      color: var(--accent);
+    }
+
+    .budget-display {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .budget-separator {
+      color: var(--text-secondary);
+    }
+
+    .budget-bar {
+      width: 150px;
+      height: 10px;
+      background: var(--bg-input);
+      border-radius: 5px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+    }
+
+    .budget-bar-fill {
+      height: 100%;
+      background: var(--success);
+      transition: width 0.3s ease, background-color 0.3s ease;
+    }
+
+    .budget-bar-fill.warning { background: var(--warning); }
+    .budget-bar-fill.danger { background: var(--error); }
+
+    .encounter-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.5rem;
+    }
+
+    .encounter-library-panel,
+    .encounter-roster-panel {
+      background: var(--bg-card);
+      border-radius: 8px;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      min-height: 400px;
+    }
+
+    .encounter-library-panel h3,
+    .encounter-roster-panel h3 {
+      margin: 0 0 1rem 0;
+      font-size: 1.1rem;
+      color: var(--accent);
+    }
+
+    #encounter-library-search,
+    #encounter-name {
+      width: 100%;
+      padding: 0.5rem 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      margin-bottom: 1rem;
+      font-size: 0.9rem;
+      background: var(--bg-input);
+      color: var(--text-primary);
+    }
+
+    #encounter-library-search:focus,
+    #encounter-name:focus {
+      outline: none;
+      border-color: var(--accent);
+    }
+
+    .encounter-list {
+      flex: 1;
+      overflow-y: auto;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      background: var(--bg-input);
+    }
+
+    .encounter-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .encounter-item:last-child { border-bottom: none; }
+    .encounter-item:hover { background: rgba(201, 162, 39, 0.1); }
+
+    .encounter-item-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .encounter-item-name {
+      font-weight: 600;
+    }
+
+    .encounter-item-meta {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    .encounter-bp-badge {
+      background: var(--accent);
+      color: var(--bg-dark);
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .encounter-item-controls {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .encounter-count {
+      font-weight: 600;
+      min-width: 1.5rem;
+      text-align: center;
+    }
+
+    .encounter-total {
+      padding: 1rem;
+      text-align: right;
+      font-size: 1.1rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    .encounter-actions {
+      display: flex;
+      gap: 0.5rem;
+      justify-content: flex-end;
+      padding-top: 1rem;
+    }
+
+    .saved-encounters-section {
+      margin-top: 2rem;
+      padding: 1rem;
+      background: var(--bg-card);
+      border-radius: 8px;
+      border: 1px solid var(--border);
+    }
+
+    .saved-encounters-section h3 {
+      margin: 0 0 1rem 0;
+      color: var(--accent);
+    }
+
+    .saved-encounter-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .saved-encounter-item:last-child {
+      border-bottom: none;
+    }
+
+    .saved-encounter-info {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .saved-encounter-info strong {
+      color: var(--text-primary);
+    }
+
+    .encounter-empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+      color: var(--text-secondary);
+      text-align: center;
+      height: 100%;
+    }
+
+    @media (max-width: 768px) {
+      .encounter-columns {
+        grid-template-columns: 1fr;
+      }
+      .encounter-controls {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+      .budget-display {
+        width: 100%;
+      }
+      .budget-bar {
+        flex: 1;
+        min-width: 100px;
+      }
+      .encounter-builder-container {
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -5373,6 +5791,15 @@
             <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
           </svg>
           <span>Community</span>
+        </a>
+        <a href="#" class="nav-link" data-page="encounter-builder" onclick="navigateTo('encounter-builder'); return false;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="7"/>
+            <rect x="14" y="3" width="7" height="7"/>
+            <rect x="14" y="14" width="7" height="7"/>
+            <rect x="3" y="14" width="7" height="7"/>
+          </svg>
+          <span>Encounters</span>
         </a>
         <a href="#" class="nav-link admin-only hidden" id="adminNavLink" data-page="admin" onclick="navigateTo('admin'); return false;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -5764,6 +6191,66 @@ The converter will auto-detect the source system."
           <span id="communityPageInfo">Page 1 of 1</span>
           <button class="btn btn-secondary btn-small" onclick="communityNextPage()" id="communityNextBtn" disabled>Next</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Encounter Builder Page -->
+  <div id="encounter-builderPage" class="page-view">
+    <div class="encounter-builder-container">
+      <!-- Header with party size and budget -->
+      <div class="encounter-header">
+        <h2>Encounter Builder</h2>
+        <div class="encounter-controls">
+          <div class="party-size-control">
+            <label>Party Size:</label>
+            <button class="party-btn" onclick="adjustPartySize(-1)">−</button>
+            <span id="party-size-value">4</span>
+            <button class="party-btn" onclick="adjustPartySize(1)">+</button>
+          </div>
+          <div class="budget-display">
+            <span>Budget: <strong id="budget-total">14</strong> BP</span>
+            <span class="budget-separator">|</span>
+            <span>Used: <strong id="budget-used">0</strong> BP</span>
+            <div class="budget-bar">
+              <div class="budget-bar-fill" id="budget-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Two-column layout -->
+      <div class="encounter-columns">
+        <!-- Left: Library picker -->
+        <div class="encounter-library-panel">
+          <h3>Your Library</h3>
+          <input type="text" id="encounter-library-search"
+                 placeholder="Search adversaries..."
+                 oninput="debouncedFilterEncounterLibrary()">
+          <div id="encounter-library-list" class="encounter-list"></div>
+        </div>
+
+        <!-- Right: Current encounter -->
+        <div class="encounter-roster-panel">
+          <h3>Current Encounter</h3>
+          <input type="text" id="encounter-name"
+                 placeholder="Encounter Name (optional)"
+                 oninput="encounterState.name = this.value">
+          <div id="encounter-roster" class="encounter-list"></div>
+          <div class="encounter-total">
+            Total: <strong id="encounter-total-bp">0</strong> BP
+          </div>
+          <div class="encounter-actions">
+            <button class="btn btn-secondary" onclick="clearEncounter()">Clear</button>
+            <button class="btn btn-primary" onclick="saveEncounter()">Save Encounter</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Saved encounters section -->
+      <div class="saved-encounters-section">
+        <h3>Saved Encounters</h3>
+        <div id="saved-encounters-list"></div>
       </div>
     </div>
   </div>
@@ -7474,7 +7961,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
         return `
           <div class="dh-stat-block-feature">
             <span class="dh-stat-block-feature-name">${escapeHtml(f.name)}</span> -
-            <span class="dh-stat-block-feature-type ${typeClass}">${f.type || 'Passive'}:</span>
+            <span class="dh-stat-block-feature-type ${typeClass}">${f.type || 'Passive'}</span>:
             ${descWithDice}
           </div>
         `;
@@ -7504,7 +7991,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
         const damageWithHighlight = highlightDiceRolls(escapeHtml(c.damage || '?'));
         attackLine = `
           <div class="dh-stat-block-stats-line">
-            <span class="label">ATK:</span> ${c.atkMod}<span class="separator">|</span><span class="label">${escapeHtml(c.weapon || 'Attack')}:</span> ${c.range || 'Melee'}<span class="separator">|</span>${damageWithHighlight} ${c.dmgType || 'phy'}
+            <span class="stat-item"><span class="label">ATK:</span> ${c.atkMod}</span><span class="separator">|</span><span class="stat-item"><span class="label">${escapeHtml(c.weapon || 'Attack')}:</span> ${c.range || 'Melee'}</span><span class="separator">|</span><span class="stat-item">${damageWithHighlight} ${c.dmgType || 'phy'}</span>
           </div>
         `;
       }
@@ -7949,9 +8436,11 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
         modal.addEventListener('scroll', () => {
           const header = modal.querySelector('.dh-stat-block-header');
           if (header) {
+            // Use hysteresis: compact at 30px, but only expand back at 5px
+            // This prevents the animation from interfering with scroll-to-top
             if (modal.scrollTop > 30) {
               header.classList.add('compact');
-            } else {
+            } else if (modal.scrollTop <= 5) {
               header.classList.remove('compact');
             }
           }
@@ -8532,6 +9021,279 @@ Tags: ${c.tags.join(', ')}`;
       if (page === 'admin' && currentUser?.is_admin) {
         loadAdminData();
       }
+
+      // Initialize encounter builder when navigating to it
+      if (page === 'encounter-builder') {
+        initEncounterBuilder();
+      }
+    }
+
+    // ==================== ENCOUNTER BUILDER ====================
+
+    // Battle Points costs by adversary type
+    const ADV_TYPE_BATTLE_POINTS = {
+      'Minion': 1, 'Social': 1, 'Support': 1,
+      'Horde': 2, 'Ranged': 2, 'Skulk': 2, 'Standard': 2,
+      'Leader': 3, 'Bruiser': 4, 'Solo': 5
+    };
+
+    // Encounter state
+    let encounterState = {
+      partySize: 4,
+      name: '',
+      roster: [] // [{adversaryId, adversary, count}]
+    };
+
+    // Debounce for search
+    let encounterSearchTimeout = null;
+    function debouncedFilterEncounterLibrary() {
+      clearTimeout(encounterSearchTimeout);
+      encounterSearchTimeout = setTimeout(renderEncounterLibrary, 150);
+    }
+
+    // XSS prevention
+    function escapeHtmlEncounter(str) {
+      if (!str) return '';
+      const div = document.createElement('div');
+      div.textContent = str;
+      return div.innerHTML;
+    }
+
+    function getAdvTypeBattlePoints(advType) {
+      return ADV_TYPE_BATTLE_POINTS[advType] || 2;
+    }
+
+    function calculateBudget(partySize) {
+      return (3 * partySize) + 2;
+    }
+
+    function calculateUsedPoints() {
+      return encounterState.roster.reduce((sum, item) => {
+        const bp = getAdvTypeBattlePoints(item.adversary.advType);
+        return sum + (bp * item.count);
+      }, 0);
+    }
+
+    function adjustPartySize(delta) {
+      encounterState.partySize = Math.max(1, Math.min(10, encounterState.partySize + delta));
+      document.getElementById('party-size-value').textContent = encounterState.partySize;
+      updateBudgetDisplay();
+    }
+
+    function updateBudgetDisplay() {
+      const budget = calculateBudget(encounterState.partySize);
+      const used = calculateUsedPoints();
+      const percent = Math.min(100, (used / budget) * 100);
+
+      document.getElementById('budget-total').textContent = budget;
+      document.getElementById('budget-used').textContent = used;
+      document.getElementById('encounter-total-bp').textContent = used;
+
+      const fill = document.getElementById('budget-bar-fill');
+      fill.style.width = percent + '%';
+      fill.classList.remove('warning', 'danger');
+      if (used > budget) fill.classList.add('danger');
+      else if (percent > 75) fill.classList.add('warning');
+    }
+
+    function addToEncounter(adversaryId) {
+      const existing = encounterState.roster.find(r => r.adversaryId === adversaryId);
+      if (existing) {
+        existing.count++;
+      } else {
+        const adversary = getAllLibraryAdversaries().find(a => a.id === adversaryId);
+        if (adversary) {
+          encounterState.roster.push({ adversaryId, adversary, count: 1 });
+        }
+      }
+      renderEncounterRoster();
+      updateBudgetDisplay();
+    }
+
+    function removeFromEncounter(adversaryId) {
+      const idx = encounterState.roster.findIndex(r => r.adversaryId === adversaryId);
+      if (idx !== -1) {
+        if (encounterState.roster[idx].count > 1) {
+          encounterState.roster[idx].count--;
+        } else {
+          encounterState.roster.splice(idx, 1);
+        }
+      }
+      renderEncounterRoster();
+      updateBudgetDisplay();
+    }
+
+    function renderEncounterLibrary() {
+      const container = document.getElementById('encounter-library-list');
+      if (!container) return;
+
+      const search = document.getElementById('encounter-library-search')?.value?.toLowerCase() || '';
+      const adversaries = getAllLibraryAdversaries().filter(a =>
+        a.name.toLowerCase().includes(search) ||
+        (a.advType || '').toLowerCase().includes(search)
+      );
+
+      if (adversaries.length === 0) {
+        container.innerHTML = '<div class="empty-state">No adversaries in library. Add some from the Converter!</div>';
+        return;
+      }
+
+      container.innerHTML = adversaries.map(adv => {
+        const bp = getAdvTypeBattlePoints(adv.advType);
+        return `
+          <div class="encounter-item" data-adversary-id="${escapeHtmlEncounter(adv.id)}" onclick="addToEncounter('${escapeHtmlEncounter(adv.id)}')">
+            <div class="encounter-item-info">
+              <span class="encounter-item-name">${escapeHtmlEncounter(adv.name)}</span>
+              <span class="encounter-item-meta">T${escapeHtmlEncounter(String(adv.tier || '?'))} ${escapeHtmlEncounter(adv.advType || 'Standard')}</span>
+            </div>
+            <span class="encounter-bp-badge">${bp} BP</span>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderEncounterRoster() {
+      const container = document.getElementById('encounter-roster');
+      if (!container) return;
+
+      if (encounterState.roster.length === 0) {
+        container.innerHTML = '<div class="empty-state">Click adversaries from your library to add them</div>';
+        return;
+      }
+
+      container.innerHTML = encounterState.roster.map(item => {
+        const bp = getAdvTypeBattlePoints(item.adversary.advType);
+        const totalBp = bp * item.count;
+        return `
+          <div class="encounter-item">
+            <div class="encounter-item-info">
+              <span class="encounter-item-name">${escapeHtmlEncounter(item.adversary.name)}</span>
+              <span class="encounter-item-meta">${item.count > 1 ? `×${item.count}` : ''} ${escapeHtmlEncounter(item.adversary.advType || 'Standard')}</span>
+            </div>
+            <div class="encounter-item-controls">
+              <button class="party-btn" onclick="removeFromEncounter('${escapeHtmlEncounter(item.adversaryId)}')">−</button>
+              <span class="encounter-count">${item.count}</span>
+              <button class="party-btn" onclick="addToEncounter('${escapeHtmlEncounter(item.adversaryId)}')">+</button>
+              <span class="encounter-bp-badge">${totalBp} BP</span>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function clearEncounter() {
+      encounterState.roster = [];
+      encounterState.name = '';
+      const nameInput = document.getElementById('encounter-name');
+      if (nameInput) nameInput.value = '';
+      renderEncounterRoster();
+      updateBudgetDisplay();
+    }
+
+    function saveEncounter() {
+      if (encounterState.roster.length === 0) {
+        showToast('Add adversaries before saving', 'error');
+        return;
+      }
+
+      const saved = JSON.parse(localStorage.getItem('dh-saved-encounters') || '[]');
+      const encounter = {
+        id: 'enc-' + Date.now(),
+        name: encounterState.name || 'Unnamed Encounter',
+        partySize: encounterState.partySize,
+        totalBp: calculateUsedPoints(),
+        roster: encounterState.roster.map(r => ({
+          adversaryId: r.adversaryId,
+          name: r.adversary.name,
+          advType: r.adversary.advType,
+          tier: r.adversary.tier,
+          count: r.count
+        })),
+        createdAt: new Date().toISOString()
+      };
+
+      saved.unshift(encounter);
+      localStorage.setItem('dh-saved-encounters', JSON.stringify(saved));
+      showToast('Encounter saved!', 'success');
+      renderSavedEncounters();
+    }
+
+    function loadEncounter(encounterId) {
+      const saved = JSON.parse(localStorage.getItem('dh-saved-encounters') || '[]');
+      const encounter = saved.find(e => e.id === encounterId);
+      if (!encounter) return;
+
+      encounterState.partySize = encounter.partySize;
+      encounterState.name = encounter.name;
+      encounterState.roster = [];
+
+      // Rebuild roster from library
+      const library = getAllLibraryAdversaries();
+      const missingAdversaries = [];
+
+      for (const item of encounter.roster) {
+        const adversary = library.find(a => a.id === item.adversaryId);
+        if (adversary) {
+          encounterState.roster.push({
+            adversaryId: item.adversaryId,
+            adversary,
+            count: item.count
+          });
+        } else {
+          missingAdversaries.push(item.name);
+        }
+      }
+
+      // Warn about missing adversaries
+      if (missingAdversaries.length > 0) {
+        showToast(`Warning: ${missingAdversaries.length} adversary(s) no longer in library: ${missingAdversaries.join(', ')}`, 'error');
+      }
+
+      document.getElementById('party-size-value').textContent = encounterState.partySize;
+      const nameInput = document.getElementById('encounter-name');
+      if (nameInput) nameInput.value = encounterState.name;
+      renderEncounterRoster();
+      updateBudgetDisplay();
+    }
+
+    function deleteEncounter(encounterId) {
+      const saved = JSON.parse(localStorage.getItem('dh-saved-encounters') || '[]');
+      const filtered = saved.filter(e => e.id !== encounterId);
+      localStorage.setItem('dh-saved-encounters', JSON.stringify(filtered));
+      showToast('Encounter deleted', 'success');
+      renderSavedEncounters();
+    }
+
+    function renderSavedEncounters() {
+      const container = document.getElementById('saved-encounters-list');
+      if (!container) return;
+
+      const saved = JSON.parse(localStorage.getItem('dh-saved-encounters') || '[]');
+
+      if (saved.length === 0) {
+        container.innerHTML = '<div class="empty-state">No saved encounters yet</div>';
+        return;
+      }
+
+      container.innerHTML = saved.map(enc => `
+        <div class="saved-encounter-item">
+          <div>
+            <strong>${escapeHtmlEncounter(enc.name)}</strong>
+            <span class="encounter-item-meta">${enc.roster.length} type${enc.roster.length !== 1 ? 's' : ''} • ${enc.totalBp} BP • ${enc.partySize} players</span>
+          </div>
+          <div class="encounter-item-controls">
+            <button class="btn btn-secondary btn-small" onclick="loadEncounter('${escapeHtmlEncounter(enc.id)}')">Load</button>
+            <button class="btn btn-secondary btn-small" onclick="deleteEncounter('${escapeHtmlEncounter(enc.id)}')">Delete</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function initEncounterBuilder() {
+      renderEncounterLibrary();
+      renderEncounterRoster();
+      renderSavedEncounters();
+      updateBudgetDisplay();
     }
 
     // ==================== ADMIN PANEL ====================
@@ -9162,31 +9924,96 @@ Tags: ${c.tags.join(', ')}`;
 
       if (emptyState) emptyState.classList.add('hidden');
 
-      container.innerHTML = filtered.map(adv => `
-        <div class="adversary-card"
-             draggable="true"
-             data-adversary-id="${adv.id}"
-             ondragstart="handleAdversaryDragStart(event, '${adv.id}')"
-             ondragend="handleAdversaryDragEnd(event)"
-             onclick="openMyLibraryAdversary('${adv.id}')">
-          <div class="adversary-card-header">
-            <span class="adversary-card-name">${escapeHtml(adv.name || 'Unknown')}</span>
-            <span class="adversary-card-tier">T${adv.tier || '?'}</span>
+      container.innerHTML = filtered.map(adv => {
+        const hp = adv.hp || '?';
+        const stress = adv.stress || '?';
+        const difficulty = adv.difficulty || '?';
+        const majorThresh = adv.majorThresh || '?';
+        const severeThresh = adv.severeThresh || '?';
+        const description = adv.description || '';
+        const motives = adv.motives || '';
+        const cardTypeClass = (adv.advType || 'standard').toLowerCase().trim();
+
+        // Build attack line
+        let attackLine = '';
+        if (adv.atkMod && adv.atkMod !== '?') {
+          attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${adv.atkMod}</span>`;
+          if (adv.weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.weapon}: ${adv.range || ''}</span>`;
+          if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.damage}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
+        }
+
+        return `
+          <div class="community-item library-draggable"
+               draggable="true"
+               data-adversary-id="${adv.id}"
+               ondragstart="handleAdversaryDragStart(event, '${adv.id}')"
+               ondragend="handleAdversaryDragEnd(event)"
+               onclick="openMyLibraryAdversary('${adv.id}')">
+            <div class="dh-card-header" data-type="${cardTypeClass}">
+              <div class="dh-card-name">${escapeHtml(adv.name || 'Unknown')}</div>
+              <div class="dh-card-tier-type">Tier ${adv.tier || '?'} ${adv.advType || 'Standard'}</div>
+            </div>
+            <div class="dh-card-body">
+              ${description ? `<div class="dh-card-description">${escapeHtml(description)}</div>` : ''}
+              ${motives ? `<div class="dh-card-motives"><strong>Motives & Tactics:</strong> ${escapeHtml(motives)}</div>` : ''}
+              <div class="mini-stats-container">
+                <div class="mini-vitals-row">
+                  <div class="mini-vital-box difficulty">
+                    <span class="mini-vital-value">${difficulty}</span>
+                    <span class="mini-vital-label">Diff</span>
+                  </div>
+                  <div class="mini-vital-box hp">
+                    <span class="mini-vital-value">${hp}</span>
+                    <span class="mini-vital-label">HP</span>
+                  </div>
+                  <div class="mini-vital-box stress">
+                    <span class="mini-vital-value">${stress}</span>
+                    <span class="mini-vital-label">Stress</span>
+                  </div>
+                </div>
+                <div class="mini-damage-tracker">
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -874.223 1942.978 L -874.223 1442.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Minor</span>
+                  </div>
+                  <div class="mini-connector"><span class="mini-connector-number">${majorThresh}</span></div>
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                        <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Major</span>
+                  </div>
+                  <div class="mini-connector"><span class="mini-connector-number">${severeThresh}</span></div>
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                        <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Severe</span>
+                  </div>
+                </div>
+                ${attackLine ? `<div class="dh-card-stats-row">${attackLine}</div>` : ''}
+              </div>
+            </div>
+            <div class="library-drag-hint">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                <circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/>
+                <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
+                <circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/>
+              </svg>
+            </div>
           </div>
-          <div class="adversary-card-type">${adv.advType || 'Standard'}</div>
-          <div class="adversary-card-stats">
-            <span>HP ${adv.hp || '?'}</span>
-            <span>Diff ${adv.difficulty || '?'}</span>
-          </div>
-          <div class="adversary-card-drag-hint">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
-              <circle cx="9" cy="5" r="2"/><circle cx="15" cy="5" r="2"/>
-              <circle cx="9" cy="12" r="2"/><circle cx="15" cy="12" r="2"/>
-              <circle cx="9" cy="19" r="2"/><circle cx="15" cy="19" r="2"/>
-            </svg>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function filterLibraryItems() {
@@ -9837,9 +10664,9 @@ Tags: ${c.tags.join(', ')}`;
         // Build attack line
         let attackLine = '';
         if (atkMod && atkMod !== '?') {
-          attackLine = `<span class="dh-stat-label">ATK:</span> ${atkMod}`;
-          if (weapon) attackLine += `<span class="dh-stat-separator">|</span>${weapon}: ${range}`;
-          if (damage) attackLine += `<span class="dh-stat-separator">|</span>${damage}${dmgType ? ' ' + dmgType : ''}`;
+          attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${atkMod}</span>`;
+          if (weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${weapon}: ${range}</span>`;
+          if (damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${damage}${dmgType ? ' ' + dmgType : ''}</span>`;
         }
 
         const cardTypeClass = (conv.advType || 'standard').toLowerCase().trim();
@@ -9853,9 +10680,50 @@ Tags: ${c.tags.join(', ')}`;
             <div class="dh-card-body">
               ${description ? `<div class="dh-card-description">${escapeHtml(description)}</div>` : ''}
               ${motives ? `<div class="dh-card-motives"><strong>Motives & Tactics:</strong> ${escapeHtml(motives)}</div>` : ''}
-              <div class="dh-card-stats">
-                <div class="dh-card-stats-row">
-                  <span class="dh-stat-label">Difficulty:</span> ${difficulty}<span class="dh-stat-separator">|</span><span class="dh-stat-label">Thresholds:</span> ${majorThresh}/${severeThresh}<span class="dh-stat-separator">|</span><span class="dh-stat-label">HP:</span> ${hp}<span class="dh-stat-separator">|</span><span class="dh-stat-label">Stress:</span> ${stress}
+              <div class="mini-stats-container">
+                <div class="mini-vitals-row">
+                  <div class="mini-vital-box difficulty">
+                    <span class="mini-vital-value">${difficulty}</span>
+                    <span class="mini-vital-label">Diff</span>
+                  </div>
+                  <div class="mini-vital-box hp">
+                    <span class="mini-vital-value">${hp}</span>
+                    <span class="mini-vital-label">HP</span>
+                  </div>
+                  <div class="mini-vital-box stress">
+                    <span class="mini-vital-value">${stress}</span>
+                    <span class="mini-vital-label">Stress</span>
+                  </div>
+                </div>
+                <div class="mini-damage-tracker">
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -874.223 1942.978 L -874.223 1442.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Minor</span>
+                  </div>
+                  <div class="mini-connector"><span class="mini-connector-number">${majorThresh}</span></div>
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                        <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Major</span>
+                  </div>
+                  <div class="mini-connector"><span class="mini-connector-number">${severeThresh}</span></div>
+                  <div class="mini-damage-card">
+                    <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                      <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                        <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                        <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                      </g>
+                    </svg>
+                    <span class="mini-card-label">Severe</span>
+                  </div>
                 </div>
                 ${attackLine ? `<div class="dh-card-stats-row">${attackLine}</div>` : ''}
               </div>
