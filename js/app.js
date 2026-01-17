@@ -2253,6 +2253,7 @@ function startCombat() {
     for (let i = 0; i < item.count; i++) {
       combatState.adversaries.push({
         id: `combat-${instanceId++}`,
+        libraryId: adv.id, // Original adversary ID for modal
         name: item.count > 1 ? `${adv.name} #${i + 1}` : adv.name,
         baseName: adv.name,
         advType: adv.advType || 'Standard',
@@ -2266,7 +2267,7 @@ function startCombat() {
         // Full adversary data for display
         description: adv.description || '',
         motives: adv.motives || '',
-        difficulty: scaled.difficulty || adv.difficulty || 14,
+        difficulty: parseInt(scaled.difficulty) || parseInt(adv.difficulty) || 14,
         atkMod: scaled.atkMod || adv.atkMod || '+2',
         weapon: adv.weapon || '',
         range: adv.range || 'Melee',
@@ -2358,13 +2359,13 @@ function renderCombatAdversaries() {
     // Build conditions
     let conditionsHtml = '<div class="combat-conditions">';
     adv.conditions.forEach(cond => {
-      conditionsHtml += `<span class="condition-tag">${cond} <span class="remove-condition" onclick="removeCondition('${adv.id}', '${cond}')">&times;</span></span>`;
+      conditionsHtml += `<span class="condition-tag">${cond} <span class="remove-condition" onclick="event.stopPropagation(); removeCondition('${adv.id}', '${cond}')">&times;</span></span>`;
     });
     conditionsHtml += `<div class="condition-dropdown">
-      <button class="add-condition-btn" onclick="toggleConditionMenu('${adv.id}')">+ Condition</button>
+      <button class="add-condition-btn" onclick="event.stopPropagation(); toggleConditionMenu('${adv.id}')">+ Condition</button>
       <div class="condition-menu" id="condition-menu-${adv.id}">
         ${DH_CONDITIONS.filter(c => !adv.conditions.includes(c)).map(c =>
-          `<div class="condition-option" onclick="addCondition('${adv.id}', '${c}')">${c}</div>`
+          `<div class="condition-option" onclick="event.stopPropagation(); addCondition('${adv.id}', '${c}')">${c}</div>`
         ).join('')}
       </div>
     </div></div>`;
@@ -2387,13 +2388,11 @@ function renderCombatAdversaries() {
     }
 
     // Build attack line
-    let attackHtml = '';
+    let attackLine = '';
     if (adv.atkMod) {
-      attackHtml = `<div class="combat-attack-line">
-        <span class="atk-label">ATK:</span> ${adv.atkMod}`;
-      if (adv.weapon) attackHtml += ` | <span class="weapon-name">${adv.weapon}:</span> ${adv.range}`;
-      if (adv.damage) attackHtml += ` | <span class="dice-roll" onclick="rollDamage('${adv.damage}')" title="Click to roll">${adv.damage}</span> ${adv.dmgType}`;
-      attackHtml += '</div>';
+      attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${adv.atkMod}</span>`;
+      if (adv.weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${adv.weapon}: ${adv.range}</span>`;
+      if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${highlightDiceRolls(adv.damage)}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
     }
 
     const cardClass = `combat-card dh-card ${isDefeated ? 'defeated' : ''} ${isSevere ? 'threshold-severe' : isMajor ? 'threshold-major' : ''}`;
@@ -2409,49 +2408,66 @@ function renderCombatAdversaries() {
           ${adv.description ? `<div class="dh-card-description">${escapeHtml(adv.description)}</div>` : ''}
           ${adv.motives ? `<div class="dh-card-motives"><strong>Motives & Tactics:</strong> ${escapeHtml(adv.motives)}</div>` : ''}
 
-          <div class="combat-stats-row">
-            <div class="combat-stat-box">
-              <span class="combat-stat-value">${adv.difficulty}</span>
-              <span class="combat-stat-label">Difficulty</span>
+          <div class="mini-stats-container">
+            <div class="mini-vitals-row">
+              <div class="mini-vital-box difficulty">
+                <span class="mini-vital-value">${adv.difficulty}</span>
+                <span class="mini-vital-label">Diff</span>
+              </div>
+              <div class="mini-vital-box hp">
+                <span class="mini-vital-value">${adv.maxHp}</span>
+                <span class="mini-vital-label">HP</span>
+              </div>
+              <div class="mini-vital-box stress">
+                <span class="mini-vital-value">${adv.maxStress}</span>
+                <span class="mini-vital-label">Stress</span>
+              </div>
             </div>
-            <div class="combat-stat-box">
-              <span class="combat-stat-value">${adv.currentDamage}/${adv.maxHp}</span>
-              <span class="combat-stat-label">Damage</span>
+            <div class="mini-damage-tracker">
+              <div class="mini-damage-card ${adv.currentDamage > 0 && adv.currentDamage <= adv.majorThresh ? 'active' : ''}">
+                <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                  <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                    <path d="M -974.223 2292.978 L -974.223 2042.978 L -874.223 1942.978 L -874.223 1442.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                  </g>
+                </svg>
+                <span class="mini-card-label">Minor</span>
+              </div>
+              <div class="mini-connector"><span class="mini-connector-number">${adv.majorThresh}</span></div>
+              <div class="mini-damage-card ${isMajor ? 'active major' : ''}">
+                <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                  <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                    <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                    <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                  </g>
+                </svg>
+                <span class="mini-card-label">Major</span>
+              </div>
+              <div class="mini-connector"><span class="mini-connector-number">${adv.severeThresh}</span></div>
+              <div class="mini-damage-card ${isSevere || isDefeated ? 'active severe' : ''}">
+                <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                  <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                    <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                    <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                  </g>
+                </svg>
+                <span class="mini-card-label">Severe</span>
+              </div>
             </div>
-            <div class="combat-stat-box">
-              <span class="combat-stat-value">${adv.stressTaken}/${adv.maxStress}</span>
-              <span class="combat-stat-label">Stress</span>
-            </div>
+            ${attackLine ? `<div class="dh-card-stats-row">${attackLine}</div>` : ''}
           </div>
 
-          <div class="combat-threshold-display">
-            <span class="threshold-item">Minor: 1-${adv.majorThresh}</span>
-            <span class="threshold-item major">Major: ${adv.majorThresh + 1}-${adv.severeThresh}</span>
-            <span class="threshold-item severe">Severe: ${adv.severeThresh + 1}+</span>
-            ${isSevere ? '<span class="threshold-warning severe">⚠️ SEVERE</span>' : isMajor ? '<span class="threshold-warning major">⚠️ Major</span>' : ''}
-          </div>
-
-          ${attackHtml}
           ${adv.experience ? `<div class="combat-experience"><strong>Experience:</strong> ${escapeHtml(adv.experience)}</div>` : ''}
 
           ${featuresHtml}
 
           <div class="combat-tracking-section">
             <div class="combat-hp-section">
-              <div class="combat-tracking-label">HP Damage <span class="tracking-hint">(click boxes to mark/heal)</span></div>
+              <div class="combat-tracking-label">HP Damage: ${adv.currentDamage}/${adv.maxHp} <span class="tracking-hint">(click boxes)</span></div>
               ${hpBoxesHtml}
-              <div class="combat-damage-controls">
-                <button class="damage-btn" onclick="dealDamage('${adv.id}', 1)">+1</button>
-                <button class="damage-btn" onclick="dealDamage('${adv.id}', 5)">+5</button>
-                <input type="number" class="damage-input" id="custom-dmg-${adv.id}" placeholder="#" min="1" style="width: 50px;">
-                <button class="damage-btn" onclick="dealCustomDamage('${adv.id}')">Deal</button>
-                <button class="damage-btn heal" onclick="healDamage('${adv.id}', 1)">Heal 1</button>
-                ${adv.damage ? `<button class="damage-btn dice" onclick="rollDamage('${adv.damage}')" title="Roll ${adv.damage}"><i class="fas fa-dice-d20"></i></button>` : ''}
-              </div>
             </div>
 
             <div class="combat-stress-section">
-              <div class="combat-tracking-label">Stress <span class="tracking-hint">(click to mark/clear)</span></div>
+              <div class="combat-tracking-label">Stress: ${adv.stressTaken}/${adv.maxStress} <span class="tracking-hint">(click boxes)</span></div>
               ${stressHtml}
             </div>
 
@@ -2462,13 +2478,27 @@ function renderCombatAdversaries() {
 
             <div class="combat-notes-section">
               <div class="combat-tracking-label">Notes</div>
-              <textarea class="combat-notes-input" placeholder="Combat notes..." rows="2" onchange="updateCombatNotes('${adv.id}', this.value)">${adv.notes}</textarea>
+              <textarea class="combat-notes-input" placeholder="Combat notes..." rows="2" onclick="event.stopPropagation();" onchange="updateCombatNotes('${adv.id}', this.value)">${adv.notes}</textarea>
             </div>
           </div>
+
+          <button class="combat-view-full-btn" onclick="event.stopPropagation(); openCombatAdversaryModal('${adv.libraryId}')">
+            <i class="fas fa-expand"></i> View Full Card
+          </button>
         </div>
       </div>
     `;
   }).join('');
+}
+
+// Open modal for combat adversary
+function openCombatAdversaryModal(libraryId) {
+  const adversary = getAllLibraryAdversaries().find(a => a.id === libraryId);
+  if (adversary) {
+    openAdversaryModal(adversary);
+  } else {
+    showToast('Adversary not found in library', 'error');
+  }
 }
 
 // Toggle HP box (click to fill/unfill)

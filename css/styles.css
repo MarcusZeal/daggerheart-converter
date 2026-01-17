@@ -6172,93 +6172,6 @@ textarea::placeholder {
   padding: 1rem;
 }
 
-/* Combat stat boxes */
-.combat-stats-row {
-  display: flex;
-  gap: 1rem;
-  margin: 1rem 0;
-}
-
-.combat-stat-box {
-  background: rgba(0, 0, 0, 0.2);
-  border: 1px solid var(--border-color);
-  border-radius: 6px;
-  padding: 0.5rem 1rem;
-  text-align: center;
-  min-width: 80px;
-}
-
-.combat-stat-value {
-  display: block;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-.combat-stat-label {
-  display: block;
-  font-size: 0.7rem;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-}
-
-/* Threshold display */
-.combat-threshold-display {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.75rem;
-  margin-bottom: 1rem;
-  font-size: 0.85rem;
-}
-
-.threshold-item {
-  padding: 0.25rem 0.5rem;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-}
-
-.threshold-item.major {
-  color: #eab308;
-  border: 1px solid #eab308;
-}
-
-.threshold-item.severe {
-  color: #ef4444;
-  border: 1px solid #ef4444;
-}
-
-.threshold-warning {
-  font-weight: 700;
-  animation: pulse 1s infinite;
-}
-
-.threshold-warning.major { color: #eab308; }
-.threshold-warning.severe { color: #ef4444; }
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.5; }
-}
-
-/* Attack line */
-.combat-attack-line {
-  padding: 0.5rem 0.75rem;
-  background: rgba(0, 0, 0, 0.15);
-  border-radius: 4px;
-  margin-bottom: 1rem;
-  font-size: 0.9rem;
-}
-
-.combat-attack-line .atk-label {
-  font-weight: 600;
-  color: var(--accent);
-}
-
-.combat-attack-line .weapon-name {
-  font-weight: 600;
-}
-
 .combat-experience {
   font-size: 0.85rem;
   margin-bottom: 1rem;
@@ -6433,50 +6346,42 @@ textarea::placeholder {
   border-color: var(--accent);
 }
 
-/* Damage controls */
-.combat-damage-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+/* Active damage card states */
+.combat-card .mini-damage-card.active svg g {
+  fill: var(--accent);
 }
 
-.damage-btn {
-  padding: 0.4rem 0.75rem;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-primary);
+.combat-card .mini-damage-card.active.major svg g {
+  fill: #eab308;
+}
+
+.combat-card .mini-damage-card.active.severe svg g {
+  fill: #ef4444;
+}
+
+/* View Full Card button */
+.combat-view-full-btn {
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  margin-top: 1rem;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: rgba(0, 0, 0, 0.1);
+  color: var(--text-secondary);
   font-size: 0.85rem;
   cursor: pointer;
   transition: all 0.2s;
 }
 
-.damage-btn:hover {
-  background: #ef4444;
-  border-color: #ef4444;
-  color: white;
-}
-
-.damage-btn.heal:hover {
-  background: #22c55e;
-  border-color: #22c55e;
-}
-
-.damage-btn.custom {
+.combat-view-full-btn:hover {
   background: var(--accent);
   color: var(--bg-dark);
   border-color: var(--accent);
 }
 
-.damage-input {
-  width: 60px;
-  padding: 0.4rem;
-  border-radius: 4px;
-  border: 1px solid var(--border);
-  background: var(--bg-input);
-  color: var(--text-primary);
-  text-align: center;
+.combat-view-full-btn i {
+  margin-right: 0.5rem;
 }
 
 /* Conditions */
