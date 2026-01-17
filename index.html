@@ -2205,6 +2205,182 @@
       color: #555;
     }
 
+    /* Card-style Modal (Community & Library) */
+    .dh-modal-card {
+      position: relative;
+      max-width: 600px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      border-radius: 6px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    }
+
+    .dh-modal-card .dh-stat-block {
+      border-radius: 6px 6px 0 0;
+    }
+
+    .dh-modal-close {
+      position: absolute;
+      top: 0.5rem;
+      right: 0.5rem;
+      z-index: 10;
+      background: rgba(0,0,0,0.5);
+      border: none;
+      color: #fff;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      font-size: 1.25rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .dh-modal-close:hover {
+      background: rgba(0,0,0,0.7);
+    }
+
+    .dh-modal-footer {
+      background: #f5f0e6;
+      border-top: 2px solid #2d2d2d;
+      padding: 1rem 1.25rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      align-items: center;
+      justify-content: space-between;
+      border-radius: 0 0 6px 6px;
+    }
+
+    .dh-modal-votes {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .dh-modal-votes .vote-btn {
+      background: #2d2d2d;
+      color: #fff;
+      border: none;
+      width: 28px;
+      height: 28px;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      transition: all 0.2s;
+    }
+
+    .dh-modal-votes .vote-btn:hover {
+      background: #444;
+    }
+
+    .dh-modal-votes .vote-btn.active.upvote {
+      background: #22c55e;
+    }
+
+    .dh-modal-votes .vote-btn.active.downvote {
+      background: #ef4444;
+    }
+
+    .dh-modal-votes .vote-score {
+      font-weight: 700;
+      font-size: 1rem;
+      min-width: 2rem;
+      text-align: center;
+      color: #2d2d2d;
+    }
+
+    .dh-modal-votes .vote-score.positive {
+      color: #22c55e;
+    }
+
+    .dh-modal-votes .vote-score.negative {
+      color: #ef4444;
+    }
+
+    .dh-modal-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .dh-modal-actions .btn {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+      background: #2d2d2d;
+      color: #fff;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .dh-modal-actions .btn:hover {
+      background: #444;
+    }
+
+    .dh-modal-actions .btn-save {
+      background: #22c55e;
+    }
+
+    .dh-modal-actions .btn-save:hover {
+      background: #16a34a;
+    }
+
+    .dh-modal-secondary {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-top: 0.5rem;
+      margin-top: 0.5rem;
+      border-top: 1px solid #d4cfc3;
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .dh-modal-author img {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-right: 0.3rem;
+    }
+
+    .dh-modal-report {
+      background: none;
+      border: none;
+      color: #888;
+      cursor: pointer;
+      font-size: 0.75rem;
+      padding: 0.25rem 0.5rem;
+      border-radius: 3px;
+      transition: all 0.2s;
+    }
+
+    .dh-modal-report:hover {
+      color: #ef4444;
+      background: rgba(239, 68, 68, 0.1);
+    }
+
+    @media (max-width: 500px) {
+      .dh-modal-footer {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .dh-modal-votes {
+        justify-content: center;
+      }
+
+      .dh-modal-actions {
+        justify-content: center;
+      }
+    }
+
     /* Legacy classes for backwards compatibility */
     .stat-block-header {
       border-bottom: 2px solid var(--accent);
@@ -4851,30 +5027,25 @@ The converter will auto-detect the source system."
 
   <!-- Community Detail Modal -->
   <div id="communityModal" class="modal-overlay hidden" onclick="closeCommunityModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h2 id="modalTitle">Conversion Details</h2>
-        <button class="modal-close" onclick="closeCommunityModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div id="modalStatBlock" class="stat-block"></div>
-      </div>
-      <div class="modal-footer">
-        <div class="modal-vote-section" id="modalVoteSection">
+    <div class="dh-modal-card" onclick="event.stopPropagation()">
+      <button class="dh-modal-close" onclick="closeCommunityModal()" aria-label="Close">&times;</button>
+      <div id="modalStatBlock"></div>
+      <div class="dh-modal-footer">
+        <div class="dh-modal-votes" id="modalVoteSection">
           <button class="vote-btn upvote" id="modalUpvoteBtn" onclick="voteOnConversion(1)" title="Upvote">&#9650;</button>
           <span class="vote-score" id="modalVoteScore">0</span>
           <button class="vote-btn downvote" id="modalDownvoteBtn" onclick="voteOnConversion(-1)" title="Downvote">&#9660;</button>
         </div>
-        <div class="btn-group">
-          <button class="btn btn-secondary btn-small" onclick="copyShareLink()" title="Copy share link">Share Link</button>
-          <button class="btn btn-secondary btn-small" onclick="copyModalJSON()" title="Copy JSON">Copy JSON</button>
-          <button class="btn btn-success btn-small" onclick="addModalToLibrary()" title="Add to your library">Add to Library</button>
-          <button class="btn btn-secondary btn-small" onclick="addModalToGroup()" title="Add to a group">Add to Group</button>
+        <div class="dh-modal-actions">
+          <button class="btn" onclick="copyShareLink()" title="Copy share link">Share</button>
+          <button class="btn" onclick="copyModalJSON()" title="Copy JSON">JSON</button>
+          <button class="btn btn-save" onclick="addModalToLibrary()" title="Add to your library">Save</button>
+          <button class="btn" onclick="addModalToGroup()" title="Add to a group">Group</button>
         </div>
-      </div>
-      <div class="modal-actions-secondary">
-        <span class="modal-author" id="modalAuthor"></span>
-        <button class="report-btn" onclick="openReportModal()" title="Report this conversion">Report</button>
+        <div class="dh-modal-secondary">
+          <span class="dh-modal-author" id="modalAuthor"></span>
+          <button class="dh-modal-report" onclick="openReportModal()" title="Report this conversion">Report</button>
+        </div>
       </div>
     </div>
   </div>
@@ -8011,7 +8182,6 @@ Tags: ${c.tags.join(', ')}`;
     // ==================== COMMUNITY MODAL ====================
     async function openCommunityModal(conversionId) {
       const modal = document.getElementById('communityModal');
-      const titleEl = document.getElementById('modalTitle');
       const statBlockEl = document.getElementById('modalStatBlock');
 
       // Find in local cache first
@@ -8028,7 +8198,6 @@ Tags: ${c.tags.join(', ')}`;
         }
       }
 
-      titleEl.textContent = selectedConversion.name;
       statBlockEl.innerHTML = renderStatBlockReadOnly(selectedConversion.data);
       updateModalVotes();
       updateModalAuthor();
