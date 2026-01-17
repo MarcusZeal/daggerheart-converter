@@ -19,6 +19,9 @@ const DISCORD_CLIENT_SECRET = process.env.DISCORD_CLIENT_SECRET;
 // Base URL for OAuth callbacks
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 
+// Admin user IDs (comma-separated Discord user IDs)
+const ADMIN_USER_IDS = (process.env.ADMIN_USER_IDS || '').split(',').filter(Boolean);
+
 // ============================================================================
 // DATABASE SETUP
 // ============================================================================
@@ -40,6 +43,7 @@ db.exec(`
     avatar_url TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_banned INTEGER DEFAULT 0,
+    is_admin INTEGER DEFAULT 0,
     UNIQUE(provider, provider_id)
   );
 
@@ -80,7 +84,22 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_stats_score ON conversion_stats(score DESC);
 `);
 
+// Migration: Add is_admin column if it doesn't exist
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0`);
+} catch (e) {
+  // Column already exists
+}
+
+// Update admin status based on ADMIN_USER_IDS environment variable
+if (ADMIN_USER_IDS.length > 0) {
+  db.prepare(`UPDATE users SET is_admin = 0`).run();
+  const placeholders = ADMIN_USER_IDS.map(() => '?').join(',');
+  db.prepare(`UPDATE users SET is_admin = 1 WHERE provider_id IN (${placeholders})`).run(...ADMIN_USER_IDS);
+}
+
 console.log('Database initialized at:', DATABASE_PATH);
+console.log('Admin user IDs configured:', ADMIN_USER_IDS.length);
 
 // ============================================================================
 // EXPRESS APP SETUP
@@ -148,6 +167,16 @@ function authenticateToken(req, res, next) {
 function requireAuth(req, res, next) {
   if (!req.user) {
     return res.status(401).json({ error: 'Authentication required' });
+  }
+  next();
+}
+
+function requireAdmin(req, res, next) {
+  if (!req.user) {
+    return res.status(401).json({ error: 'Authentication required' });
+  }
+  if (!req.user.is_admin) {
+    return res.status(403).json({ error: 'Admin access required' });
   }
   next();
 }
@@ -262,7 +291,8 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
       id: req.user.id,
       username: req.user.username,
       avatar_url: req.user.avatar_url,
-      provider: req.user.provider
+      provider: req.user.provider,
+      is_admin: !!req.user.is_admin
     }
   });
 });
@@ -597,6 +627,224 @@ app.get('/api/community/my-submissions', apiLimiter, authenticateToken, requireA
       score: c.score
     }))
   });
+});
+
+// ============================================================================
+// ADMIN API ROUTES
+// ============================================================================
+
+// Get admin statistics
+app.get('/api/admin/stats', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const stats = {
+    totalUsers: db.prepare('SELECT COUNT(*) as count FROM users').get().count,
+    totalConversions: db.prepare('SELECT COUNT(*) as count FROM conversions').get().count,
+    publishedConversions: db.prepare('SELECT COUNT(*) as count FROM conversions WHERE is_published = 1').get().count,
+    totalVotes: db.prepare('SELECT COUNT(*) as count FROM votes').get().count,
+    bannedUsers: db.prepare('SELECT COUNT(*) as count FROM users WHERE is_banned = 1').get().count,
+
+    // Conversions by tier
+    conversionsByTier: db.prepare(`
+      SELECT tier, COUNT(*) as count FROM conversions GROUP BY tier ORDER BY tier
+    `).all(),
+
+    // Conversions by type
+    conversionsByType: db.prepare(`
+      SELECT adv_type as type, COUNT(*) as count FROM conversions GROUP BY adv_type ORDER BY count DESC
+    `).all(),
+
+    // Top contributors
+    topContributors: db.prepare(`
+      SELECT u.username, u.avatar_url, COUNT(c.id) as count
+      FROM users u
+      JOIN conversions c ON u.id = c.user_id
+      GROUP BY u.id
+      ORDER BY count DESC
+      LIMIT 10
+    `).all(),
+
+    // Recent activity (last 7 days)
+    recentConversions: db.prepare(`
+      SELECT COUNT(*) as count FROM conversions
+      WHERE created_at >= datetime('now', '-7 days')
+    `).get().count,
+
+    recentUsers: db.prepare(`
+      SELECT COUNT(*) as count FROM users
+      WHERE created_at >= datetime('now', '-7 days')
+    `).get().count
+  };
+
+  res.json(stats);
+});
+
+// Get all conversions (admin view - includes unpublished)
+app.get('/api/admin/conversions', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const { search = '', page = 1, limit = 50 } = req.query;
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const safeLimit = Math.min(parseInt(limit), 100);
+
+  let whereClause = '1=1';
+  const params = [];
+
+  if (search) {
+    whereClause += ' AND (c.name LIKE ? OR u.username LIKE ?)';
+    params.push(`%${search}%`, `%${search}%`);
+  }
+
+  const total = db.prepare(`
+    SELECT COUNT(*) as count FROM conversions c
+    LEFT JOIN users u ON c.user_id = u.id
+    WHERE ${whereClause}
+  `).get(...params).count;
+
+  const conversions = db.prepare(`
+    SELECT
+      c.*,
+      u.username,
+      u.avatar_url,
+      u.is_banned as author_banned,
+      COALESCE(cs.upvotes, 0) as upvotes,
+      COALESCE(cs.downvotes, 0) as downvotes,
+      COALESCE(cs.score, 0) as score
+    FROM conversions c
+    LEFT JOIN users u ON c.user_id = u.id
+    LEFT JOIN conversion_stats cs ON c.id = cs.conversion_id
+    WHERE ${whereClause}
+    ORDER BY c.created_at DESC
+    LIMIT ? OFFSET ?
+  `).all(...params, safeLimit, offset);
+
+  res.json({
+    conversions: conversions.map(c => ({
+      id: c.id,
+      name: c.name,
+      tier: c.tier,
+      advType: c.adv_type,
+      sourceSystem: c.source_system,
+      createdAt: c.created_at,
+      isPublished: !!c.is_published,
+      author: {
+        id: c.user_id,
+        username: c.username,
+        avatarUrl: c.avatar_url,
+        isBanned: !!c.author_banned
+      },
+      upvotes: c.upvotes,
+      downvotes: c.downvotes,
+      score: c.score
+    })),
+    pagination: {
+      page: parseInt(page),
+      limit: safeLimit,
+      total,
+      totalPages: Math.ceil(total / safeLimit)
+    }
+  });
+});
+
+// Get all users (admin view)
+app.get('/api/admin/users', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const { search = '', page = 1, limit = 50 } = req.query;
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const safeLimit = Math.min(parseInt(limit), 100);
+
+  let whereClause = '1=1';
+  const params = [];
+
+  if (search) {
+    whereClause += ' AND username LIKE ?';
+    params.push(`%${search}%`);
+  }
+
+  const total = db.prepare(`SELECT COUNT(*) as count FROM users WHERE ${whereClause}`).get(...params).count;
+
+  const users = db.prepare(`
+    SELECT
+      u.*,
+      (SELECT COUNT(*) FROM conversions WHERE user_id = u.id) as conversion_count,
+      (SELECT COUNT(*) FROM votes WHERE user_id = u.id) as vote_count
+    FROM users u
+    WHERE ${whereClause}
+    ORDER BY u.created_at DESC
+    LIMIT ? OFFSET ?
+  `).all(...params, safeLimit, offset);
+
+  res.json({
+    users: users.map(u => ({
+      id: u.id,
+      username: u.username,
+      avatarUrl: u.avatar_url,
+      provider: u.provider,
+      providerId: u.provider_id,
+      createdAt: u.created_at,
+      isBanned: !!u.is_banned,
+      isAdmin: !!u.is_admin,
+      conversionCount: u.conversion_count,
+      voteCount: u.vote_count
+    })),
+    pagination: {
+      page: parseInt(page),
+      limit: safeLimit,
+      total,
+      totalPages: Math.ceil(total / safeLimit)
+    }
+  });
+});
+
+// Admin delete any conversion
+app.delete('/api/admin/conversions/:id', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const conversion = db.prepare('SELECT * FROM conversions WHERE id = ?').get(req.params.id);
+
+  if (!conversion) {
+    return res.status(404).json({ error: 'Conversion not found' });
+  }
+
+  db.prepare('DELETE FROM votes WHERE conversion_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM conversion_stats WHERE conversion_id = ?').run(req.params.id);
+  db.prepare('DELETE FROM conversions WHERE id = ?').run(req.params.id);
+
+  console.log(`Admin ${req.user.username} deleted conversion ${req.params.id} (${conversion.name})`);
+  res.json({ message: 'Conversion deleted' });
+});
+
+// Admin toggle publish status
+app.patch('/api/admin/conversions/:id/publish', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const { isPublished } = req.body;
+
+  const conversion = db.prepare('SELECT * FROM conversions WHERE id = ?').get(req.params.id);
+  if (!conversion) {
+    return res.status(404).json({ error: 'Conversion not found' });
+  }
+
+  db.prepare('UPDATE conversions SET is_published = ? WHERE id = ?').run(isPublished ? 1 : 0, req.params.id);
+
+  console.log(`Admin ${req.user.username} ${isPublished ? 'published' : 'unpublished'} conversion ${req.params.id}`);
+  res.json({ message: `Conversion ${isPublished ? 'published' : 'unpublished'}` });
+});
+
+// Admin ban/unban user
+app.patch('/api/admin/users/:id/ban', apiLimiter, authenticateToken, requireAdmin, (req, res) => {
+  const { isBanned } = req.body;
+
+  const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+  if (!user) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  // Can't ban yourself
+  if (user.id === req.user.id) {
+    return res.status(400).json({ error: 'Cannot ban yourself' });
+  }
+
+  // Can't ban other admins
+  if (user.is_admin) {
+    return res.status(400).json({ error: 'Cannot ban an admin' });
+  }
+
+  db.prepare('UPDATE users SET is_banned = ? WHERE id = ?').run(isBanned ? 1 : 0, req.params.id);
+
+  console.log(`Admin ${req.user.username} ${isBanned ? 'banned' : 'unbanned'} user ${user.username}`);
+  res.json({ message: `User ${isBanned ? 'banned' : 'unbanned'}` });
 });
 
 // ============================================================================
