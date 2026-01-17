@@ -161,7 +161,7 @@
       position: relative;
     }
 
-    body::after {
+    #converterPage.active::after {
       content: '';
       position: fixed;
       bottom: 0;
@@ -2587,6 +2587,25 @@
       font-weight: bold;
       color: var(--accent);
       margin-bottom: 0.25rem;
+    }
+
+    .stat-block-name-input {
+      font-size: 1.4rem;
+      font-weight: bold;
+      color: var(--accent);
+      background: transparent;
+      border: none;
+      border-bottom: 1px dashed transparent;
+      width: 100%;
+      padding: 0;
+      margin-bottom: 0.25rem;
+      font-family: inherit;
+    }
+
+    .stat-block-name-input:hover,
+    .stat-block-name-input:focus {
+      border-bottom-color: var(--accent);
+      outline: none;
     }
 
     .stat-block-type {
@@ -6296,7 +6315,8 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
 
       return `
         <div class="stat-block-header">
-          <div class="stat-block-name">${escapeHtml(c.name)}</div>
+          <input type="text" class="stat-block-name-input" value="${escapeHtml(c.name)}"
+                 onchange="updateName(this.value)" aria-label="Adversary name">
           <div class="stat-block-type">Tier ${c.tier} ${c.advType}</div>
         </div>
 
@@ -6541,6 +6561,17 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
         currentConverted.imageUrl = url.trim();
         pushHistory();
         renderPreview();
+        renderJSON();
+        renderMarkdown();
+        renderText();
+      }
+    }
+
+    function updateName(name) {
+      if (currentConverted) {
+        currentConverted.name = name.trim();
+        currentConverted.id = 'adv-' + name.trim().toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/-+$/, '');
+        pushHistory();
         renderJSON();
         renderMarkdown();
         renderText();
