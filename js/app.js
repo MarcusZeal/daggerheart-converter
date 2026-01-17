@@ -9,7 +9,7 @@ let detectedSystem = null;
 let batchResults = [];
 
 // Undo/Redo history
-let history = [];
+let undoHistory = [];
 let historyIndex = -1;
 const MAX_HISTORY = 50;
 
@@ -467,17 +467,17 @@ function pushHistory() {
   if (!currentConverted) return;
 
   // Remove any redo history
-  history = history.slice(0, historyIndex + 1);
+  history = undoHistory.slice(0, historyIndex + 1);
 
   // Add current state
-  history.push(JSON.stringify(currentConverted));
+  undoHistory.push(JSON.stringify(currentConverted));
 
   // Limit history size
-  if (history.length > MAX_HISTORY) {
-    history.shift();
+  if (undoHistory.length > MAX_HISTORY) {
+    undoHistory.shift();
   }
 
-  historyIndex = history.length - 1;
+  historyIndex = undoHistory.length - 1;
   updateUndoRedoButtons();
 }
 
@@ -492,7 +492,7 @@ function undo() {
 }
 
 function redo() {
-  if (historyIndex < history.length - 1) {
+  if (historyIndex < undoHistory.length - 1) {
     historyIndex++;
     currentConverted = JSON.parse(history[historyIndex]);
     renderAll();
@@ -503,7 +503,7 @@ function redo() {
 
 function updateUndoRedoButtons() {
   document.getElementById('undoBtn').disabled = historyIndex <= 0;
-  document.getElementById('redoBtn').disabled = historyIndex >= history.length - 1;
+  document.getElementById('redoBtn').disabled = historyIndex >= undoHistory.length - 1;
 }
 
 // ==================== LIVE PARSING ====================
@@ -2136,7 +2136,7 @@ function navigateTo(page, updateUrl = true) {
   // Update URL without page reload
   if (updateUrl) {
     const url = PAGE_TO_URL[page] || '/';
-    history.pushState({ page }, '', url);
+    window.history.pushState({ page }, '', url);
   }
 
   // Update nav links
@@ -2180,7 +2180,7 @@ window.addEventListener('popstate', (event) => {
 function initRouting() {
   const page = URL_TO_PAGE[window.location.pathname] || 'converter';
   // Replace current history entry with proper state
-  history.replaceState({ page }, '', window.location.pathname);
+  window.history.replaceState({ page }, '', window.location.pathname);
   navigateTo(page, false);
 }
 
@@ -4667,7 +4667,7 @@ function handleUrlRouting() {
   const page = URL_TO_PAGE[path];
   if (page) {
     // Replace history state with page info
-    history.replaceState({ page }, '', path);
+    window.history.replaceState({ page }, '', path);
     navigateTo(page, false);
   }
 }
