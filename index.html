@@ -5930,20 +5930,15 @@ The converter will auto-detect the source system."
 
   <!-- Adversary Detail Modal for My Library -->
   <div id="myLibraryModal" class="modal-overlay hidden" onclick="closeMyLibraryModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-      <div class="modal-header">
-        <h2 id="myLibraryModalTitle">Adversary Details</h2>
-        <button class="modal-close" onclick="closeMyLibraryModal()">&times;</button>
-      </div>
-      <div class="modal-body">
-        <div id="myLibraryModalStatBlock"></div>
-      </div>
-      <div class="modal-footer">
-        <div class="btn-group">
-          <button class="btn btn-secondary btn-small" onclick="copyMyLibraryJSON()" title="Copy JSON">Copy JSON</button>
-          <button class="btn btn-secondary btn-small" onclick="moveToGroup()" title="Move to different group">Move to Group</button>
-          <button class="btn btn-danger btn-small" onclick="removeFromLibrary()" title="Remove from library">Remove</button>
-          <button class="btn btn-danger btn-small hidden" id="deleteFromServerBtn" onclick="deleteFromServer()" title="Delete from community server">Delete from Server</button>
+    <div class="dh-modal-card" onclick="event.stopPropagation()">
+      <button class="dh-modal-close" onclick="closeMyLibraryModal()" aria-label="Close">&times;</button>
+      <div id="myLibraryModalStatBlock"></div>
+      <div class="dh-modal-footer">
+        <div class="dh-modal-actions">
+          <button class="btn" onclick="copyMyLibraryJSON()" title="Copy JSON">JSON</button>
+          <button class="btn" onclick="moveToGroup()" title="Move to different group">Move</button>
+          <button class="btn btn-danger" onclick="removeFromLibrary()" title="Remove from library">Remove</button>
+          <button class="btn btn-danger hidden" id="deleteFromServerBtn" onclick="deleteFromServer()" title="Delete from community server">Delete from Server</button>
         </div>
       </div>
     </div>
@@ -9100,7 +9095,6 @@ Tags: ${c.tags.join(', ')}`;
       }
 
       selectedMyLibraryAdversary = adversary;
-      document.getElementById('myLibraryModalTitle').textContent = adversary.name || 'Adversary Details';
       document.getElementById('myLibraryModalStatBlock').innerHTML = renderStatBlockReadOnly(adversary);
 
       // Show delete from server button only if user is creator and logged in
