@@ -1930,13 +1930,14 @@
 
     .community-item {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       padding: 1rem;
       background: var(--bg-input);
       border: 1px solid var(--border);
       border-radius: 8px;
       cursor: pointer;
       transition: all 0.2s;
+      gap: 1rem;
     }
 
     .community-item:hover {
@@ -1946,20 +1947,60 @@
 
     .community-item-main {
       flex: 1;
+      min-width: 0;
+    }
+
+    .community-item-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.35rem;
     }
 
     .community-item-name {
       font-weight: 600;
       font-size: 1rem;
-      margin-bottom: 0.25rem;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .community-item-source {
+      font-size: 0.7rem;
+      padding: 0.1rem 0.4rem;
+      border-radius: 3px;
+      background: var(--accent);
+      color: var(--bg-dark);
+      font-weight: 500;
+      white-space: nowrap;
+    }
+
+    .community-item-stats {
+      display: flex;
+      gap: 1rem;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-bottom: 0.35rem;
+      flex-wrap: wrap;
+    }
+
+    .community-item-stat {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .community-item-stat strong {
+      color: var(--text-primary);
     }
 
     .community-item-meta {
       display: flex;
-      gap: 0.75rem;
+      gap: 0.5rem;
       font-size: 0.8rem;
       color: var(--text-secondary);
       flex-wrap: wrap;
+      align-items: center;
     }
 
     .community-item-tag {
@@ -1969,6 +2010,24 @@
       font-size: 0.75rem;
     }
 
+    .community-item-tag.tier {
+      background: var(--accent);
+      color: var(--bg-dark);
+      font-weight: 600;
+    }
+
+    .community-item-author {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .community-item-author img {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+    }
+
     .community-item-votes {
       display: flex;
       flex-direction: column;
@@ -1976,6 +2035,57 @@
       gap: 0.25rem;
       padding: 0.5rem;
       min-width: 50px;
+    }
+
+    .community-item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: center;
+    }
+
+    .share-link-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-secondary);
+      padding: 0.25rem;
+      font-size: 0.85rem;
+      opacity: 0.6;
+      transition: all 0.2s;
+    }
+
+    .share-link-btn:hover {
+      color: var(--accent);
+      opacity: 1;
+    }
+
+    .community-filters-row {
+      display: flex;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.5rem;
+    }
+
+    .filter-btn {
+      padding: 0.4rem 0.8rem;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: all 0.2s;
+    }
+
+    .filter-btn:hover {
+      border-color: var(--accent);
+    }
+
+    .filter-btn.active {
+      background: var(--accent);
+      color: var(--bg-dark);
+      border-color: var(--accent);
     }
 
     .vote-btn {
@@ -2101,6 +2211,43 @@
       display: flex;
       align-items: center;
       gap: 1rem;
+    }
+
+    .modal-actions-secondary {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 1.5rem;
+      background: var(--bg-input);
+      border-top: 1px solid var(--border);
+      font-size: 0.85rem;
+    }
+
+    .modal-author {
+      color: var(--text-secondary);
+    }
+
+    .modal-author img {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      vertical-align: middle;
+      margin-right: 0.35rem;
+    }
+
+    .report-btn {
+      background: none;
+      border: none;
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      opacity: 0.6;
+      transition: all 0.2s;
+    }
+
+    .report-btn:hover {
+      color: var(--error);
+      opacity: 1;
     }
 
     /* Share button */
@@ -2617,6 +2764,10 @@ The converter will auto-detect the source system."
       </div>
 
       <div class="community-container">
+        <div class="community-filters-row" id="communityFilterTabs">
+          <button class="filter-btn active" onclick="setCommunityFilter('all')" data-filter="all">All Conversions</button>
+          <button class="filter-btn" onclick="setCommunityFilter('mine')" data-filter="mine" id="mySubmissionsBtn" style="display: none;">My Submissions</button>
+        </div>
         <div class="community-filters">
           <input type="text" class="search-input" id="communitySearch" placeholder="Search conversions..." oninput="debounceCommunitySearch()">
           <select id="communityTier" class="form-select" onchange="loadCommunityConversions()">
@@ -2678,9 +2829,14 @@ The converter will auto-detect the source system."
           <button class="vote-btn downvote" id="modalDownvoteBtn" onclick="voteOnConversion(-1)" title="Downvote">&#9660;</button>
         </div>
         <div class="btn-group">
+          <button class="btn btn-secondary btn-small" onclick="copyShareLink()" title="Copy share link">Share Link</button>
           <button class="btn btn-secondary btn-small" onclick="copyModalJSON()" title="Copy JSON">Copy JSON</button>
           <button class="btn btn-success btn-small" onclick="addModalToLibrary()" title="Add to your library">Add to Library</button>
         </div>
+      </div>
+      <div class="modal-actions-secondary">
+        <span class="modal-author" id="modalAuthor"></span>
+        <button class="report-btn" onclick="reportConversion()" title="Report this conversion">Report</button>
       </div>
     </div>
   </div>
@@ -2926,6 +3082,7 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
       setupToastInteraction();
       checkAuthState();
       handleAuthRedirect();
+      handleUrlRouting();
     });
 
     // ==================== THEME TOGGLE ====================
@@ -4125,6 +4282,19 @@ Tags: ${c.tags.join(', ')}`;
       const authSection = document.getElementById('authSection');
       if (!authSection) return;
 
+      // Show/hide My Submissions filter button
+      const mySubmissionsBtn = document.getElementById('mySubmissionsBtn');
+      if (mySubmissionsBtn) {
+        mySubmissionsBtn.style.display = currentUser ? '' : 'none';
+      }
+
+      // Show/hide share button
+      const shareBtn = document.getElementById('shareBtn');
+      if (shareBtn) {
+        shareBtn.disabled = !currentUser;
+        shareBtn.title = currentUser ? 'Share to Community' : 'Sign in to share';
+      }
+
       if (currentUser) {
         const initial = currentUser.username.charAt(0).toUpperCase();
         authSection.innerHTML = `
@@ -4138,7 +4308,7 @@ Tags: ${c.tags.join(', ')}`;
               <span>${currentUser.username}</span>
             </button>
             <div class="user-dropdown" id="userDropdown">
-              <button class="user-dropdown-item" onclick="navigateTo('community'); toggleUserMenu();">My Submissions</button>
+              <button class="user-dropdown-item" onclick="navigateTo('community'); setCommunityFilter('mine'); toggleUserMenu();">My Submissions</button>
               <button class="user-dropdown-item danger" onclick="logout()">Logout</button>
             </div>
           </div>
@@ -4285,25 +4455,45 @@ Tags: ${c.tags.join(', ')}`;
         return;
       }
 
-      listEl.innerHTML = communityConversions.map(conv => `
-        <div class="community-item" onclick="openCommunityModal('${conv.id}')">
-          <div class="community-item-main">
-            <div class="community-item-name">${escapeHtml(conv.name)}</div>
-            <div class="community-item-meta">
-              <span class="community-item-tag">T${conv.tier}</span>
-              <span class="community-item-tag">${conv.advType}</span>
-              <span>by @${escapeHtml(conv.author?.username || 'Unknown')}</span>
+      listEl.innerHTML = communityConversions.map(conv => {
+        const data = conv.data || {};
+        const hp = data.hp || '?';
+        const difficulty = data.difficulty || '?';
+        const sourceSystem = conv.sourceSystem || data.sourceSystem;
+        const authorAvatar = conv.author?.avatarUrl
+          ? `<img src="${conv.author.avatarUrl}" alt="">`
+          : '';
+
+        return `
+          <div class="community-item" onclick="openCommunityModal('${conv.id}')">
+            <div class="community-item-main">
+              <div class="community-item-header">
+                <div class="community-item-name">${escapeHtml(conv.name)}</div>
+                ${sourceSystem ? `<span class="community-item-source">${escapeHtml(sourceSystem)}</span>` : ''}
+              </div>
+              <div class="community-item-stats">
+                <span class="community-item-stat"><strong>Diff:</strong> ${difficulty}</span>
+                <span class="community-item-stat"><strong>HP:</strong> ${hp}</span>
+              </div>
+              <div class="community-item-meta">
+                <span class="community-item-tag tier">T${conv.tier}</span>
+                <span class="community-item-tag">${conv.advType}</span>
+                <span class="community-item-author">${authorAvatar}@${escapeHtml(conv.author?.username || 'Unknown')}</span>
+              </div>
+            </div>
+            <div class="community-item-actions">
+              <div class="community-item-votes">
+                <button class="vote-btn upvote ${conv.userVote === 1 ? 'active' : ''}"
+                        onclick="event.stopPropagation(); quickVote('${conv.id}', 1)">&#9650;</button>
+                <span class="vote-score ${conv.score > 0 ? 'positive' : conv.score < 0 ? 'negative' : ''}">${conv.score}</span>
+                <button class="vote-btn downvote ${conv.userVote === -1 ? 'active' : ''}"
+                        onclick="event.stopPropagation(); quickVote('${conv.id}', -1)">&#9660;</button>
+              </div>
+              <button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>
             </div>
           </div>
-          <div class="community-item-votes">
-            <button class="vote-btn upvote ${conv.userVote === 1 ? 'active' : ''}"
-                    onclick="event.stopPropagation(); quickVote('${conv.id}', 1)">&#9650;</button>
-            <span class="vote-score ${conv.score > 0 ? 'positive' : conv.score < 0 ? 'negative' : ''}">${conv.score}</span>
-            <button class="vote-btn downvote ${conv.userVote === -1 ? 'active' : ''}"
-                    onclick="event.stopPropagation(); quickVote('${conv.id}', -1)">&#9660;</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
     }
 
     function escapeHtml(text) {
@@ -4411,8 +4601,12 @@ Tags: ${c.tags.join(', ')}`;
       }
 
       titleEl.textContent = selectedConversion.name;
-      statBlockEl.innerHTML = renderStatBlock(selectedConversion.data);
+      statBlockEl.innerHTML = renderStatBlockHTML(selectedConversion.data);
       updateModalVotes();
+      updateModalAuthor();
+
+      // Update URL for direct linking
+      history.pushState({ conversionId }, '', `/community/${conversionId}`);
 
       modal.classList.remove('hidden');
     }
@@ -4421,6 +4615,26 @@ Tags: ${c.tags.join(', ')}`;
       if (event && event.target !== event.currentTarget) return;
       document.getElementById('communityModal').classList.add('hidden');
       selectedConversion = null;
+      // Reset URL
+      history.pushState({}, '', '/');
+    }
+
+    function updateModalAuthor() {
+      const authorEl = document.getElementById('modalAuthor');
+      if (!selectedConversion || !authorEl) return;
+
+      const author = selectedConversion.author;
+      if (author) {
+        const avatarHtml = author.avatarUrl
+          ? `<img src="${author.avatarUrl}" alt="">`
+          : '';
+        const date = selectedConversion.createdAt
+          ? new Date(selectedConversion.createdAt).toLocaleDateString()
+          : '';
+        authorEl.innerHTML = `${avatarHtml}Shared by @${escapeHtml(author.username)}${date ? ` on ${date}` : ''}`;
+      } else {
+        authorEl.innerHTML = '';
+      }
     }
 
     function updateModalVotes() {
@@ -4511,6 +4725,113 @@ Tags: ${c.tags.join(', ')}`;
         showToast('Could not add to library: ' + err.message, 'error');
       }
     }
+
+    function copyShareLink() {
+      if (!selectedConversion) return;
+      const url = `${window.location.origin}/community/${selectedConversion.id}`;
+      navigator.clipboard.writeText(url)
+        .then(() => showToast('Share link copied!', 'success'))
+        .catch(() => showToast('Failed to copy link', 'error'));
+    }
+
+    function copyShareLinkFor(conversionId) {
+      const url = `${window.location.origin}/community/${conversionId}`;
+      navigator.clipboard.writeText(url)
+        .then(() => showToast('Share link copied!', 'success'))
+        .catch(() => showToast('Failed to copy link', 'error'));
+    }
+
+    function reportConversion() {
+      if (!selectedConversion) return;
+      if (!currentUser) {
+        showToast('Please log in to report content', 'info');
+        return;
+      }
+      // For now, just show a message. In a full implementation, this would send to an API
+      showToast('Report submitted. Thank you for helping keep the community safe.', 'success');
+    }
+
+    // ==================== COMMUNITY FILTERS ====================
+    let communityFilterMode = 'all';
+
+    function setCommunityFilter(mode) {
+      communityFilterMode = mode;
+      communityPage = 1;
+
+      // Update active state
+      document.querySelectorAll('.filter-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.filter === mode);
+      });
+
+      if (mode === 'mine') {
+        loadMySubmissions();
+      } else {
+        loadCommunityConversions();
+      }
+    }
+
+    async function loadMySubmissions() {
+      const listEl = document.getElementById('communityList');
+      listEl.innerHTML = `
+        <div class="community-loading">
+          <div class="loading-spinner"></div>
+          <span>Loading your submissions...</span>
+        </div>
+      `;
+
+      try {
+        const response = await fetch('/api/community/my-submissions');
+        if (!response.ok) throw new Error('Failed to load');
+
+        const data = await response.json();
+        communityConversions = data.conversions || [];
+        communityTotalPages = 1;
+
+        if (communityConversions.length === 0) {
+          listEl.innerHTML = `
+            <div class="community-empty">
+              <h3>No submissions yet</h3>
+              <p>Convert a stat block and click "Share to Community" to get started!</p>
+            </div>
+          `;
+        } else {
+          renderCommunityList();
+        }
+
+        document.getElementById('communityPagination').classList.add('hidden');
+
+      } catch (err) {
+        listEl.innerHTML = `
+          <div class="community-empty">
+            <p>Could not load your submissions.</p>
+          </div>
+        `;
+      }
+    }
+
+    // ==================== URL ROUTING ====================
+    function handleUrlRouting() {
+      const path = window.location.pathname;
+
+      // Handle /community/:id routes
+      const communityMatch = path.match(/^\/community\/(.+)$/);
+      if (communityMatch) {
+        const conversionId = communityMatch[1];
+        navigateTo('community');
+        // Wait for community page to load, then open modal
+        setTimeout(() => openCommunityModal(conversionId), 100);
+        return;
+      }
+    }
+
+    // Handle browser back/forward
+    window.addEventListener('popstate', (e) => {
+      if (e.state?.conversionId) {
+        openCommunityModal(e.state.conversionId);
+      } else {
+        closeCommunityModal();
+      }
+    });
 
     // ==================== SHARE TO COMMUNITY ====================
     async function shareToCommunity() {

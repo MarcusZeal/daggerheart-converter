@@ -608,6 +608,11 @@ app.use(express.static(__dirname, {
 // Serve parsers directory
 app.use('/parsers', express.static(path.join(__dirname, 'parsers')));
 
+// SPA fallback - serve index.html for client-side routing
+app.get('/community/*', (req, res) => {
+  res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // ============================================================================
 // START SERVER
 // ============================================================================
