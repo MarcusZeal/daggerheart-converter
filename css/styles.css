@@ -1340,8 +1340,8 @@ body {
   flex-direction: column;
   overflow: hidden;
   position: sticky;
-  top: 1rem;
-  max-height: 80vh;
+  top: calc(60px + 1rem);
+  max-height: calc(100vh - 60px - 2rem);
   align-self: flex-start;
 }
 
