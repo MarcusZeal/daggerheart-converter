@@ -149,7 +149,7 @@ db.exec(`
     provider TEXT NOT NULL,
     provider_id TEXT NOT NULL,
     username TEXT NOT NULL,
-    url_slug TEXT UNIQUE,
+    url_slug TEXT,
     avatar_url TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_banned INTEGER DEFAULT 0,
@@ -218,9 +218,17 @@ try {
 
 // Migration: Add url_slug column if it doesn't exist
 try {
-  db.exec(`ALTER TABLE users ADD COLUMN url_slug TEXT UNIQUE`);
+  db.exec(`ALTER TABLE users ADD COLUMN url_slug TEXT`);
+  console.log('Added url_slug column to users table');
 } catch (e) {
-  // Column already exists
+  // Column already exists - this is expected
+}
+
+// Create index for url_slug if it doesn't exist
+try {
+  db.exec(`CREATE UNIQUE INDEX IF NOT EXISTS idx_users_url_slug ON users(url_slug)`);
+} catch (e) {
+  // Index already exists or can't be created (NULLs exist)
 }
 
 // Helper: Generate unique url_slug from username
