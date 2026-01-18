@@ -1340,6 +1340,10 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  position: sticky;
+  top: 1rem;
+  max-height: 80vh;
+  align-self: flex-start;
 }
 
 .folders-header {
