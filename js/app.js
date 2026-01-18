@@ -4117,12 +4117,41 @@ let librarySearchFilter = '';
 let librarySelectedTiers = [];
 let librarySelectedTypes = [];
 let libraryCurrentFilterType = null;
+let hideSrdContent = false;
+
+// SRD Tier folders (system folders, read-only)
+const SRD_FOLDERS = [
+  { id: 'srd-tier-1', name: 'SRD: Tier 1', tier: '1', isSystem: true },
+  { id: 'srd-tier-2', name: 'SRD: Tier 2', tier: '2', isSystem: true },
+  { id: 'srd-tier-3', name: 'SRD: Tier 3', tier: '3', isSystem: true },
+  { id: 'srd-tier-4', name: 'SRD: Tier 4', tier: '4', isSystem: true }
+];
 
 function loadMyLibrary() {
   loadGroupsFromStorage();
+  loadHideSrdSetting();
   renderFoldersList();
   updateFolderCounts();
   selectFolder(selectedFolderId || 'all');
+}
+
+function loadHideSrdSetting() {
+  hideSrdContent = localStorage.getItem('dh-hide-srd') === 'true';
+  const toggle = document.getElementById('hideSrdToggle');
+  if (toggle) toggle.checked = hideSrdContent;
+}
+
+function toggleHideSrd() {
+  hideSrdContent = document.getElementById('hideSrdToggle')?.checked ?? false;
+  localStorage.setItem('dh-hide-srd', hideSrdContent);
+  renderFoldersList();
+  updateFolderCounts();
+  selectFolder(selectedFolderId);
+}
+
+function getSrdFolderAdversaries(tier) {
+  if (!srdLibrary || srdLibrary.length === 0) return [];
+  return srdLibrary.filter(a => String(a.tier) === tier);
 }
 
 function loadGroupsFromStorage() {
@@ -4190,12 +4219,30 @@ function renderFoldersList() {
   const container = document.getElementById('foldersList');
   if (!container) return;
 
-  if (myLibraryGroups.length === 0) {
-    container.innerHTML = '';
-    return;
+  let html = '';
+
+  // Render SRD folders first (if not hidden)
+  if (!hideSrdContent && srdLibrary && srdLibrary.length > 0) {
+    html += SRD_FOLDERS.map(folder => {
+      const count = getSrdFolderAdversaries(folder.tier).length;
+      return `
+        <div class="folder-item folder-srd ${selectedFolderId === folder.id ? 'active' : ''}"
+             data-folder="${folder.id}"
+             onclick="selectFolder('${folder.id}')">
+          <span class="folder-icon srd-folder-icon">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M20 6h-8l-2-2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2z"/>
+            </svg>
+          </span>
+          <span class="folder-name">${escapeHtml(folder.name)}</span>
+          <span class="folder-count">${count}</span>
+        </div>
+      `;
+    }).join('');
   }
 
-  container.innerHTML = myLibraryGroups.map(folder => `
+  // Render user folders
+  html += myLibraryGroups.map(folder => `
     <div class="folder-item ${selectedFolderId === folder.id ? 'active' : ''}"
          data-folder="${folder.id}"
          onclick="selectFolder('${folder.id}')"
@@ -4211,12 +4258,20 @@ function renderFoldersList() {
       <span class="folder-count">${(folder.adversaries || []).length}</span>
     </div>
   `).join('');
+
+  container.innerHTML = html;
 }
 
 function updateFolderCounts() {
   const allCount = document.getElementById('allCount');
   const ungroupedCount = document.getElementById('ungroupedCount');
-  if (allCount) allCount.textContent = getAllLibraryAdversaries().length;
+
+  let allAdversaries = getAllLibraryAdversaries();
+  if (hideSrdContent) {
+    allAdversaries = allAdversaries.filter(a => a._source !== 'daggerheart-srd');
+  }
+
+  if (allCount) allCount.textContent = allAdversaries.length;
   if (ungroupedCount) ungroupedCount.textContent = getUngroupedAdversaries().length;
 }
 
@@ -4238,12 +4293,24 @@ function selectFolder(folderId) {
 
   if (folderId === 'all') {
     adversaries = getAllLibraryAdversaries();
+    // Filter out SRD if hidden
+    if (hideSrdContent) {
+      adversaries = adversaries.filter(a => a._source !== 'daggerheart-srd');
+    }
     folderName = 'All Adversaries';
     if (editActionsEl) editActionsEl.style.display = 'none';
   } else if (folderId === 'ungrouped') {
     adversaries = getUngroupedAdversaries();
     folderName = 'Ungrouped';
     if (editActionsEl) editActionsEl.style.display = 'none';
+  } else if (folderId.startsWith('srd-tier-')) {
+    // SRD tier folder
+    const srdFolder = SRD_FOLDERS.find(f => f.id === folderId);
+    if (srdFolder) {
+      adversaries = getSrdFolderAdversaries(srdFolder.tier);
+      folderName = srdFolder.name;
+    }
+    if (editActionsEl) editActionsEl.style.display = 'none'; // Can't edit SRD folders
   } else {
     const folder = myLibraryGroups.find(g => g.id === folderId);
     if (folder) {
