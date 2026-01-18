@@ -521,6 +521,9 @@ The converter will auto-detect the source system."
             <button class="btn btn-share btn-small" onclick="saveAndPublish()" id="saveBtn" disabled title="Save to library and publish to community">
               <span class="btn-icon-inline">💾</span> Save
             </button>
+            <button class="btn btn-share btn-small hidden" onclick="saveAllBatch()" id="saveAllBtn" disabled title="Save all converted adversaries to library">
+              <span class="btn-icon-inline">💾</span> Save All
+            </button>
             <!-- More Actions Dropdown -->
             <div class="action-dropdown">
               <button class="btn btn-secondary btn-small" onclick="toggleMoreMenu()" id="moreBtn" disabled title="More actions">
@@ -1073,6 +1076,21 @@ The converter will auto-detect the source system."
                 Create New
               </button>
               <input type="text" class="library-search" id="librarySearch" placeholder="Search..." oninput="filterLibraryItems()">
+              <button class="filter-select-btn" onclick="openLibraryFilterModal('tier')" id="libraryTierFilterBtn">
+                <span id="libraryTierFilterLabel">All Tiers</span>
+                <span class="filter-arrow">▾</span>
+              </button>
+              <button class="filter-select-btn" onclick="openLibraryFilterModal('type')" id="libraryTypeFilterBtn">
+                <span id="libraryTypeFilterLabel">All Types</span>
+                <span class="filter-arrow">▾</span>
+              </button>
+              <select id="librarySort" class="form-select" onchange="filterLibraryItems()">
+                <option value="name">Name A-Z</option>
+                <option value="name-desc">Name Z-A</option>
+                <option value="tier">Tier (Low-High)</option>
+                <option value="tier-desc">Tier (High-Low)</option>
+                <option value="type">Type</option>
+              </select>
               <div class="folder-edit-actions" id="folderEditActions" style="display: none;">
                 <button class="icon-btn" onclick="startRenameFolder()" title="Rename folder">
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">

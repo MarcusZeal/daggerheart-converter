@@ -904,6 +904,24 @@ function enableButtons() {
   document.getElementById('printBtn').disabled = false;
   document.getElementById('urlBtn').disabled = false;
   updateSaveButtonState();
+  updateSaveAllButtonState();
+}
+
+function updateSaveAllButtonState() {
+  const saveAllBtn = document.getElementById('saveAllBtn');
+  if (!saveAllBtn) return;
+
+  const successfulBatch = batchResults.filter(r => r.success);
+  const isBatchMode = currentMode === 'batch' && successfulBatch.length > 1;
+
+  if (isBatchMode) {
+    saveAllBtn.classList.remove('hidden');
+    saveAllBtn.disabled = false;
+    saveAllBtn.title = `Save all ${successfulBatch.length} adversaries to library`;
+  } else {
+    saveAllBtn.classList.add('hidden');
+    saveAllBtn.disabled = true;
+  }
 }
 
 function updateSaveButtonState() {
@@ -4096,6 +4114,9 @@ let selectedMyLibraryAdversary = null;
 let adversaryToAdd = null;
 let draggedAdversary = null;
 let librarySearchFilter = '';
+let librarySelectedTiers = [];
+let librarySelectedTypes = [];
+let libraryCurrentFilterType = null;
 
 function loadMyLibrary() {
   loadGroupsFromStorage();
@@ -4247,10 +4268,53 @@ function renderLibraryItems(adversaries) {
   let filtered = adversaries;
   if (librarySearchFilter) {
     const search = librarySearchFilter.toLowerCase();
-    filtered = adversaries.filter(a =>
+    filtered = filtered.filter(a =>
       (a.name || '').toLowerCase().includes(search) ||
-      (a.advType || '').toLowerCase().includes(search)
+      (a.advType || '').toLowerCase().includes(search) ||
+      (a.description || '').toLowerCase().includes(search)
     );
+  }
+
+  // Apply tier filter
+  if (librarySelectedTiers.length > 0) {
+    filtered = filtered.filter(a => librarySelectedTiers.includes(String(a.tier)));
+  }
+
+  // Apply type filter
+  if (librarySelectedTypes.length > 0) {
+    filtered = filtered.filter(a =>
+      librarySelectedTypes.map(t => t.toLowerCase()).includes((a.advType || '').toLowerCase())
+    );
+  }
+
+  // Apply sorting
+  const sortValue = document.getElementById('librarySort')?.value || 'name';
+  filtered = [...filtered].sort((a, b) => {
+    switch (sortValue) {
+      case 'name':
+        return (a.name || '').localeCompare(b.name || '');
+      case 'name-desc':
+        return (b.name || '').localeCompare(a.name || '');
+      case 'tier':
+        return (parseInt(a.tier) || 0) - (parseInt(b.tier) || 0);
+      case 'tier-desc':
+        return (parseInt(b.tier) || 0) - (parseInt(a.tier) || 0);
+      case 'type':
+        return (a.advType || '').localeCompare(b.advType || '');
+      default:
+        return 0;
+    }
+  });
+
+  // Update item count with filtered count
+  const countEl = document.getElementById('folderItemCount');
+  if (countEl) {
+    const total = adversaries.length;
+    if (filtered.length !== total) {
+      countEl.textContent = `(${filtered.length} of ${total} items)`;
+    } else {
+      countEl.textContent = `(${total} items)`;
+    }
   }
 
   if (filtered.length === 0) {
@@ -4366,6 +4430,109 @@ function filterLibraryItems() {
   const input = document.getElementById('librarySearch');
   librarySearchFilter = input ? input.value : '';
   selectFolder(selectedFolderId);
+}
+
+function openLibraryFilterModal(filterType) {
+  libraryCurrentFilterType = filterType;
+  const modal = document.getElementById('filterModal');
+  const title = document.getElementById('filterModalTitle');
+  const optionsContainer = document.getElementById('filterOptions');
+
+  const options = filterType === 'tier' ? TIER_OPTIONS : TYPE_OPTIONS;
+  const selected = filterType === 'tier' ? librarySelectedTiers : librarySelectedTypes;
+
+  title.textContent = filterType === 'tier' ? 'Select Tiers' : 'Select Types';
+
+  optionsContainer.innerHTML = options.map(opt => `
+    <div class="filter-option ${selected.includes(opt.value) ? 'selected' : ''}" onclick="toggleLibraryFilterOption('${opt.value}')">
+      <input type="checkbox" id="filter-${opt.value}" ${selected.includes(opt.value) ? 'checked' : ''}>
+      <label for="filter-${opt.value}">${opt.label}</label>
+    </div>
+  `).join('');
+
+  // Override apply button for library context
+  const applyBtn = modal.querySelector('.btn-primary');
+  if (applyBtn) {
+    applyBtn.onclick = applyLibraryFilter;
+  }
+
+  const clearBtn = modal.querySelector('.btn-secondary');
+  if (clearBtn) {
+    clearBtn.onclick = clearLibraryFilterSelection;
+  }
+
+  modal.classList.remove('hidden');
+}
+
+function toggleLibraryFilterOption(value) {
+  const selected = libraryCurrentFilterType === 'tier' ? librarySelectedTiers : librarySelectedTypes;
+  const index = selected.indexOf(value);
+
+  if (index === -1) {
+    selected.push(value);
+  } else {
+    selected.splice(index, 1);
+  }
+
+  // Update UI
+  const optionEl = document.querySelector(`.filter-option input[id="filter-${value}"]`);
+  if (optionEl) {
+    optionEl.checked = selected.includes(value);
+    optionEl.closest('.filter-option').classList.toggle('selected', selected.includes(value));
+  }
+}
+
+function clearLibraryFilterSelection() {
+  if (libraryCurrentFilterType === 'tier') {
+    librarySelectedTiers = [];
+  } else {
+    librarySelectedTypes = [];
+  }
+
+  document.querySelectorAll('.filter-option').forEach(opt => {
+    opt.classList.remove('selected');
+    opt.querySelector('input').checked = false;
+  });
+}
+
+function applyLibraryFilter() {
+  updateLibraryFilterButtonLabels();
+  closeFilterModal();
+  libraryCurrentFilterType = null;
+  filterLibraryItems();
+}
+
+function updateLibraryFilterButtonLabels() {
+  const tierBtn = document.getElementById('libraryTierFilterBtn');
+  const typeBtn = document.getElementById('libraryTypeFilterBtn');
+  const tierLabel = document.getElementById('libraryTierFilterLabel');
+  const typeLabel = document.getElementById('libraryTypeFilterLabel');
+
+  if (tierLabel) {
+    if (librarySelectedTiers.length === 0) {
+      tierLabel.textContent = 'All Tiers';
+      if (tierBtn) tierBtn.classList.remove('has-selection');
+    } else if (librarySelectedTiers.length === 1) {
+      tierLabel.textContent = `Tier ${librarySelectedTiers[0]}`;
+      if (tierBtn) tierBtn.classList.add('has-selection');
+    } else {
+      tierLabel.textContent = `${librarySelectedTiers.length} Tiers`;
+      if (tierBtn) tierBtn.classList.add('has-selection');
+    }
+  }
+
+  if (typeLabel) {
+    if (librarySelectedTypes.length === 0) {
+      typeLabel.textContent = 'All Types';
+      if (typeBtn) typeBtn.classList.remove('has-selection');
+    } else if (librarySelectedTypes.length === 1) {
+      typeLabel.textContent = librarySelectedTypes[0];
+      if (typeBtn) typeBtn.classList.add('has-selection');
+    } else {
+      typeLabel.textContent = `${librarySelectedTypes.length} Types`;
+      if (typeBtn) typeBtn.classList.add('has-selection');
+    }
+  }
 }
 
 // ==================== DRAG & DROP HANDLERS ====================
@@ -5838,6 +6005,67 @@ async function saveAndPublish() {
 // Legacy function for backwards compatibility
 async function shareToCommunity() {
   return saveAndPublish();
+}
+
+// Save all batch results to library (local only, no publishing)
+async function saveAllBatch() {
+  const successfulResults = batchResults.filter(r => r.success);
+
+  if (successfulResults.length === 0) {
+    showToast('No successful conversions to save', 'error');
+    return;
+  }
+
+  try {
+    const existingLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+    let added = 0;
+    let updated = 0;
+
+    for (const result of successfulResults) {
+      const adversary = result.data;
+
+      // Create export object with proper structure
+      const exportObj = {
+        ...adversary,
+        id: adversary.id || `adv-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+        category: 'adversary',
+        _userCreated: true,
+        _batchImport: true
+      };
+
+      const existingIdx = existingLibrary.findIndex(item => item.id === exportObj.id);
+      if (existingIdx >= 0) {
+        existingLibrary[existingIdx] = exportObj;
+        updated++;
+      } else {
+        existingLibrary.push(exportObj);
+        added++;
+      }
+    }
+
+    localStorage.setItem('dh-user-library', JSON.stringify(existingLibrary));
+
+    // Build message
+    let message = '';
+    if (added > 0 && updated > 0) {
+      message = `Added ${added}, updated ${updated} adversaries`;
+    } else if (added > 0) {
+      message = `Added ${added} adversaries to library`;
+    } else {
+      message = `Updated ${updated} adversaries in library`;
+    }
+
+    showToast(message, 'success');
+
+    // Trigger sync if available
+    if (typeof scheduleSaveToServer === 'function') {
+      scheduleSaveToServer();
+    }
+
+  } catch (err) {
+    console.error('Failed to save batch:', err);
+    showToast('Failed to save batch: ' + err.message, 'error');
+  }
 }
 
 // Close modals on Escape key
