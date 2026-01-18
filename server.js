@@ -1557,8 +1557,7 @@ app.use(express.static(__dirname, {
 app.use('/parsers', express.static(path.join(__dirname, 'parsers')));
 
 // SPA fallback - serve index.html for client-side routing
-// Handle all SPA routes: /community, /collection, /encounters, /admin
-app.get(['/community', '/community/*', '/collection', '/encounters', '/admin'], (req, res) => {
+app.get(['/community', '/community/*', '/collection', '/encounters', '/admin', '/leaderboard', '/user', '/user/*'], (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
