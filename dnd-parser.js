@@ -375,6 +375,30 @@ const DnDParser = (function() {
   }
 
   /**
+   * Strip legendary action boilerplate intro text
+   * Removes: "The X can take Y legendary actions, choosing from the options below..."
+   */
+  function stripLegendaryBoilerplate(text) {
+    if (!text) return text;
+
+    let cleaned = text;
+
+    // Remove any sentence containing "can take" and "legendary action" (the intro sentence)
+    cleaned = cleaned.replace(/[^.]*can take \d+ legendary action[^.]*\.\s*/gi, '');
+
+    // Remove "Only one legendary action" sentence
+    cleaned = cleaned.replace(/[^.]*only one legendary action[^.]*\.\s*/gi, '');
+
+    // Remove "regains spent legendary actions" sentence
+    cleaned = cleaned.replace(/[^.]*regains spent legendary action[^.]*\.\s*/gi, '');
+
+    // Remove any remaining "choosing from the options" fragments
+    cleaned = cleaned.replace(/[^.]*choosing from the options[^.]*\.\s*/gi, '');
+
+    return cleaned.trim();
+  }
+
+  /**
    * Parse abilities/traits from a section
    */
   function parseAbilities(sectionText) {
@@ -451,7 +475,7 @@ const DnDParser = (function() {
       actions: parseAbilities(sections.actions),
       bonusActions: parseAbilities(sections.bonusActions),
       reactions: parseAbilities(sections.reactions),
-      legendaryActions: parseAbilities(sections.legendaryActions),
+      legendaryActions: parseAbilities(stripLegendaryBoilerplate(sections.legendaryActions)),
       lairActions: parseAbilities(sections.lairActions),
       raw: {
         text: text,

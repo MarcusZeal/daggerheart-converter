@@ -612,6 +612,10 @@ The converter will auto-detect the source system."
             <span id="typeFilterLabel">All Types</span>
             <span class="filter-arrow">▾</span>
           </button>
+          <label class="srd-toggle" title="Include official Daggerheart SRD adversaries">
+            <input type="checkbox" id="showSrdToggle" checked onchange="toggleSrdContent()">
+            <span class="srd-toggle-label">SRD</span>
+          </label>
           <select id="communitySort" class="form-select" onchange="loadCommunityConversions()">
             <option value="popular">Most Popular</option>
             <option value="newest">Newest</option>

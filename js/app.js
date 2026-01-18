@@ -8,6 +8,9 @@ let currentSystem = 'auto';
 let detectedSystem = null;
 let batchResults = [];
 
+// SRD Library (loaded from content/daggerheart-srd-adversaries.json)
+let srdLibrary = [];
+
 // Undo/Redo history
 let undoHistory = [];
 let historyIndex = -1;
@@ -149,7 +152,10 @@ Small, cruel humanoids with sharp teeth and pointed ears. Fight with -1 penalty 
 };
 
 // ==================== INITIALIZATION ====================
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
+  // Load SRD library first (non-blocking)
+  loadSrdLibrary();
+
   setupDragAndDrop();
   setupKeyboardShortcuts();
   loadDraft();
@@ -4119,9 +4125,34 @@ function saveGroupsToStorage() {
 
 function getAllLibraryAdversaries() {
   try {
+    const userLibrary = JSON.parse(localStorage.getItem('dh-user-library') || '[]');
+    // Merge SRD library with user library (user library takes precedence for same IDs)
+    const userIds = new Set(userLibrary.map(a => a.id));
+    const mergedSrd = srdLibrary.filter(a => !userIds.has(a.id));
+    return [...userLibrary, ...mergedSrd];
+  } catch (e) {
+    return srdLibrary || [];
+  }
+}
+
+function getUserLibraryOnly() {
+  try {
     return JSON.parse(localStorage.getItem('dh-user-library') || '[]');
   } catch (e) {
     return [];
+  }
+}
+
+async function loadSrdLibrary() {
+  try {
+    const response = await fetch('content/daggerheart-srd-adversaries.json');
+    if (response.ok) {
+      srdLibrary = await response.json();
+      console.log(`Loaded ${srdLibrary.length} SRD adversaries`);
+    }
+  } catch (e) {
+    console.warn('Could not load SRD library:', e);
+    srdLibrary = [];
   }
 }
 
@@ -4248,15 +4279,16 @@ function renderLibraryItems(adversaries) {
       if (adv.damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${highlightDiceRolls(adv.damage)}${adv.dmgType ? ' ' + adv.dmgType : ''}</span>`;
     }
 
+    const isSrd = adv._source === 'daggerheart-srd';
     return `
-      <div class="community-item library-draggable"
+      <div class="community-item library-draggable ${isSrd ? 'srd-item' : ''}"
            draggable="true"
            data-adversary-id="${adv.id}"
            ondragstart="handleAdversaryDragStart(event, '${adv.id}')"
            ondragend="handleAdversaryDragEnd(event)"
            onclick="openMyLibraryAdversary('${adv.id}')">
         <div class="dh-card-header" data-type="${cardTypeClass}">
-          <div class="dh-card-name">${escapeHtml(adv.name || 'Unknown')}</div>
+          <div class="dh-card-name">${escapeHtml(adv.name || 'Unknown')}${isSrd ? '<span class="srd-badge" title="Official Daggerheart SRD">SRD</span>' : ''}</div>
           <div class="dh-card-tier-type">Tier ${adv.tier || '?'} ${adv.advType || 'Standard'}</div>
         </div>
         <div class="dh-card-body">
@@ -4515,6 +4547,13 @@ function moveToGroup() {
 
 function removeFromLibrary() {
   if (!selectedMyLibraryAdversary) return;
+
+  // Check if this is an SRD adversary (can't delete those)
+  if (selectedMyLibraryAdversary._source === 'daggerheart-srd') {
+    showToast('Cannot remove SRD adversaries', 'error');
+    return;
+  }
+
   if (!confirm(`Remove "${selectedMyLibraryAdversary.name}" from your library?`)) return;
 
   const advId = selectedMyLibraryAdversary.id;
@@ -4525,9 +4564,9 @@ function removeFromLibrary() {
   });
   saveGroupsToStorage();
 
-  // Remove from main library
+  // Remove from user library only (not SRD)
   try {
-    let library = getAllLibraryAdversaries().filter(a => a.id !== advId);
+    let library = getUserLibraryOnly().filter(a => a.id !== advId);
     localStorage.setItem('dh-user-library', JSON.stringify(library));
   } catch (e) {
     console.error('Failed to remove:', e);
@@ -4846,6 +4885,7 @@ let selectedConversion = null;
 let selectedTiers = [];
 let selectedTypes = [];
 let currentFilterType = null; // 'tier' or 'type'
+let showSrdContent = true; // Show SRD adversaries in community by default
 
 const TIER_OPTIONS = [
   { value: '1', label: 'Tier 1' },
@@ -4933,6 +4973,35 @@ function applyFilter() {
   loadCommunityConversions();
 }
 
+function toggleSrdContent() {
+  showSrdContent = document.getElementById('showSrdToggle')?.checked ?? true;
+  renderCommunityList();
+}
+
+function viewSrdAdversary(adversaryId) {
+  // Find in SRD library
+  const adversary = srdLibrary.find(a => a.id === adversaryId);
+  if (!adversary) {
+    showToast('Adversary not found', 'error');
+    return;
+  }
+
+  // Open using the My Library modal
+  selectedMyLibraryAdversary = adversary;
+  document.getElementById('myLibraryModalStatBlock').innerHTML = renderStatBlockReadOnly(adversary);
+
+  // Hide delete buttons for SRD content
+  const deleteServerBtn = document.getElementById('deleteFromServerBtn');
+  if (deleteServerBtn) {
+    deleteServerBtn.classList.add('hidden');
+  }
+
+  document.getElementById('myLibraryModal').classList.remove('hidden');
+
+  // Position dice tooltips after modal is visible
+  setTimeout(() => positionDiceTooltips(document.getElementById('myLibraryModal')), 50);
+}
+
 function updateFilterButtonLabels() {
   const tierBtn = document.getElementById('tierFilterBtn');
   const typeBtn = document.getElementById('typeFilterBtn');
@@ -5013,8 +5082,52 @@ async function loadCommunityConversions() {
 
 function renderCommunityList() {
   const listEl = document.getElementById('communityList');
+  const searchTerm = document.getElementById('communitySearch')?.value?.toLowerCase() || '';
 
-  if (communityConversions.length === 0) {
+  // Build combined list: community conversions + filtered SRD content
+  let allItems = [...communityConversions];
+
+  // Add SRD content if enabled
+  if (showSrdContent && srdLibrary.length > 0) {
+    let filteredSrd = srdLibrary;
+
+    // Apply search filter to SRD
+    if (searchTerm) {
+      filteredSrd = filteredSrd.filter(adv =>
+        adv.name.toLowerCase().includes(searchTerm) ||
+        (adv.advType || '').toLowerCase().includes(searchTerm) ||
+        (adv.description || '').toLowerCase().includes(searchTerm)
+      );
+    }
+
+    // Apply tier filter
+    if (selectedTiers.length > 0) {
+      filteredSrd = filteredSrd.filter(adv => selectedTiers.includes(adv.tier));
+    }
+
+    // Apply type filter
+    if (selectedTypes.length > 0) {
+      filteredSrd = filteredSrd.filter(adv =>
+        selectedTypes.map(t => t.toLowerCase()).includes((adv.advType || '').toLowerCase())
+      );
+    }
+
+    // Convert SRD items to community-like format for rendering
+    const srdItems = filteredSrd.map(adv => ({
+      id: adv.id,
+      name: adv.name,
+      tier: adv.tier,
+      advType: adv.advType,
+      data: adv,
+      isSrd: true,
+      author: { username: 'Daggerheart SRD' },
+      score: 0
+    }));
+
+    allItems = [...allItems, ...srdItems];
+  }
+
+  if (allItems.length === 0) {
     listEl.innerHTML = `
       <div class="community-empty">
         <p>No conversions found.</p>
@@ -5024,7 +5137,7 @@ function renderCommunityList() {
     return;
   }
 
-  listEl.innerHTML = communityConversions.map(conv => {
+  listEl.innerHTML = allItems.map(conv => {
     const data = conv.data || {};
     const hp = data.hp || '?';
     const stress = data.stress || '?';
@@ -5039,7 +5152,8 @@ function renderCommunityList() {
     const damage = data.damage || data.attack?.damage || '';
     const dmgType = data.dmgType || data.attack?.type || '';
     const sourceSystem = conv.sourceSystem || data.sourceSystem;
-    const authorAvatar = conv.author?.avatarUrl
+    const isSrd = conv.isSrd === true;
+    const authorAvatar = !isSrd && conv.author?.avatarUrl
       ? `<img src="${conv.author.avatarUrl}" alt="">`
       : '';
 
@@ -5052,11 +5166,12 @@ function renderCommunityList() {
     }
 
     const cardTypeClass = (conv.advType || 'standard').toLowerCase().trim();
+    const clickHandler = isSrd ? `viewSrdAdversary('${conv.id}')` : `openCommunityModal('${conv.id}')`;
 
     return `
-      <div class="community-item" onclick="openCommunityModal('${conv.id}')">
+      <div class="community-item${isSrd ? ' srd-item' : ''}" onclick="${clickHandler}">
         <div class="dh-card-header" data-type="${cardTypeClass}">
-          <div class="dh-card-name">${escapeHtml(conv.name)}</div>
+          <div class="dh-card-name">${escapeHtml(conv.name)}${isSrd ? ' <span class="srd-badge">SRD</span>' : ''}</div>
           <div class="dh-card-tier-type">Tier ${conv.tier} ${conv.advType}</div>
         </div>
         <div class="dh-card-body">
@@ -5111,12 +5226,13 @@ function renderCommunityList() {
           </div>
         </div>
         <div class="dh-card-footer">
-          <div class="dh-card-author">${authorAvatar}@${escapeHtml(conv.author?.username || 'Unknown')}</div>
+          <div class="dh-card-author">${isSrd ? '' : `${authorAvatar}@${escapeHtml(conv.author?.username || 'Unknown')}`}</div>
           <div class="dh-card-footer-right">
-            ${sourceSystem ? `<span class="dh-card-source">${escapeHtml(sourceSystem)}</span>` : ''}
-            <button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>
+            ${isSrd ? '<span class="dh-card-source srd-source">DH SRD</span>' : (sourceSystem ? `<span class="dh-card-source">${escapeHtml(sourceSystem)}</span>` : '')}
+            ${!isSrd ? `<button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>` : ''}
           </div>
         </div>
+        ${isSrd ? '' : `
         <div class="community-item-votes">
           <button class="vote-btn upvote ${conv.userVote === 1 ? 'active' : ''}"
                   onclick="event.stopPropagation(); quickVote('${conv.id}', 1)">&#9650;</button>
@@ -5129,6 +5245,7 @@ function renderCommunityList() {
             ${isInLibrary(conv.data?.id) ? '★' : '☆'}
           </button>
         </div>
+        `}
       </div>
     `;
   }).join('');

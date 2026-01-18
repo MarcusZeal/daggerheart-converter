@@ -393,6 +393,7 @@ const DaggerheartConverter = (function() {
    * 2. As prefix: "[Fear 2] Breath Weapon"
    * 3. In description: "Fear Cost: 2" or "costs 2 Fear"
    * 4. Daggerheart format: "Fear Feature:" prefix
+   * 5. D&D format: "(3/Day)" becomes Fear 3, "(Costs 2 Actions)" becomes Fear 2
    * Returns { fearCost, cleanName, cleanDesc }
    */
   function parseFearCost(name, description) {
@@ -404,30 +405,55 @@ const DaggerheartConverter = (function() {
     const skullMatch = name.match(/💀+/);
     if (skullMatch) {
       fearCost = skullMatch[0].length;
-      cleanName = name.replace(/\s*💀+\s*/, '').trim();
     }
 
-    // Pattern 2: (Fear X) or (Fear: X) in name
-    const fearParenMatch = name.match(/\s*\(Fear\s*:?\s*(\d+)\)\s*/i);
+    // Pattern 2: (Fear X) or (Fear: X) in name - this takes priority
+    const fearParenMatch = name.match(/\(Fear\s*:?\s*(\d+)\)/i);
     if (fearParenMatch) {
       fearCost = parseInt(fearParenMatch[1]);
-      cleanName = name.replace(fearParenMatch[0], '').trim();
     }
 
     // Pattern 3: [Fear X] prefix in name
-    const fearBracketMatch = name.match(/^\s*\[Fear\s*:?\s*(\d+)\]\s*/i);
+    const fearBracketMatch = name.match(/\[Fear\s*:?\s*(\d+)\]/i);
     if (fearBracketMatch) {
       fearCost = parseInt(fearBracketMatch[1]);
-      cleanName = name.replace(fearBracketMatch[0], '').trim();
     }
 
     // Pattern 4: "Fear Feature:" prefix in name (Daggerheart official format)
     if (name.match(/^Fear\s+Feature\s*:/i)) {
-      fearCost = fearCost || 1; // Default to 1 if not specified elsewhere
-      cleanName = name.replace(/^Fear\s+Feature\s*:\s*/i, '').trim();
+      fearCost = fearCost || 1;
     }
 
-    // Pattern 5: Fear cost in description - "Fear Cost: X" or "Fear: X"
+    // Pattern 5: (X/Day) in name - convert to Fear X (only if no explicit fear cost)
+    const perDayMatch = name.match(/\((\d+)\/Day\)/i);
+    if (perDayMatch && fearCost === 0) {
+      fearCost = parseInt(perDayMatch[1]);
+    }
+
+    // Pattern 6: (Costs X Actions) in name - convert to Fear X (only if no explicit fear cost)
+    const costsActionsMatch = name.match(/\(Costs?\s*(\d+)\s*Actions?\)/i);
+    if (costsActionsMatch && fearCost === 0) {
+      fearCost = parseInt(costsActionsMatch[1]);
+    }
+
+    // Normalize different parentheses characters (some PDFs use special chars)
+    cleanName = cleanName
+      .replace(/[\u0028\u207D\uFE59\uFF08]/g, '(')  // Various open parens to (
+      .replace(/[\u0029\u207E\uFE5A\uFF09]/g, ')'); // Various close parens to )
+
+    // Now clean ALL these patterns from the name using regex replace
+    cleanName = cleanName
+      .replace(/\s*💀+\s*/g, '')                                    // Skulls
+      .replace(/\s*\(Fear\s*:?\s*\d+\)\s*/gi, '')                   // (Fear X)
+      .replace(/\s*\[Fear\s*:?\s*\d+\]\s*/gi, '')                   // [Fear X]
+      .replace(/^Fear\s+Feature\s*:\s*/i, '')                       // Fear Feature:
+      .replace(/\s*\(\d+\/Day\)\s*/gi, '')                          // (X/Day)
+      .replace(/\s*\(Costs?\s*\d+\s*Actions?\)\s*/gi, '')           // (Costs X Actions)
+      .replace(/\s*Costs?\s*\d+\s*Actions?\s*/gi, '')               // Costs X Actions without parens
+      .replace(/\s*\([^)]*\d+\s*Actions?\s*\)\s*/gi, '')            // Any (... X Actions) pattern
+      .trim();
+
+    // Pattern 7: Fear cost in description - "Fear Cost: X" or "Fear: X"
     const descFearMatch = description.match(/Fear\s*Cost\s*:\s*(\d+)/i) ||
                           description.match(/\bFear\s*:\s*(\d+)/i);
     if (descFearMatch) {
@@ -435,14 +461,22 @@ const DaggerheartConverter = (function() {
       cleanDesc = description.replace(descFearMatch[0], '').trim();
     }
 
-    // Pattern 6: "costs X Fear" or "spend X Fear" in description
+    // Pattern 8: "costs X Fear" or "spend X Fear" in description (with number)
     const costsFearMatch = description.match(/(?:costs?|spends?)\s+(\d+)\s+Fear/i);
     if (costsFearMatch) {
       fearCost = parseInt(costsFearMatch[1]);
       // Don't remove this from description as it's part of the mechanic explanation
     }
 
-    // Pattern 7: Skull emojis in description
+    // Pattern 8b: "spend a Fear" or "spend Fear" or "cost a Fear" (implies 1)
+    if (fearCost === 0) {
+      const spendAFearMatch = description.match(/(?:costs?|spends?)\s+(?:a\s+)?Fear\b/i);
+      if (spendAFearMatch) {
+        fearCost = 1;
+      }
+    }
+
+    // Pattern 9: Skull emojis in description
     const descSkullMatch = description.match(/💀+/);
     if (descSkullMatch && fearCost === 0) {
       fearCost = descSkullMatch[0].length;
@@ -462,18 +496,18 @@ const DaggerheartConverter = (function() {
   function convertFeature(dndFeature, tier) {
     const nameLower = dndFeature.name.toLowerCase();
 
-    // Check for known feature templates
-    for (const [key, template] of Object.entries(FEATURE_TEMPLATES)) {
-      if (nameLower.includes(key)) {
-        return { ...template };
-      }
-    }
-
-    // Parse fear cost from name and description
+    // Parse fear cost from name and description FIRST (before templates)
     const { fearCost, cleanName, cleanDesc: initialCleanDesc } = parseFearCost(
       dndFeature.name,
       dndFeature.description
     );
+
+    // Check for known feature templates (but preserve fear cost)
+    for (const [key, template] of Object.entries(FEATURE_TEMPLATES)) {
+      if (nameLower.includes(key)) {
+        return { ...template, fearCost: fearCost || template.fearCost || 0 };
+      }
+    }
 
     // Determine feature type
     let featureType = 'Passive';
@@ -686,10 +720,27 @@ const DaggerheartConverter = (function() {
     // Add legendary actions as features
     if (parsed.legendaryActionCount > 0) {
       features.push({
-        name: `Relentless (${parsed.legendaryActionCount})`,
+        name: 'Legendary Presence',
         type: 'Passive',
-        desc: `Can take ${parsed.legendaryActionCount} additional actions per round, usable at the end of another creature's turn.`
+        desc: `This creature has a pool of ${parsed.legendaryActionCount} bonus Fear it can spend each round. When it spends Fear on a Legendary action, it may spend 1 additional Fear from this pool to use another Legendary action immediately. This pool replenishes at the start of each round.`,
+        fearCost: 0
       });
+
+      // Convert each individual legendary action to a Fear Feature
+      for (const legAction of parsed.legendaryActions) {
+        const converted = convertFeature(legAction, tier);
+        if (converted) {
+          // Legendary actions are Fear Features (Action type)
+          converted.type = 'Action';
+          // Mark as a legendary action
+          converted.isLegendary = true;
+          // Default to Fear 1 if no explicit fear cost was specified
+          if (converted.fearCost === 0) {
+            converted.fearCost = 1;
+          }
+          features.push(converted);
+        }
+      }
     }
 
     // Find primary attack for main stats
@@ -754,9 +805,199 @@ const DaggerheartConverter = (function() {
   }
 
   /**
+   * Detect if text is in Daggerheart SRD format (not D&D 5e)
+   */
+  function isDaggerheartFormat(text) {
+    // Daggerheart format indicators:
+    // - "Tier [1-4] [Type]" on line 2
+    // - "Difficulty:" with "Thresholds:" on same line
+    // - "ATK:" for attack modifier
+    // - "FEATURES" section header
+    // - Feature format: "Name - Type: Description"
+    const tierLine = /^Tier\s+[1-4]\s+(Bruiser|Horde|Leader|Minion|Ranged|Skulk|Social|Solo|Standard|Support)/im;
+    const difficultyLine = /Difficulty:\s*\d+\s*\|\s*Thresholds:/i;
+    const atkLine = /ATK:\s*[+-]?\d+/i;
+    const featuresSection = /^FEATURES\s*$/im;
+
+    // If we find Tier line with type AND (difficulty line OR features section), it's Daggerheart
+    const hasTierLine = tierLine.test(text);
+    const hasDifficultyLine = difficultyLine.test(text);
+    const hasAtkLine = atkLine.test(text);
+    const hasFeaturesSection = featuresSection.test(text);
+
+    // Check for D&D indicators (to exclude false positives)
+    const hasDnDIndicators = /^(Armor Class|Hit Points|Speed|STR|DEX|Challenge)\s/im.test(text);
+
+    if (hasDnDIndicators) return false;
+    return hasTierLine && (hasDifficultyLine || hasAtkLine || hasFeaturesSection);
+  }
+
+  /**
+   * Parse Daggerheart SRD format directly
+   */
+  function parseDaggerheart(text) {
+    const lines = text.trim().split('\n').map(l => l.trim()).filter(l => l);
+
+    // Extract name (first line)
+    const name = lines[0];
+
+    // Extract tier and type (second line: "Tier 2 Standard")
+    let tier = 2;
+    let advType = 'Standard';
+    const tierMatch = lines[1]?.match(/^Tier\s+(\d+)\s+(\w+)/i);
+    if (tierMatch) {
+      tier = parseInt(tierMatch[1]);
+      advType = tierMatch[2];
+    }
+
+    // Find description (line after tier, before Motives)
+    let description = '';
+    let descIndex = 2;
+    while (descIndex < lines.length && !lines[descIndex].match(/^(Motives|Difficulty|ATK|FEATURES)/i)) {
+      if (lines[descIndex]) {
+        description = lines[descIndex];
+        break;
+      }
+      descIndex++;
+    }
+
+    // Parse stats line: "Difficulty: 14 | Thresholds: 10/20 | HP: 5 | Stress: 3"
+    let difficulty = TIER_STATS[tier]?.difficulty || 14;
+    let majorThresh = TIER_STATS[tier]?.majorThresh || 10;
+    let severeThresh = TIER_STATS[tier]?.severeThresh || 20;
+    let hp = TIER_STATS[tier]?.hp || 5;
+    let stress = TIER_STATS[tier]?.stress || 3;
+
+    const statsLine = lines.find(l => /Difficulty:\s*\d+/i.test(l));
+    if (statsLine) {
+      const diffMatch = statsLine.match(/Difficulty:\s*(\d+)/i);
+      if (diffMatch) difficulty = parseInt(diffMatch[1]);
+
+      const threshMatch = statsLine.match(/Thresholds:\s*(\d+)\/(\d+)/i);
+      if (threshMatch) {
+        majorThresh = parseInt(threshMatch[1]);
+        severeThresh = parseInt(threshMatch[2]);
+      }
+
+      const hpMatch = statsLine.match(/HP:\s*(\d+)/i);
+      if (hpMatch) hp = parseInt(hpMatch[1]);
+
+      const stressMatch = statsLine.match(/Stress:\s*(\d+)/i);
+      if (stressMatch) stress = parseInt(stressMatch[1]);
+    }
+
+    // Parse attack line: "ATK: +2 | Glaive: Melee | 2d8+3 phy"
+    let atkMod = '+' + (TIER_STATS[tier]?.atkMod || 2);
+    let weapon = 'Natural Weapon';
+    let range = 'Melee';
+    let damage = TIER_STATS[tier]?.baseDamage || '2d8+3';
+    let dmgType = 'phy';
+
+    const atkLine = lines.find(l => /ATK:\s*[+-]?\d+/i.test(l));
+    if (atkLine) {
+      const atkMatch = atkLine.match(/ATK:\s*([+-]?\d+)/i);
+      if (atkMatch) atkMod = atkMatch[1].startsWith('+') || atkMatch[1].startsWith('-') ? atkMatch[1] : '+' + atkMatch[1];
+
+      const weaponMatch = atkLine.match(/\|\s*([^|:]+):\s*(Melee|Very Close|Close|Far|Very Far)/i);
+      if (weaponMatch) {
+        weapon = weaponMatch[1].trim();
+        range = weaponMatch[2];
+      }
+
+      const damageMatch = atkLine.match(/\|\s*(\d+d\d+[+-]?\d*)\s*(phy|mag)?/i);
+      if (damageMatch) {
+        damage = damageMatch[1];
+        dmgType = damageMatch[2] || 'phy';
+      }
+    }
+
+    // Parse Motives & Tactics
+    let motives = '';
+    let tactics = '';
+    const motivesLine = lines.find(l => /^Motives\s*(&|and)?\s*Tactics:/i.test(l));
+    if (motivesLine) {
+      const motivesContent = motivesLine.replace(/^Motives\s*(&|and)?\s*Tactics:\s*/i, '');
+      // Split by period or comma for motives vs tactics
+      const parts = motivesContent.split(/\.\s*/);
+      motives = parts[0] || '';
+      tactics = parts.slice(1).join('. ') || '';
+    }
+
+    // Parse Experience line
+    let experience = '';
+    const expLine = lines.find(l => /^Experience:/i.test(l));
+    if (expLine) {
+      experience = expLine.replace(/^Experience:\s*/i, '');
+    }
+
+    // Parse features
+    const features = [];
+    let inFeatures = false;
+    for (const line of lines) {
+      if (/^FEATURES\s*$/i.test(line)) {
+        inFeatures = true;
+        continue;
+      }
+      if (inFeatures && line) {
+        // Format: "Feature Name - Type: Description" or "Feature Name (Fear X) - Type: Description"
+        const featureMatch = line.match(/^([^-]+)\s*-\s*(Passive|Action|Reaction):\s*(.+)$/i);
+        if (featureMatch) {
+          let featureName = featureMatch[1].trim();
+          const featureType = featureMatch[2];
+          const featureDesc = featureMatch[3].trim();
+
+          // Parse fear cost from feature name
+          const { fearCost, cleanName } = parseFearCost(featureName, featureDesc);
+
+          features.push({
+            name: cleanName,
+            type: featureType,
+            desc: featureDesc,
+            fearCost: fearCost
+          });
+        }
+      }
+    }
+
+    // Build Daggerheart object
+    return {
+      id: `adv-${name.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`,
+      category: 'adversary',
+      name: name,
+      tier: tier.toString(),
+      description: description,
+      imageUrl: '',
+      advType: advType,
+      difficulty: difficulty,
+      majorThresh: majorThresh,
+      severeThresh: severeThresh,
+      hp: hp,
+      stress: stress,
+      motives: motives,
+      tactics: tactics,
+      atkMod: atkMod,
+      weapon: weapon,
+      range: range,
+      damage: damage,
+      dmgType: dmgType,
+      experience: experience,
+      tags: [],
+      features: features,
+      _source: 'daggerheart-srd'
+    };
+  }
+
+  /**
    * Quick convert - parse and convert in one step
+   * Automatically detects Daggerheart vs D&D format
    */
   function quickConvert(rawText, options = {}) {
+    // Check if already in Daggerheart format
+    if (isDaggerheartFormat(rawText)) {
+      return parseDaggerheart(rawText);
+    }
+
+    // Otherwise parse as D&D and convert
     // Assumes DnDParser is available
     if (typeof DnDParser === 'undefined') {
       throw new Error('DnDParser must be loaded before DaggerheartConverter');
@@ -770,6 +1011,8 @@ const DaggerheartConverter = (function() {
   return {
     convert: convert,
     quickConvert: quickConvert,
+    isDaggerheartFormat: isDaggerheartFormat,
+    parseDaggerheart: parseDaggerheart,
     getTier: getTier,
     suggestType: suggestType,
     convertDamageType: convertDamageType,
