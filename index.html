@@ -104,6 +104,14 @@
           </svg>
           <span>Encounters</span>
         </a>
+        <a href="#" class="nav-link" data-page="leaderboard" onclick="navigateTo('leaderboard'); return false;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M8 21V12H4v9h4z"/>
+            <path d="M14 21V8h-4v13h4z"/>
+            <path d="M20 21V4h-4v17h4z"/>
+          </svg>
+          <span>Leaderboard</span>
+        </a>
         <a href="#" class="nav-link admin-only hidden" id="adminNavLink" data-page="admin" onclick="navigateTo('admin'); return false;">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M12 15v2"/>
@@ -183,6 +191,14 @@
           <rect x="3" y="14" width="7" height="7"/>
         </svg>
         Encounter Builder
+      </a>
+      <a href="#" class="mobile-menu-link" data-page="leaderboard" onclick="navigateTo('leaderboard'); closeMobileMenu(); return false;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M8 21V12H4v9h4z"/>
+          <path d="M14 21V8h-4v13h4z"/>
+          <path d="M20 21V4h-4v17h4z"/>
+        </svg>
+        Leaderboard
       </a>
       <a href="#" class="mobile-menu-link admin-only hidden" id="adminMobileLink" data-page="admin" onclick="navigateTo('admin'); closeMobileMenu(); return false;">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -829,6 +845,44 @@ The converter will auto-detect the source system."
         </div>
         </div><!-- End combat-mode -->
       </div><!-- End combat-view -->
+    </div>
+  </div>
+
+  <!-- Leaderboard Page -->
+  <div id="leaderboardPage" class="page-view">
+    <div class="leaderboard-container">
+      <div class="leaderboard-header">
+        <h1>Leaderboard</h1>
+        <p>Top contributors by community upvotes</p>
+      </div>
+      <div class="leaderboard-content">
+        <div id="leaderboard-list" class="leaderboard-list">
+          <div class="loading-spinner">Loading...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Profile Page -->
+  <div id="userProfilePage" class="page-view">
+    <div class="user-profile-container">
+      <div class="user-profile-header" id="user-profile-header">
+        <div class="loading-spinner">Loading...</div>
+      </div>
+      <div class="user-profile-content">
+        <div class="user-profile-filters">
+          <select id="user-profile-sort" class="form-select" onchange="loadUserConversions()">
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+            <option value="popular">Most Popular</option>
+            <option value="name">Name A-Z</option>
+          </select>
+        </div>
+        <div id="user-profile-conversions" class="community-grid">
+          <div class="loading-spinner">Loading...</div>
+        </div>
+        <div id="user-profile-pagination" class="pagination-controls"></div>
+      </div>
     </div>
   </div>
 

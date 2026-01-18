@@ -149,6 +149,7 @@ db.exec(`
     provider TEXT NOT NULL,
     provider_id TEXT NOT NULL,
     username TEXT NOT NULL,
+    url_slug TEXT UNIQUE,
     avatar_url TEXT,
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
     is_banned INTEGER DEFAULT 0,
@@ -213,6 +214,41 @@ try {
   db.exec(`ALTER TABLE users ADD COLUMN is_admin INTEGER DEFAULT 0`);
 } catch (e) {
   // Column already exists
+}
+
+// Migration: Add url_slug column if it doesn't exist
+try {
+  db.exec(`ALTER TABLE users ADD COLUMN url_slug TEXT UNIQUE`);
+} catch (e) {
+  // Column already exists
+}
+
+// Helper: Generate unique url_slug from username
+function generateUrlSlug(username) {
+  const baseSlug = username.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+  const suffix = Math.floor(1000 + Math.random() * 9000); // 4-digit random number
+  return `${baseSlug}-${suffix}`;
+}
+
+// Helper: Ensure url_slug is unique
+function getUniqueUrlSlug(username) {
+  let slug = generateUrlSlug(username);
+  let attempts = 0;
+  while (db.prepare('SELECT id FROM users WHERE url_slug = ?').get(slug) && attempts < 10) {
+    slug = generateUrlSlug(username);
+    attempts++;
+  }
+  return slug;
+}
+
+// Migration: Backfill url_slug for existing users
+const usersWithoutSlug = db.prepare('SELECT id, username FROM users WHERE url_slug IS NULL').all();
+for (const user of usersWithoutSlug) {
+  const slug = getUniqueUrlSlug(user.username);
+  db.prepare('UPDATE users SET url_slug = ? WHERE id = ?').run(slug, user.id);
+}
+if (usersWithoutSlug.length > 0) {
+  console.log(`Generated url_slugs for ${usersWithoutSlug.length} existing users`);
 }
 
 // Update admin status based on ADMIN_USER_IDS environment variable
@@ -406,11 +442,12 @@ app.get('/auth/discord/callback', authLimiter, async (req, res) => {
       const avatarUrl = discordUser.avatar
         ? `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png`
         : null;
+      const urlSlug = getUniqueUrlSlug(discordUser.username);
 
       db.prepare(`
-        INSERT INTO users (id, provider, provider_id, username, avatar_url, is_admin)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `).run(userId, 'discord', discordUser.id, discordUser.username, avatarUrl, shouldBeAdmin ? 1 : 0);
+        INSERT INTO users (id, provider, provider_id, username, url_slug, avatar_url, is_admin)
+        VALUES (?, ?, ?, ?, ?, ?, ?)
+      `).run(userId, 'discord', discordUser.id, discordUser.username, urlSlug, avatarUrl, shouldBeAdmin ? 1 : 0);
 
       user = { id: userId };
     } else {
@@ -445,6 +482,40 @@ app.get('/api/auth/me', authenticateToken, (req, res) => {
     user: {
       id: req.user.id,
       username: req.user.username,
+      urlSlug: req.user.url_slug,
+      avatar_url: req.user.avatar_url,
+      provider: req.user.provider,
+      is_admin: !!req.user.is_admin
+    }
+  });
+});
+
+// Update user display name
+app.put('/api/auth/me', apiLimiter, authenticateToken, requireAuth, (req, res) => {
+  const { username } = req.body;
+
+  if (!username || typeof username !== 'string') {
+    return res.status(400).json({ error: 'Username is required' });
+  }
+
+  const trimmed = username.trim();
+  if (trimmed.length < 2 || trimmed.length > 32) {
+    return res.status(400).json({ error: 'Username must be 2-32 characters' });
+  }
+
+  // Check for inappropriate content (basic filter)
+  const forbidden = /[<>\"\'&]/;
+  if (forbidden.test(trimmed)) {
+    return res.status(400).json({ error: 'Username contains invalid characters' });
+  }
+
+  db.prepare('UPDATE users SET username = ? WHERE id = ?').run(trimmed, req.user.id);
+
+  res.json({
+    user: {
+      id: req.user.id,
+      username: trimmed,
+      urlSlug: req.user.url_slug,
       avatar_url: req.user.avatar_url,
       provider: req.user.provider,
       is_admin: !!req.user.is_admin
@@ -872,6 +943,144 @@ app.post('/api/community/conversions/:id/report', apiLimiter, authenticateToken,
 
   console.log(`Report submitted: ${reportId} for conversion ${req.params.id} by user ${req.user.username}`);
   res.json({ message: 'Report submitted successfully' });
+});
+
+// ============================================================================
+// PUBLIC LEADERBOARD & USER PROFILES
+// ============================================================================
+
+// Get leaderboard - top users by total upvotes received
+app.get('/api/leaderboard', apiLimiter, (req, res) => {
+  const { limit = 25 } = req.query;
+  const safeLimit = Math.min(parseInt(limit), 100);
+
+  const leaderboard = db.prepare(`
+    SELECT
+      u.id,
+      u.username,
+      u.url_slug,
+      u.avatar_url,
+      COUNT(DISTINCT c.id) as conversion_count,
+      COALESCE(SUM(cs.upvotes), 0) as total_upvotes,
+      COALESCE(SUM(cs.score), 0) as total_score
+    FROM users u
+    JOIN conversions c ON u.id = c.user_id AND c.is_published = 1
+    LEFT JOIN conversion_stats cs ON c.id = cs.conversion_id
+    WHERE u.is_banned = 0
+    GROUP BY u.id
+    HAVING total_upvotes > 0
+    ORDER BY total_upvotes DESC, conversion_count DESC
+    LIMIT ?
+  `).all(safeLimit);
+
+  res.json({
+    leaderboard: leaderboard.map((u, index) => ({
+      rank: index + 1,
+      id: u.id,
+      username: u.username,
+      urlSlug: u.url_slug,
+      avatarUrl: u.avatar_url,
+      conversionCount: u.conversion_count,
+      totalUpvotes: u.total_upvotes,
+      totalScore: u.total_score
+    }))
+  });
+});
+
+// Get user profile by url_slug
+app.get('/api/users/:slug', apiLimiter, (req, res) => {
+  const { slug } = req.params;
+
+  const user = db.prepare(`
+    SELECT id, username, url_slug, avatar_url, created_at, is_banned
+    FROM users
+    WHERE url_slug = ? COLLATE NOCASE
+  `).get(slug);
+
+  if (!user || user.is_banned) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  // Get user stats
+  const stats = db.prepare(`
+    SELECT
+      COUNT(DISTINCT c.id) as conversion_count,
+      COALESCE(SUM(cs.upvotes), 0) as total_upvotes,
+      COALESCE(SUM(cs.score), 0) as total_score
+    FROM conversions c
+    LEFT JOIN conversion_stats cs ON c.id = cs.conversion_id
+    WHERE c.user_id = ? AND c.is_published = 1
+  `).get(user.id);
+
+  res.json({
+    id: user.id,
+    username: user.username,
+    urlSlug: user.url_slug,
+    avatarUrl: user.avatar_url,
+    createdAt: user.created_at,
+    conversionCount: stats.conversion_count,
+    totalUpvotes: stats.total_upvotes,
+    totalScore: stats.total_score
+  });
+});
+
+// Get user's published conversions by url_slug
+app.get('/api/users/:slug/conversions', apiLimiter, (req, res) => {
+  const { slug } = req.params;
+  const { page = 1, limit = 20, sort = 'newest' } = req.query;
+  const offset = (parseInt(page) - 1) * parseInt(limit);
+  const safeLimit = Math.min(parseInt(limit), 50);
+
+  const user = db.prepare(`
+    SELECT id, is_banned FROM users WHERE url_slug = ? COLLATE NOCASE
+  `).get(slug);
+
+  if (!user || user.is_banned) {
+    return res.status(404).json({ error: 'User not found' });
+  }
+
+  let orderBy = 'c.created_at DESC';
+  if (sort === 'oldest') orderBy = 'c.created_at ASC';
+  else if (sort === 'popular') orderBy = 'COALESCE(cs.upvotes, 0) DESC, c.created_at DESC';
+  else if (sort === 'name') orderBy = 'c.name ASC';
+
+  const total = db.prepare(`
+    SELECT COUNT(*) as count FROM conversions WHERE user_id = ? AND is_published = 1
+  `).get(user.id).count;
+
+  const conversions = db.prepare(`
+    SELECT
+      c.*,
+      COALESCE(cs.upvotes, 0) as upvotes,
+      COALESCE(cs.downvotes, 0) as downvotes,
+      COALESCE(cs.score, 0) as score
+    FROM conversions c
+    LEFT JOIN conversion_stats cs ON c.id = cs.conversion_id
+    WHERE c.user_id = ? AND c.is_published = 1
+    ORDER BY ${orderBy}
+    LIMIT ? OFFSET ?
+  `).all(user.id, safeLimit, offset);
+
+  res.json({
+    conversions: conversions.map(c => ({
+      id: c.id,
+      name: c.name,
+      tier: c.tier,
+      advType: c.adv_type,
+      sourceSystem: c.source_system,
+      createdAt: c.created_at,
+      upvotes: c.upvotes,
+      downvotes: c.downvotes,
+      score: c.score,
+      data: JSON.parse(c.data)
+    })),
+    pagination: {
+      page: parseInt(page),
+      limit: safeLimit,
+      total,
+      totalPages: Math.ceil(total / safeLimit)
+    }
+  });
 });
 
 // ============================================================================

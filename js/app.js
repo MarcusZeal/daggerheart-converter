@@ -2346,6 +2346,7 @@ const URL_TO_PAGE = {
   '/community': 'community',
   '/collection': 'myLibrary',
   '/encounters': 'encounter-builder',
+  '/leaderboard': 'leaderboard',
   '/admin': 'admin'
 };
 
@@ -2355,8 +2356,12 @@ const PAGE_TO_URL = {
   'community': '/community',
   'myLibrary': '/collection',
   'encounter-builder': '/encounters',
+  'leaderboard': '/leaderboard',
   'admin': '/admin'
 };
+
+// Current user profile being viewed
+let currentProfileSlug = null;
 
 function navigateTo(page, updateUrl = true) {
   // Block non-admins from admin page
@@ -2405,6 +2410,16 @@ function navigateTo(page, updateUrl = true) {
     initEncounterBuilder();
   }
 
+  // Load leaderboard when navigating to it
+  if (page === 'leaderboard') {
+    loadLeaderboard();
+  }
+
+  // Load user profile when navigating to it
+  if (page === 'userProfile' && currentProfileSlug) {
+    loadUserProfile(currentProfileSlug);
+  }
+
   // Reset to landing page when navigating to converter
   if (page === 'converter') {
     // Show landing by default, unless explicitly entering a mode
@@ -2420,6 +2435,17 @@ function navigateTo(page, updateUrl = true) {
 
 // Handle browser back/forward buttons
 window.addEventListener('popstate', (event) => {
+  // Handle user profile pages
+  if (event.state?.page === 'userProfile' && event.state?.slug) {
+    currentProfileSlug = event.state.slug;
+    document.querySelectorAll('.page-view').forEach(view => {
+      view.classList.toggle('active', view.id === 'userProfilePage');
+    });
+    document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+    loadUserProfile(event.state.slug);
+    return;
+  }
+
   const page = event.state?.page || URL_TO_PAGE[window.location.pathname] || 'converter';
   navigateTo(page, false);
 });
@@ -5979,6 +6005,175 @@ async function loadMySubmissions() {
   }
 }
 
+// ==================== LEADERBOARD ====================
+async function loadLeaderboard() {
+  const container = document.getElementById('leaderboard-list');
+  container.innerHTML = '<div class="loading-spinner">Loading...</div>';
+
+  try {
+    const response = await fetch('/api/leaderboard?limit=50');
+    if (!response.ok) throw new Error('Failed to load leaderboard');
+
+    const data = await response.json();
+
+    if (data.leaderboard.length === 0) {
+      container.innerHTML = '<div class="user-profile-empty">No contributors yet. Be the first!</div>';
+      return;
+    }
+
+    container.innerHTML = data.leaderboard.map(user => {
+      const rankClass = user.rank === 1 ? 'gold' : user.rank === 2 ? 'silver' : user.rank === 3 ? 'bronze' : '';
+      const avatar = user.avatarUrl
+        ? `<img src="${user.avatarUrl}" alt="" class="leaderboard-avatar">`
+        : `<div class="leaderboard-avatar-placeholder">${user.username.charAt(0).toUpperCase()}</div>`;
+
+      return `
+        <div class="leaderboard-item" onclick="navigateToUserProfile('${user.urlSlug}')">
+          <div class="leaderboard-rank ${rankClass}">#${user.rank}</div>
+          ${avatar}
+          <div class="leaderboard-info">
+            <div class="leaderboard-username">${escapeHtml(user.username)}</div>
+            <div class="leaderboard-stats">
+              <span>${user.conversionCount} adversar${user.conversionCount === 1 ? 'y' : 'ies'}</span>
+            </div>
+          </div>
+          <div class="leaderboard-upvotes">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3zM7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"/>
+            </svg>
+            ${user.totalUpvotes}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+  } catch (err) {
+    console.error('Error loading leaderboard:', err);
+    container.innerHTML = '<div class="user-profile-empty">Failed to load leaderboard</div>';
+  }
+}
+
+// ==================== USER PROFILE ====================
+function navigateToUserProfile(slug) {
+  currentProfileSlug = slug;
+  window.history.pushState({ page: 'userProfile', slug }, '', `/user/${slug}`);
+
+  // Update page views
+  document.querySelectorAll('.page-view').forEach(view => {
+    view.classList.toggle('active', view.id === 'userProfilePage');
+  });
+
+  // Clear active nav states
+  document.querySelectorAll('.nav-link').forEach(link => {
+    link.classList.remove('active');
+  });
+
+  loadUserProfile(slug);
+}
+
+async function loadUserProfile(slug) {
+  const headerEl = document.getElementById('user-profile-header');
+  const conversionsEl = document.getElementById('user-profile-conversions');
+
+  headerEl.innerHTML = '<div class="loading-spinner">Loading...</div>';
+  conversionsEl.innerHTML = '<div class="loading-spinner">Loading...</div>';
+
+  try {
+    const response = await fetch(`/api/users/${encodeURIComponent(slug)}`);
+    if (!response.ok) {
+      if (response.status === 404) {
+        headerEl.innerHTML = '<div class="user-profile-empty">User not found</div>';
+        conversionsEl.innerHTML = '';
+        return;
+      }
+      throw new Error('Failed to load user');
+    }
+
+    const user = await response.json();
+
+    const avatar = user.avatarUrl
+      ? `<img src="${user.avatarUrl}" alt="" class="user-profile-avatar">`
+      : `<div class="user-profile-avatar-placeholder">${user.username.charAt(0).toUpperCase()}</div>`;
+
+    const joinDate = new Date(user.createdAt).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+
+    headerEl.innerHTML = `
+      ${avatar}
+      <div class="user-profile-info">
+        <h1 class="user-profile-username">${escapeHtml(user.username)}</h1>
+        <div class="user-profile-meta">
+          <span class="user-profile-stat"><strong>${user.conversionCount}</strong> adversar${user.conversionCount === 1 ? 'y' : 'ies'}</span>
+          <span class="user-profile-stat"><strong>${user.totalUpvotes}</strong> upvotes</span>
+          <span class="user-profile-stat">Joined ${joinDate}</span>
+        </div>
+      </div>
+    `;
+
+    // Load conversions
+    loadUserConversions();
+
+  } catch (err) {
+    console.error('Error loading user profile:', err);
+    headerEl.innerHTML = '<div class="user-profile-empty">Failed to load profile</div>';
+    conversionsEl.innerHTML = '';
+  }
+}
+
+async function loadUserConversions(page = 1) {
+  if (!currentProfileSlug) return;
+
+  const conversionsEl = document.getElementById('user-profile-conversions');
+  const paginationEl = document.getElementById('user-profile-pagination');
+  const sort = document.getElementById('user-profile-sort')?.value || 'newest';
+
+  conversionsEl.innerHTML = '<div class="loading-spinner">Loading...</div>';
+
+  try {
+    const response = await fetch(`/api/users/${encodeURIComponent(currentProfileSlug)}/conversions?page=${page}&sort=${sort}`);
+    if (!response.ok) throw new Error('Failed to load conversions');
+
+    const data = await response.json();
+
+    if (data.conversions.length === 0) {
+      conversionsEl.innerHTML = '<div class="user-profile-empty">No published adversaries yet</div>';
+      paginationEl.innerHTML = '';
+      return;
+    }
+
+    conversionsEl.innerHTML = data.conversions.map(c => `
+      <div class="community-item" onclick="openCommunityModal('${c.id}')">
+        <div class="community-item-header">
+          <h3 class="community-item-title">${escapeHtml(c.name)}</h3>
+          <div class="community-item-badges">
+            ${c.tier ? `<span class="badge tier-badge">T${c.tier}</span>` : ''}
+            ${c.advType ? `<span class="badge type-badge">${escapeHtml(c.advType)}</span>` : ''}
+          </div>
+        </div>
+        <div class="community-item-footer">
+          <div class="community-item-votes">
+            <span class="vote-count">${c.upvotes || 0} upvotes</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+
+    // Pagination
+    if (data.pagination.totalPages > 1) {
+      paginationEl.innerHTML = `
+        <button class="btn btn-secondary" ${page <= 1 ? 'disabled' : ''} onclick="loadUserConversions(${page - 1})">Previous</button>
+        <span class="pagination-info">Page ${page} of ${data.pagination.totalPages}</span>
+        <button class="btn btn-secondary" ${page >= data.pagination.totalPages ? 'disabled' : ''} onclick="loadUserConversions(${page + 1})">Next</button>
+      `;
+    } else {
+      paginationEl.innerHTML = '';
+    }
+
+  } catch (err) {
+    console.error('Error loading user conversions:', err);
+    conversionsEl.innerHTML = '<div class="user-profile-empty">Failed to load adversaries</div>';
+  }
+}
+
 // ==================== URL ROUTING ====================
 function handleUrlRouting() {
   const path = window.location.pathname;
@@ -5990,6 +6185,14 @@ function handleUrlRouting() {
     navigateTo('community', false);
     // Wait for community page to load, then open modal
     setTimeout(() => openCommunityModal(conversionId), 100);
+    return;
+  }
+
+  // Handle /user/:slug routes (user profile)
+  const userMatch = path.match(/^\/user\/(.+)$/);
+  if (userMatch) {
+    const slug = userMatch[1];
+    navigateToUserProfile(slug);
     return;
   }
 
