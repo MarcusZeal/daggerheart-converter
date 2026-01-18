@@ -6140,22 +6140,102 @@ async function loadUserConversions(page = 1) {
       return;
     }
 
-    conversionsEl.innerHTML = data.conversions.map(c => `
-      <div class="community-item" onclick="openCommunityModal('${c.id}')">
-        <div class="community-item-header">
-          <h3 class="community-item-title">${escapeHtml(c.name)}</h3>
-          <div class="community-item-badges">
-            ${c.tier ? `<span class="badge tier-badge">T${c.tier}</span>` : ''}
-            ${c.advType ? `<span class="badge type-badge">${escapeHtml(c.advType)}</span>` : ''}
+    conversionsEl.innerHTML = data.conversions.map(conv => {
+      const cardData = conv.data || {};
+      const hp = cardData.hp || '?';
+      const stress = cardData.stress || '?';
+      const difficulty = cardData.difficulty || '?';
+      const majorThresh = cardData.majorThresh || cardData.thresholds?.major || '?';
+      const severeThresh = cardData.severeThresh || cardData.thresholds?.severe || '?';
+      const description = cardData.description || '';
+      const motives = cardData.motives || '';
+      const atkMod = cardData.atkMod || cardData.attack?.modifier || '?';
+      const weapon = cardData.weapon || cardData.attack?.name || '';
+      const range = cardData.range || cardData.attack?.range || '';
+      const damage = cardData.damage || cardData.attack?.damage || '';
+      const dmgType = cardData.dmgType || cardData.attack?.type || '';
+      const sourceSystem = conv.sourceSystem || cardData.sourceSystem;
+
+      // Build attack line
+      let attackLine = '';
+      if (atkMod && atkMod !== '?') {
+        attackLine = `<span class="dh-stat-item"><span class="dh-stat-label">ATK:</span> ${atkMod}</span>`;
+        if (weapon) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${weapon}: ${range}</span>`;
+        if (damage) attackLine += `<span class="dh-stat-separator">|</span><span class="dh-stat-item">${highlightDiceRolls(damage)}${dmgType ? ' ' + dmgType : ''}</span>`;
+      }
+
+      const cardTypeClass = (conv.advType || 'standard').toLowerCase().trim();
+
+      return `
+        <div class="community-item" onclick="openCommunityModal('${conv.id}')">
+          <div class="dh-card-header" data-type="${cardTypeClass}">
+            <div class="dh-card-name">${escapeHtml(conv.name)}</div>
+            <div class="dh-card-tier-type">Tier ${conv.tier} ${conv.advType}</div>
           </div>
-        </div>
-        <div class="community-item-footer">
+          <div class="dh-card-body">
+            ${description ? `<div class="dh-card-description">${escapeHtml(description)}</div>` : ''}
+            ${motives ? `<div class="dh-card-motives"><strong>Motives & Tactics:</strong> ${escapeHtml(motives)}</div>` : ''}
+            <div class="mini-stats-container">
+              <div class="mini-vitals-row">
+                <div class="mini-vital-box difficulty">
+                  <span class="mini-vital-value">${difficulty}</span>
+                  <span class="mini-vital-label">Diff</span>
+                </div>
+                <div class="mini-vital-box hp">
+                  <span class="mini-vital-value">${hp}</span>
+                  <span class="mini-vital-label">HP</span>
+                </div>
+                <div class="mini-vital-box stress">
+                  <span class="mini-vital-value">${stress}</span>
+                  <span class="mini-vital-label">Stress</span>
+                </div>
+              </div>
+              <div class="mini-damage-tracker">
+                <div class="mini-damage-card">
+                  <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                    <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                      <path d="M -974.223 2292.978 L -974.223 2042.978 L -874.223 1942.978 L -874.223 1442.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                    </g>
+                  </svg>
+                  <span class="mini-card-label">Minor</span>
+                </div>
+                <div class="mini-connector"><span class="mini-connector-number">${majorThresh}</span></div>
+                <div class="mini-damage-card">
+                  <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                    <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                      <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                      <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                    </g>
+                  </svg>
+                  <span class="mini-card-label">Major</span>
+                </div>
+                <div class="mini-connector"><span class="mini-connector-number">${severeThresh}</span></div>
+                <div class="mini-damage-card">
+                  <svg viewBox="0 0 250 120" preserveAspectRatio="xMidYMid meet">
+                    <g transform="matrix(0.1, 0, 0, -0.1, 97.422302, 229.297806)" fill="#5F6975">
+                      <path d="M -974.223 2292.978 L -974.223 2042.978 L -624.223 1692.978 L -974.223 1342.978 L -974.223 1092.978 L -724.223 1092.978 L -624.223 1192.978 L 1175.777 1192.978 L 1275.777 1092.978 L 1525.777 1092.978 L 1525.777 1342.978 L 1425.777 1442.978 L 1425.777 1942.978 L 1525.777 2042.978 L 1525.777 2292.978 L 1275.777 2292.978 L 1175.777 2192.978 L -624.223 2192.978 L -724.223 2292.978 L -974.223 2292.978 Z"/>
+                      <path d="M -974.223 1842.978 L -974.223 1542.978 L -824.223 1692.978 L -974.223 1842.978 Z"/>
+                    </g>
+                  </svg>
+                  <span class="mini-card-label">Severe</span>
+                </div>
+              </div>
+              ${attackLine ? `<div class="dh-card-stats-row">${attackLine}</div>` : ''}
+            </div>
+          </div>
+          <div class="dh-card-footer">
+            <div class="dh-card-author"></div>
+            <div class="dh-card-footer-right">
+              ${sourceSystem ? `<span class="dh-card-source">${escapeHtml(sourceSystem)}</span>` : ''}
+              <button class="share-link-btn" onclick="event.stopPropagation(); copyShareLinkFor('${conv.id}')" title="Copy share link">&#128279;</button>
+            </div>
+          </div>
           <div class="community-item-votes">
-            <span class="vote-count">${c.upvotes || 0} upvotes</span>
+            <span class="vote-count" style="padding: 0.5rem;">${conv.upvotes || 0} upvotes</span>
           </div>
         </div>
-      </div>
-    `).join('');
+      `;
+    }).join('');
 
     // Pagination
     if (data.pagination.totalPages > 1) {
