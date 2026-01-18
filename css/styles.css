@@ -833,7 +833,6 @@ body {
 /* Page Views */
 .page-view {
   display: none;
-  overflow-x: hidden;
 }
 
 .page-view.active {
@@ -1330,6 +1329,7 @@ body {
   grid-template-columns: 240px 1fr;
   gap: 1rem;
   min-height: 550px;
+  align-items: start;
 }
 
 /* Folders Sidebar */
